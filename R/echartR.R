@@ -39,8 +39,9 @@ mergeList = function(x, y) { # by yihui xie
 echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
                   title=NULL,subtitle=NULL,
                   xlab=NULL,ylab=NULL,xyflip=FALSE,AxisAtZero=TRUE,scale=TRUE,
-                  aetna_palette='green',tooltip=TRUE,legend=TRUE,toolbox=TRUE,
-                  calculable=TRUE){
+                  palette='aetnagreen',tooltip=TRUE,legend=TRUE, 
+                  legend_pos=c('center','top'),
+                  toolbox=TRUE, calculable=TRUE){
     type <- tolower(type)
     if (!type %in% c('scatter','bar','line','map','k','pie','chord','force',
                      'tree','treemap','wordcloud','heatmap','histogram','bubble',
@@ -53,7 +54,7 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
     loadpkg("Hmisc")
     loadpkg("reshape2")
     loadpkg("recharts","yihui/recharts")
-    aetPal <- aetnaPal(tolower(aetna_palette))
+    aetPal <- aetnaPal(tolower(palette))
     if (is.null(aetPal)){
         lstColor <- NULL
     }else{
@@ -61,7 +62,7 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
     }
     lstTitle <- list(text=ifelse(is.null(title),"",title),
                      subtext=ifelse(is.null(subtitle),"",subtitle),
-                     x='center',y='bottom',padding=c(25,5,5,5))
+                     x='center',y='bottom',padding=c(50,5,5,5))
     if (tooltip){
         lstTooltip <- list(
             trigger=ifelse(type %in% c('pie','ring'),
@@ -138,10 +139,9 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
             svar <- xvar
             series <- x
         }
-
         series <- as.factor(series)
         data <- data[,c(svar,yvar)]
-        if (is.factor(y)){
+        if (is.factor(y) | is.character(y)){
             data <- dcast(data,data[,1]~.,value.var=yvar,length)
         }else{
             data <- dcast(data,data[,1]~.,value.var=yvar,sum)
@@ -156,6 +156,15 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
     }else{
         lstLegend= list(show=TRUE, data=levels(x))
     }
+    if (legend_pos[1] %in% c('left','right','center') & 
+        legend_pos[2] %in% c('top','bottom','center')){
+        lstLegend[['x']] <- legend_pos[1]
+        lstLegend[['y']] <- legend_pos[2]
+    }
+    if (legend_pos[1] %in% c('left','right') & legend_pos[2]=='center'){
+        lstLegend[['orient']] <- 'vertical'
+    }
+    
     if (!xyflip){
         lstXAxis = list(
             name = ifelse(is.null(xlab),xvar,xlab),
@@ -243,7 +252,7 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
         }
     }else if (type %in% c('ring','pie')){
         lstSeries[[1]] <- list(
-            name='',
+            name=svar,
             type='pie',
             data=list()
         )
@@ -308,25 +317,132 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
 
 #-----Aetna palettes---------
 aetnaPal <- function(palname){
-    if (palname %in% c('green','blue','teal','cranberry','orange','violet'))
-    switch(palname,
-        green=c("#7AC143","#7D3F98","#F47721","#D20962","#00A78E","#00BCE4",
-                "#B8D936","#EE3D94","#FDB933","#F58F9F","#60C3AE","#5F78BB",
-                "#5E9732","#CEA979","#EF4135","#7090A5"),
-        blue=c("#00BCE4","#D20962","#7AC143","#F47721","#7D3F98","#00A78E",
-               "#F58F9F","#B8D936","#60C3AE","#FDB933","#EE3D94","#5E9732",
-               "#5F78BB","#CEA979","#EF4135","#7090A5"),
-        teal=c("#00A78E","#F47721","#7AC143","#00BCE4","#D20962","#7D3F98",
-               "#60C3AE","#FDB933","#B8D936","#5F78BB","#F58F9F","#EE3D94",
-               "#5E9732","#CEA979","#EF4135","#7090A5"),
-        cranberry=c("#D20962","#00BCE4","#7D3F98","#7AC143","#F47721","#00A78E",
-                    "#F58F9F","#60C3AE","#EE3D94","#B8D936","#FDB933","#5E9732",
-                    "#5F78BB","#CEA979","#EF4135","#7090A5"),
-        orange=c("#F47721","#7AC143","#00A78E","#D20962","#00BCE4","#7D3F98",
-                 "#FDB933","#B8D936","#60C3AE","#F58F9F","#5F78BB","#EE3D94",
-                 "#5E9732","#CEA979","#EF4135","#7090A5"),
-        violet=c("#7D3F98","#7AC143","#F47721","#00A78E","#00BCE4","#D20962",
-                 "#F58F9F","#B8D936","#FDB933","#60C3AE","#5F78BB","#EE3D94",
-                 "#5E9732","#CEA979","#EF4135","#7090A5")
-    )
+    if (tolower(palname) %in% paste("aetna",
+                           c('green','blue','teal','cranberry','orange','violet'),
+                           sep="")){
+        switch(tolower(palname),
+            aetnagreen=c("#7AC143","#7D3F98","#F47721","#D20962","#00A78E",
+                         "#00BCE4","#B8D936","#EE3D94","#FDB933","#F58F9F",
+                         "#60C3AE","#5F78BB","#5E9732","#CEA979","#EF4135",
+                         "#7090A5"),
+            aetnablue=c("#00BCE4","#D20962","#7AC143","#F47721","#7D3F98","#00A78E",
+                   "#F58F9F","#B8D936","#60C3AE","#FDB933","#EE3D94","#5E9732",
+                   "#5F78BB","#CEA979","#EF4135","#7090A5"),
+            aetnateal=c("#00A78E","#F47721","#7AC143","#00BCE4","#D20962",
+                        "#7D3F98","#60C3AE","#FDB933","#B8D936","#5F78BB",
+                        "#F58F9F","#EE3D94","#5E9732","#CEA979","#EF4135",
+                        "#7090A5"),
+            aetnacranberry=c("#D20962","#00BCE4","#7D3F98","#7AC143","#F47721",
+                             "#00A78E","#F58F9F","#60C3AE","#EE3D94","#B8D936",
+                             "#FDB933","#5E9732","#5F78BB","#CEA979","#EF4135",
+                             "#7090A5"),
+            aetnaorange=c("#F47721","#7AC143","#00A78E","#D20962","#00BCE4",
+                          "#7D3F98","#FDB933","#B8D936","#60C3AE","#F58F9F",
+                          "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
+                          "#7090A5"),
+            aetnaviolet=c("#7D3F98","#7AC143","#F47721","#00A78E","#00BCE4",
+                          "#D20962","#F58F9F","#B8D936","#FDB933","#60C3AE",
+                          "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
+                          "#7090A5")
+            )
+    }
+    if (palname %in% c('BrBG','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu',
+                       'RdYlGn','Spectral','Accent','Dark2','Paired','Pastel1',
+                       'Pastel2','Set1','Set2','Set3','Blues','BuGn','BuPu',
+                       'GnBu','Greens','Greys','Oranges','OrRd','PuBu','PuBuGn',
+                       'PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr',
+                       'YlOrRd')){
+        loadpkg("RColorBrewer")
+        maxcolors <- brewer.pal.info[row.names(brewer.pal.info)==palname,
+                                     "maxcolors"]
+        return(brewer.pal(maxcolors,palname))
+    }
+    if (tolower(palname) %in% c('calc','economist','economist_white','excel',
+                       'few','fivethirtyeight','gdocs','pander','tableau',
+                       'stata','tableau20','tableau10medium','tableaugray',
+                       'tableauprgy','tableaublrd','tableaugnor','tableaucyclic',
+                       'tableau10light', 'tableaublrd12','tableauprgy12',
+                       'tableaugnor12','hc','darkunica',
+                       'solarized','solarized_red','solarized_yellow',
+                       'solarized_orange','solarized_magenta','solarized_violet',
+                       'solarized_blue','solarized_cyan','solarized_green',
+                       'wsj','colorblind','trafficlight')){
+        switch(palname,
+               calc=c("#004586","#FF420E","#FFD320","#579D1C","#7E0021","#83CAFF",
+                      "#314004","#AECF00","#4B1F6F","#FF950E","#C5000B","#0084D1"),
+               excel=c("#FF00FF","#FFFF00","#00FFFF","#800080","#800000","#008080",
+                       "#0000FF"),
+               few=c("#F15A60","#7AC36A","#5A9BD4","#FAA75B","#9E67AB","#CE7058",
+                     "#D77FB4"),
+               economist=c("#6794a7","#014d64","#01a2d9","#7ad2f6","#00887d",
+                           "#76c0c1","#7c260b","#ee8f71","#adadad"),
+               economist_white=c("#76c0c1","#00887d","#adadad","#6794a7","#7ad2f6",
+                                 "#014d64","#7c260b","#ee8f71","#a18376"),
+               fivethirtyeight=c("#008FD5","#FF2700","#77AB43"),
+               gdocs=c("#3366CC","#DC3912","#FF9900","#109618","#990099","#0099C6",
+                       "#DD4477","#66AA00","#B82E2E","#316395","#994499","#22AA99",
+                       "#AAAA11","#6633CC","#E67300","#8B0707","#651067","#329262",
+                       "#5574A6","#3B3EAC"),
+               hc=c("#7cb5ec","#434348","#90ed7d","#f7a35c","#8085e9","#f15c80",
+                    "#e4d354","#8085e8"),
+               darkunica=c("#2b908f","#90ee7e","#f45b5b","#7798BF","#aaeeee",
+                           "#ff0066","#eeaaee","#55BF3B","#DF5353","#7798BF",
+                           "#aaeeee"),
+               pander=c("#56B4E9","#009E73","#F0E442","#0072B2","#D55E00",
+                        "#CC79A7","#999999","#E69F00"),
+               tableaugray=c("#60636A","#A5ACAF","#414451","#8F8782","#CFCFCF"),
+               tableau=c("#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD",
+                         "#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF"),
+               tableau10medium=c("#729ECE","#FF9E4A","#67BF5C","#ED665D",
+                                 "#AD8BC9","#A8786E","#ED97CA","#A2A2A2",
+                                 "#CDCC5D","#6DCCDA"),
+               tableau10light=c("#AEC7E8","#FFBB78","#98DF8A","#FF9896",
+                                "#C5B0D5","#C49C94","#F7B6D2","#C7C7C7"),
+               tableauprgy=c("#7B66D2","#DC5FBD","#5F5A41","#995688","#AB6AD5",
+                             "#8B7C6E"),
+               tableaublrd=c("#2C69B0","#F02720","#AC613C","#6BA3D6","#AC8763",
+                             "#BD0A36"),
+               tableaugnor=c("#32A251","#FF7F0F","#3CB7CC","#B85A0D","#39737C",
+                             "#82853B"),
+               tableaublrd12=c("#2C69B0","#B5C8E2","#F02720","#FFB6B0","#AC613C",
+                               "#E9C39B","#6BA3D6","#B5DFFD","#AC8763","#DDC9B4",
+                               "#BD0A36","#F4737A"),
+               tableauprgy12=c("#7B66D2","#A699E8","#DC5FBD","#FFC0DA","#5F5A41",
+                               "#B4B19B","#995688","#D898BA","#AB6AD5","#D098EE",
+                               "#8B7C6E","#DBD4C5"),
+               tableaugnor12=c("#32A251","#ACD98D","#FF7F0F","#FFB977","#3CB7CC",
+                               "#98D9E4","#B85A0D","#FFD94A","#39737C","#86B4A9",
+                               "#82853B","#CCC94D"),
+               tableau20=c("#1F77B4","#AEC7E8","#FF7F0E","#FFBB78","#2CA02C",
+                           "#98DF8A","#D62728","#FF9896","#9467BD","#C5B0D5",
+                           "#8C564B","#C49C94","#E377C2","#F7B6D2","#7F7F7F",
+                           "#C7C7C7","#BCBD22","#DBDB8D","#17BECF","#9EDAE5"),
+               stata=c("#1a476f","#90353b","#55752f","#e37e00","#6e8e84","#c10534",
+                       "#938dd2","#cac27e","#a0522d","#7b92a8","#2d6d66","#9c8847",
+                       "#bfa19c","#ffd200","#d9e6eb"),
+               solarized=c("#268bd2","#b58900","#cb4b16","#dc322f","#d33682",
+                           "#6c71c4","#2aa198","#859900"),
+               solarized_red=c("#dc322f","#b58900","#cb4b16","#d33682","#6c71c4",
+                               "#268bd2","#2aa198","#859900"),
+               solarized_yellow=c("#b58900","#cb4b16","#dc322f","#d33682","#6c71c4",
+                                  "#268bd2","#2aa198","#859900"),
+               solarized_orange=c("#cb4b16","#b58900","#dc322f","#d33682","#6c71c4",
+                                  "#268bd2","#2aa198","#859900"),
+               solarized_magenta=c("#d33682","#b58900","#cb4b16","#dc322f","#6c71c4",
+                                   "#268bd2","#2aa198","#859900"),
+               solarized_violet=c("#6c71c4","#b58900","#cb4b16","#dc322f","#d33682",
+                                  "#268bd2","#2aa198","#859900"),
+               solarized_blue=c("#268bd2","#b58900","#cb4b16","#dc322f","#d33682",
+                                "#6c71c4","#2aa198","#859900"),
+               solarized_cyan=c("#2aa198","#b58900","#cb4b16","#dc322f","#d33682",
+                                "#6c71c4","#268bd2","#859900"),
+               solarized_green=c("#859900","#b58900","#cb4b16","#dc322f","#d33682",
+                                 "#6c71c4","#268bd2","#2aa198"),
+               wsj=c("#c72e29","#016392","#be9c2e","#098154","#fb832d","#000000"),
+               colorblind=c("#000000","#E69F00","#56B4E9","#009E73","#F0E442",
+                            "#0072B2","#D55E00","#CC79A7"),
+               trafficlight=c("#B10318","#DBA13A","#309343","#D82526","#FFC156",
+                              "#69B764","#F26C64","#FFDD71")
+               )
+    }
 }

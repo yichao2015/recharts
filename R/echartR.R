@@ -47,19 +47,36 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
     if (!type[1] %in% c('scatter','bar','line','linesmooth','map','k','pie','chord',
                         'area','areasmooth','force','bubble','ring', 'funnel',
                         'pyramid', 'tree','treemap','wordcloud','heatmap','histogram', 
-                        'radar','gauge')){
+                        'radar','radarfill','gauge')){
         stop("The chart type[1] is not supported! ",
              "we now only support following charts:\n",
              "scatter, bar, line, linesmooth, map, k, pie, chord, area, areasmooth,",
              "force, bubble, tree, treemap, wordcloud, heatmap, histogram, ring,",
-             "funnel, radar, pyramid, gauge")
+             "funnel, radar, radarfill, pyramid, gauge")
     }
     loadpkg("Hmisc")
     loadpkg("reshape2")
     loadpkg("recharts","yihui/recharts")
     
     # -----Color--------
-    aetPal <- aetnaPal(palette)
+    if (length(palette)>1){
+        aetPal <- as.list(palette)
+        for (i in palette){
+            if (is(try(length(col2rgb(i))==3),"try-error")){
+                aetPal <- NULL;break
+            }
+        }
+    }else if (grepl("\\(\\d+\\)",palette)){
+        palette <- unlist(strsplit(palette,"[\\(\\)]"))
+        if (as.numeric(palette[2])>=length(aetnaPal(palette[1]))){
+            aetPal <- aetnaPal(palette[1])
+        }else{
+            aetPal <- aetnaPal(palette[1])[1:palette[2]]
+        }
+    }else{
+        aetPal <- as.list(palette)
+    }
+    
     if (is.null(aetPal)){
         lstColor <- NULL
     }else{
@@ -250,11 +267,11 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
     }
     
     #----------polar---------------
-    if (type[1] %in% c('radar')){
+    if (type[1] %in% c('radar','radarfill')){
         indicator <- as.factor(x)
-        lstPolar <- list(indicator=list())
+        lstPolar <- list(list(indicator=list()))
         for (i in 1:nlevels(indicator)){
-            lstPolar[['indicator']][[i]] <- list(
+            lstPolar[[1]][['indicator']][[i]] <- list(
                 text = as.character(indicator[i]),
                 max = max(data[data[,xvar]==indicator[i],yvar]) * 1.25
             )
@@ -382,7 +399,7 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
                         #if (symbolList=='none') lstSeries[[i]][['symbol']] <- 'none'
                     }
                 }
-            }else if (type[1] %in% c('radar')){
+            }else if (type[1] %in% c('radar','radarfill')){
                 if (is.null(series)){
                     lstSeries[[1]] <- list(
                         name=yvar,
@@ -390,6 +407,11 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
                         data=list(value=data[,yvar],
                                   name=yvar)
                     )
+                    if (type[1]=='radarfill'){
+                        lstSeries[[1]][['itemStyle']] <- list(
+                            normal=list(areaStyle=list(type='default'))
+                        )
+                    }
                     #if (symbolList==c('none')) lstSeries[[1]][['symbol']] <- 'none'
                 }else{
                     lstSeries[[1]] <- list(
@@ -397,6 +419,11 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
                         type='radar',
                         data=list()
                     )
+                    if (type[1]=='radarfill'){
+                        lstSeries[[1]][['itemStyle']] <- list(
+                            normal=list(areaStyle=list(type='default'))
+                        )
+                    }
                     for (i in 1:nlevels(as.factor(series))){
                         lstSeries[[1]][['data']][[i]]<-list(
                             value = data[data[,svar]==
@@ -502,7 +529,7 @@ echartR<-function(data,x,y,series=NULL,weight=NULL,type="scatter",stack=FALSE,
                                              width=60, height=90
         )
         chartobj[['roamController']][['mapTypeControl']][[mapType]] <- T
-    }else if (type[1] %in% c('radar')){
+    }else if (type[1] %in% c('radar','radarfill')){
         chartobj[['polar']] <- lstPolar
     }
     echart(chartobj)

@@ -50,18 +50,17 @@ isTime <- function(x,origin=NULL,tz='CST'){
     }
 }
 ##----------draw dynamic charts using recharts---------------
-echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
-           echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
+echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                   type="scatter",stack=FALSE,
                   title=NULL,subtitle=NULL,title_pos=c('center','bottom'),
-                  symbolList=NULL,dataZoom=NULL,
+                  symbolList=NULL,dataZoom=NULL,dataZoomRange=NULL,
                   dataRange=NULL,splitNumber=NULL,dataRangePalette=NULL,
                   xlab=NULL,ylab=NULL,xyflip=FALSE,AxisAtZero=TRUE,scale=TRUE,
                   palette='aetnagreen',tooltip=TRUE,legend=TRUE, 
                   legend_pos=c('left','top'),
                   toolbox=TRUE, toolbox_pos=c('right','top'),
                   calculable=TRUE, asImage=FALSE){
-    type[1] <- tolower(type[1])
+    type <- tolower(type)
     if (!type[1] %in% c('scatter','bar','line','linesmooth','map','k','pie','chord',
                         'area','areasmooth','force','bubble','ring', 'funnel',
                         'pyramid', 'tree','treemap','wordcloud','heatmap','histogram', 
@@ -77,13 +76,13 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
     loadpkg("recharts","yihui/recharts")
     
     #-------pre-process of data-----------
+    if (!is.null(y)) {      # y is mandatory
+        yvar <- substr(deparse(y),2,nchar(deparse(y)))
+        y <- evalFormula(y,data)
+    }
     if (!is.null(x)) {
         xvar <- substr(deparse(x),2,nchar(deparse(x)))
         x <- evalFormula(x,data)
-    }
-    if (!is.null(y)) {
-        yvar <- substr(deparse(y),2,nchar(deparse(y)))
-        y <- evalFormula(y,data)
     }
     if (!is.null(series)) {
         svar <- substr(deparse(series),2,nchar(deparse(series)))
@@ -205,11 +204,15 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
         lstToolbox= list(
             show = TRUE,
             feature = list(
-                mark =list(show= TRUE),
-                dataView = list(show= TRUE, readOnly= FALSE),
+                mark =list(show= TRUE,
+                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
+                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
+                                      markClear="Çå¿Õ¸¨ÖúÏßClear auxiliary conductor")),
+                dataView = list(show= TRUE, readOnly= FALSE,
+                                title="Êý¾ÝÊÓÍ¼ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE),
-                saveAsImage = list(show= TRUE)
+                restore = list(show= TRUE,title="»¹Ô­ Restore"),
+                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
             )
         )
         if (toolbox_pos[1] %in% c('left','right','center') & 
@@ -231,6 +234,16 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
                      option=list(funnel=list(x='25%',width='80%',
                                              funnelAlign='center')))
         }
+        if (lstToolbox[['feature']][['magicType']][['show']]){
+            lstToolbox[['feature']][['magicType']][['title']] <- list(
+                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
+                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
+                stack="¶Ñ»ý Stack", tiled="Æ½ÆÌ Tile",
+                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
+                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
+                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
+            )
+        }
     }else{
         lstToolbox=list(show=FALSE)
     }
@@ -238,7 +251,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
     #------Legend------------
     if (!legend){
         lstLegend= list(show=FALSE)
-    }else if (is.null(series) | nlevels(as.factor(series))==1){ 
+    }else if (is.null(series) | nlevels(as.factor(series)) ==1){ 
         lstLegend= list(show=TRUE, data=levels(as.factor(series)))
     }else{
         lstLegend= list(show=TRUE, data=levels(as.factor(series)))
@@ -257,6 +270,10 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
     if (!is.null(dataZoom)) {
         if (dataZoom){
             lstdataZoom <- list(show=T)
+            if (!is.null(dataZoomRange) & is.numeric(dataZoomRange)){
+                lstdataZoom[['start']] <- dataZoomRange[1]
+                lstdataZoom[['end']] <- dataZoomRange[2]
+            }
         }
     }
     
@@ -309,8 +326,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
                           ifelse(!is.numeric(x),'category','value')),
             boundaryGap = c(0,0),
             scale = scale,
-            axisLine = list(show=T, onZero=AxisAtZero),
-            data = list()
+            axisLine = list(show=T, onZero=AxisAtZero)
         )
         if (lstYAxis[['type']]=='category') {
             lstYAxis[['data']] <- unique(x)
@@ -320,8 +336,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
             name = ifelse(is.null(ylab),yvar,ylab),
             type = 'value',
             scale = scale,
-            axisLine = list(show=T, onZero=AxisAtZero),
-            data = list()
+            axisLine = list(show=T, onZero=AxisAtZero)
         )
     }
     if ((lstXAxis[['type']])=='time' | (lstYAxis[['type']])=='time'){
@@ -357,7 +372,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
             lstSeries[[1]] <- list(
                 type='scatter',
                 data=tmpMtx,
-                large=ifelse(nrow(data)>10000,T,F)
+                large=ifelse(nrow(data)>10000,TRUE,FALSE)
             )
             if (type[1]=='bubble'){
                 lstSeries[[1]][['data']] <-
@@ -419,7 +434,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
         }
     }else if (type[1] %in% c('funnel','pyramid')){
         lstSeries[[1]] <- list(
-            type=yvar,
+            name=svar,
             type='funnel',
             data=list()
         )
@@ -559,6 +574,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
     }else{              # the rest charts
         if (is.null(series)){
             lstSeries[[1]] <- list(
+                name=yvar,
                 type=type[1],
                 data=data[,yvar]
             )
@@ -577,8 +593,8 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
                     lstSeries[[i]][['stack']] <- 'Stack'
                 }
                 if (type[1]=='histogram'){
-                    lstSeries[[1]][['type']] <- 'bar'
-                    lstSeries[[1]][['barGap']] <- '1%'
+                    lstSeries[[i]][['type']] <- 'bar'
+                    lstSeries[[i]][['barGap']] <- '1%'
                 }
             }
         }
@@ -607,7 +623,7 @@ echartR<-function(data,x,y,z=NULL,series=NULL,weight=NULL,
     if (!is.null(lstSymbol)) chartobj[['symbolList']] <- lstSymbol
     if (!is.null(lstdataZoom)) chartobj[['dataZoom']] <- lstdataZoom
     if (!is.null(lstdataRange)) chartobj[['dataRange']] <- lstdataRange
-    if (!is.null(lstLegend))   chartobj[['legend']] <- lstLegend
+    if (!is.null(series))   chartobj[['legend']] <- lstLegend
     if (type[1] %in% c('scatter','bubble','line','bar','linesmooth','histogram',
                        'area','areasmooth')){
         chartobj[['xAxis']] <- lstXAxis

@@ -98,6 +98,7 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
 
 # Examples 示例
 
+**GitHub上只能放静态图，真实`d3-js`效果图请点击[这个链接](http://pan.baidu.com/s/1o6pDTf8)**
 
 ```r
 Sys.setlocale("LC_CTYPE","Chs")

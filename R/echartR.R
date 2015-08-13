@@ -59,7 +59,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                   palette='aetnagreen',tooltip=TRUE,legend=TRUE, 
                   legend_pos=c('left','top'),
                   toolbox=TRUE, toolbox_pos=c('right','top'),
-                  calculable=TRUE, asImage=TRUE){
+                  calculable=TRUE, asImage=FALSE){
     type <- tolower(type)
     title_pos <- tolower(title_pos)
     toolbox_pos <- tolower(toolbox_pos)

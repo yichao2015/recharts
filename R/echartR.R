@@ -55,21 +55,23 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                   title=NULL,subtitle=NULL,title_pos=c('center','bottom'),
                   symbolList=NULL,dataZoom=NULL,dataZoomRange=NULL,
                   dataRange=NULL,splitNumber=NULL,dataRangePalette=NULL,
-                  xlab=NULL,ylab=NULL,xyflip=FALSE,AxisAtZero=TRUE,scale=TRUE,
+                  xlab=NULL,ylab=NULL,xyflip=FALSE,AxisAtZero=FALSE,scale=TRUE,
                   palette='aetnagreen',tooltip=TRUE,legend=TRUE, 
                   legend_pos=c('left','top'),
                   toolbox=TRUE, toolbox_pos=c('right','top'),
                   calculable=TRUE, asImage=FALSE){
     type <- tolower(type)
-    if (!type[1] %in% c('scatter','bar','line','linesmooth','map','k','pie','chord',
-                        'area','areasmooth','force','bubble','ring', 'funnel',
-                        'pyramid', 'tree','treemap','wordcloud','heatmap','histogram', 
-                        'radar','radarfill','gauge')){
-        stop("The chart type[1] is not supported! ",
+    title_pos <- tolower(title_pos)
+    toolbox_pos <- tolower(toolbox_pos)
+    legend_pos <- tolower(legend_pos)
+    supportedTypes <- c('scatter','bar','line','linesmooth','map','k','pie',
+                        'chord', 'area','areasmooth','force','bubble','ring',
+                        'funnel', 'pyramid', 'tree','treemap','wordcloud',
+                        'heatmap','histogram', 'radar','radarfill','gauge')
+    if (!type[1] %in% supportedTypes){
+        stop("The chart type is not supported! ",
              "we now only support following charts:\n",
-             "scatter, bar, line, linesmooth, map, k, pie, chord, area, areasmooth,",
-             "force, bubble, tree, treemap, wordcloud, heatmap, histogram, ring,",
-             "funnel, radar, radarfill, pyramid, gauge")
+             supportedTypes)
     }
     loadpkg("Hmisc")
     loadpkg("reshape2")
@@ -99,7 +101,8 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
     if (type[1] %in% c('pie','ring','funnel','pyramid')){
         if (is.null(series) & !is.null(x)){
             svar <- xvar
-            data[,svar] <- series <- x
+            data[,svar] <- x
+            series <- x
         }
         series <- as.factor(series)
         data <- data[,c(svar,yvar)]
@@ -121,12 +124,17 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         data <- as.data.frame(table(x))
         cut <- round(cut[1:length(cut)-1],
                      ifelse(interval>1,1,1+ceiling(log10(1/interval))))
-        x <- data[,1] <- paste(cut,"~",sep="")
+        x <- paste(cut,"~",sep="")
+        data[,1] <- paste(cut,"~",sep="")
         x[1] <- data[1,1] <- paste("~",cut[2],sep="")
         names(data) <- c(yvar,"Freq")
         y <- data[,'Freq']
         xvar <- yvar
         yvar <- "Freq"
+    }else if (type[1] %in% c('line')){
+        if (is.numeric(x)) {
+            data[,xvar] <- x <- as.character(x)
+        }
     }
     
     # -----Color--------
@@ -163,7 +171,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                                             + date.getDate() + " "
                                             + date.getHours() + ":"
                                             + date.getMinutes();
-                                            if (param.value.length > 1) {
+                                            if (param.value.length > 2) {
                                             return data + "<br/>"
                                             + params.value[1] + ", "
                                             + params.value[2];                                            
@@ -171,9 +179,10 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                                             return data + "<br/>"
                                             + params.value[1];
                                             }
-
-            }')
-        }else if (type[1] %in% c('scatter','bubble')){
+                                            }'
+                                            )
+        }
+        if (type[1] %in% c('scatter','bubble')){
             if (!is.null(series)){
                 lstTooltip[['formatter']] <- JS('function (params) {
                                                 if (params.value.length > 1) {
@@ -184,16 +193,13 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                                                 return params.seriesName + " :<br/>"
                                                 + params.name + " : "
                                                 + params.value;
-                                                }
-                }')
-                }
-                lstTooltip[['axisPointer']] <- list(
-                    show= T,type='cross',lineStyle= list(type= 'dashed',width= 1)
-                )
+                                                }}')
+            }
+            lstTooltip[['axisPointer']] <- list(
+                show= T,type='cross',lineStyle= list(type= 'dashed',width= 1)
+            )
         }else if (type[1] %in% c('ring','pie')){
             lstTooltip[['formatter']] <- "{a} <br/>{b} : {c} ({d}%)"
-        }else{
-            lstTooltip[['formatter']] <- "{a} <br/>{b} : {c}"
         }
     }else{
         lstTooltip = list(show=FALSE)
@@ -205,14 +211,14 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
-                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
-                                      markClear="Çå¿Õ¸¨ÖúÏßClear auxiliary conductor")),
+                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
+                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
+                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="Êý¾ÝÊÓÍ¼ Data view"),
+                                title="æ•°æ®è§†å›¾ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="»¹Ô­ Restore"),
-                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
+                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
+                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
             )
         )
         if (toolbox_pos[1] %in% c('left','right','center') & 
@@ -236,12 +242,13 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
-                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
-                stack="¶Ñ»ý Stack", tiled="Æ½ÆÌ Tile",
-                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
-                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
-                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
+                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
+                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
+                stack="å †ç§¯ Stack", 
+                tiled="å¹³é“º Tile",
+                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
+                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
+                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
             )
         }
     }else{
@@ -251,8 +258,8 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
     #------Legend------------
     if (!legend){
         lstLegend= list(show=FALSE)
-    }else if (is.null(series) | nlevels(as.factor(series)) ==1){ 
-        lstLegend= list(show=TRUE, data=levels(as.factor(series)))
+    }else if (nlevels(as.factor(series)) ==1){ 
+        lstLegend= list(show=TRUE, data=levels(as.factor(x)))
     }else{
         lstLegend= list(show=TRUE, data=levels(as.factor(series)))
     }
@@ -286,7 +293,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         if (!is.null(dataRangePalette)){
             lstdataRangePalette <- funcPal(dataRangePalette)
         }
-        if (length(dataRange)==2){
+        if (length(dataRange)<2)  dataRange=c(dataRange,"")
             lstdataRange <- list(
                 show=T, calculable=ifelse(as.numeric(splitNumber)==0 | 
                                               is.null(splitNumber),calculable,F),
@@ -297,7 +304,6 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                 color=lstdataRangePalette,
                 splitNumber=ifelse(is.null(splitNumber),0,
                                    as.numeric(splitNumber)))
-        }
     }
     
     #------------Axis-------------
@@ -311,7 +317,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             axisLine = list(show=T, onZero=AxisAtZero)
         )
         if (lstXAxis[['type']]=='category'){
-            lstXAxis[['data']] <- unique(x)
+            lstXAxis[['data']] <- unique(as.character(x))
         }
         lstYAxis = list(
             name = ifelse(is.null(ylab),yvar,ylab),
@@ -329,7 +335,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             axisLine = list(show=T, onZero=AxisAtZero)
         )
         if (lstYAxis[['type']]=='category') {
-            lstYAxis[['data']] <- unique(x)
+            lstYAxis[['data']] <- unique(as.character(x))
         }
         
         lstXAxis = list(
@@ -339,8 +345,8 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             axisLine = list(show=T, onZero=AxisAtZero)
         )
     }
-    if ((lstXAxis[['type']])=='time' | (lstYAxis[['type']])=='time'){
-        lstToolbox[['feature']][['magicType']]<-list(show=F)
+    if (lstXAxis[['type']]=='time' | lstYAxis[['type']]=='time'){
+        lstToolbox[['feature']][['magicType']] <- list(show=F)
     }
     
     #----------polar---------------
@@ -367,11 +373,9 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
     
     if (type[1] %in% c('scatter','bubble')){
         if (is.null(series)){
-            tmpMtx <- as.matrix(data[,c(xvar,yvar)])
-            dimnames(tmpMtx) <- NULL
             lstSeries[[1]] <- list(
                 type='scatter',
-                data=tmpMtx,
+                data=as.matrix(data[,c(xvar,yvar)]),
                 large=ifelse(nrow(data)>10000,TRUE,FALSE)
             )
             if (type[1]=='bubble'){
@@ -379,8 +383,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                     as.matrix(data[,c(xvar,yvar,wvar)])
                 lstSeries[[1]][['symbolSize']] <- 
                     JS('function (value){
-                       return Math.round(value[2]*',symbolSizeFold,');
-            }')
+                       return Math.round(value[2]*',symbolSizeFold,');}')
             }
         }else{
             for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
@@ -403,10 +406,10 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                     lstSeries[[i]][['symbolSize']] <- 
                         JS('function (value){
                            return Math.round(value[2]*',symbolSizeFold,');
-                }')
+                     }')
                 }
             }
-        }   
+        }
     }else if (type[1] %in% c('ring','pie')){
         lstSeries[[1]] <- list(
             name=svar,
@@ -429,7 +432,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         }
         for (i in 1:nrow(data)){
             lstSeries[[1]][['data']][[i]]<- list(
-                value=data[i,2],name=as.character(data[i,1])
+                value=data[i,yvar],name=as.character(data[i,svar])
             )
         }
     }else if (type[1] %in% c('funnel','pyramid')){
@@ -446,7 +449,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         }
         for (i in 1:nrow(data)){
             lstSeries[[1]][['data']][[i]]<- list(
-                value=data[i,2],name=as.character(data[i,1])
+                value=data[i,yvar],name=as.character(data[i,svar])
             )
         }
     }else if (type[1] %in% c('line','area','linesmooth','areasmooth')){
@@ -508,6 +511,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             }
         }else{
             lstSeries[[1]] <- list(
+                name=yvar,
                 type='radar',
                 data=list()
             )
@@ -525,8 +529,8 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             }
         }
     }else if (type[1] %in% c('map')){
-        mapType <- ifelse(is.null(type[2]),'china',type[2])
-        mapMode <- ifelse(is.null(type[3]),'area',type[3])
+        mapType <- ifelse(is.null(type[2]),'china',tolower(type[2]))
+        mapMode <- ifelse(is.null(type[3]),'area',tolower(type[3]))
         for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
             lstSeries[[i]] <- list(
                 type='map',
@@ -574,7 +578,6 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
     }else{              # the rest charts
         if (is.null(series)){
             lstSeries[[1]] <- list(
-                name=yvar,
                 type=type[1],
                 data=data[,yvar]
             )
@@ -598,15 +601,14 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                 }
             }
         }
-        
     }
-    
+        
     #-------SymbolList----------
     if (!is.null(series)){
-        if (length(symbolList)<nlevels(series)){
+        if (length(symbolList)<nlevels(as.factor(series))){
             symbolList <- c(symbolList,
                             rep(symbolList[length(symbolList)],
-                                nlevels(series)-length(symbolList)))
+                                nlevels(as.factor(series))-length(symbolList)))
         }
     }
     lstSymbol <- symbolList
@@ -795,7 +797,7 @@ funcPal <- function(palette){ # build a function to extract palette info
         }else{
             aetPal <- aetnaPal(palettes[1],as.numeric(palettes[2]))
             if (as.numeric(palettes[2])<length(aetPal)){
-                set.seed(61936962)
+                #set.seed(61936962L)
                 return(sample(aetPal,as.numeric(palettes[2])))
             }else{
                 return(aetPal)

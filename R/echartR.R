@@ -59,7 +59,7 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                   palette='aetnagreen',tooltip=TRUE,legend=TRUE, 
                   legend_pos=c('left','top'),
                   toolbox=TRUE, toolbox_pos=c('right','top'),
-                  calculable=TRUE, asImage=FALSE){
+                  calculable=TRUE, asImage=TRUE){
     type <- tolower(type)
     title_pos <- tolower(title_pos)
     toolbox_pos <- tolower(toolbox_pos)
@@ -211,14 +211,14 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="辅助线开关 Auxiliary conductor switch",
-                                      markUndo="删除辅助线 Undo auxiliary conductor",
-                                      markClear="清空辅助线 Clear auxiliary conductor")),
+                           title=list(mark="辅助线开�? Auxiliary conductor switch",
+                                      markUndo="删除辅助�? Undo auxiliary conductor",
+                                      markClear="清空辅助�? Clear auxiliary conductor")),
                 dataView = list(show= TRUE, readOnly= FALSE,
                                 title="数据视图 Data view"),
                 magicType = list(show=FALSE),
                 restore = list(show= TRUE,title="还原 Restore"),
-                saveAsImage = list(show= TRUE,title="保存为图片 Save as image")
+                saveAsImage = list(show= TRUE,title="保存为图�? Save as image")
             )
         )
         if (toolbox_pos[1] %in% c('left','right','center') & 
@@ -242,13 +242,13 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="折线图切换 Switch to line chart",
-                bar="柱形图切换 Switch to bar chart",
+                line="折线图切�? Switch to line chart",
+                bar="柱形图切�? Switch to bar chart",
                 stack="堆积 Stack", 
                 tiled="平铺 Tile",
-                force="力导向布局图切换 Switch to force chart",
+                force="力导向布局图切�? Switch to force chart",
                 pie="饼图切换 Switch to pie chart",
-                funnel="漏斗图切换 Switch to funnel chart"
+                funnel="漏斗图切�? Switch to funnel chart"
             )
         }
     }else{

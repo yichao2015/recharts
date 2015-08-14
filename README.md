@@ -1,6 +1,6 @@
-# recharts
-
-[![Build Status](https://travis-ci.org/yihui/recharts.svg)](https://travis-ci.org/yihui/recharts)
+# Function echartR with package recharts
+Author: `r Sys.info()[['user']]`  
+Edited: `r format(Sys.time(),'%x %X')`  
 
 # Intro 前言
 
@@ -22,16 +22,19 @@ library(recharts)
 echart(iris, ~Sepal.Length, ~Sepal.Width)
 ```
 
-![](files/figure-html/1.png)
+![](files/figure-html/intro1.png)
 
 ```r
 echart(iris, ~Sepal.Length, ~Sepal.Width, series = ~Species)
 ```
 
-
-![](files/figure-html/2.png)
+![](files/figure-html/intro2.png)
 
 # Usage 用法
+- 首先，安装好最新版的[R](http://www.r-project.org)和[Rstudio](http://www.rstudio.com)
+- 了解最基本的R语言技巧，能够用R整理、读写数据集
+- 最好会用`knitr`，会写[`rmarkdown`](http://rmarkdown.rstudio.com/)
+
 ## Installation 安装
 - 安装 Install `devtools` (`install.packages('devtools')`)
 - 安装 Insall recharts (`install_github('yihui/recharts')`)
@@ -80,7 +83,7 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     - 种类 Palette names:
         - Aetna palettes: 可用 Including 'aetnagreen', 'aetnablue', 'aetnaviolet', 'aetnaorange', 'aetnateal', 'aetnacranberry'
         - RColorBrewer palettes: 可用 Including 'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'
-        - ggthemes palettes: 'calc', 'economist', 'economist_white', 'excel', 'few', 'fivethirtyeight', 'gdocs', 'pander', 'tableau', 'stata', 'tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy', 'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light', 'tableaublrd12','tableauprgy12', 'tableaugnor12','hc','darkunica', 'solarized','solarized_red', 'solarized_yellow', 'solarized_orange','solarized_magenta','solarized_violet', 'solarized_blue', 'solarized_cyan', 'solarized_green', 'wsj','colorblind', 'trafficlight'
+        - ggthemes palettes: 'calc', 'economist', 'economist_white', 'economist_stata','excel', 'exel_fill', 'excel_old', 'excel_new', 'few', 'fivethirtyeight', 'gdocs', 'pander', 'tableau', 'stata', 'stata1','stata1r','statamono', 'tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy', 'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light', 'tableaublrd12', 'tableauprgy12', 'tableaugnor12','hc','darkunica', 'solarized','solarized_red', 'solarized_yellow', 'solarized_orange','solarized_magenta','solarized_violet', 'solarized_blue', 'solarized_cyan', 'solarized_green', 'wsj', 'wsj_rgby', 'wsj_red_green', 'wsj_black_green', 'wsj_dem_rep', 'colorblind', 'trafficlight'
         - 其他Other palettes: 'rainbow', 'terrain', 'topo', 'heat', 'cm'
     - 用法 Usage:
         - 可以不指定，使用函数默认。Do not set the value and function defaults will be loaded
@@ -96,12 +99,13 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
 - calculable: 默认TRUE，是否支持拖曳重算(Echarts专利) Calculable switch (Echarts patent).
 - asImage: 默认FALSE，是否出静态图。renderAsImage switch.Deafult to FALSE.
 
+--------
+
 # Examples 示例
 
-**GitHub上只能放静态图，真实`d3-js`效果图请点击[百度云链接](http://pan.baidu.com/s/1eQ53pAE)下载html文件**
 
 ```r
-Sys.setlocale("LC_CTYPE","Chs")
+Sys.setlocale("LC_ALL","Chinese")
 source("~/Github/recharts/R/echartR.R")
 #source("C:/HMSProjects/Data Analytics/R_scripts/CommonFunctions.R")
 knitr::opts_chunk$set(message=FALSE,warning=FALSE,results='asis')
@@ -109,7 +113,7 @@ knitr::opts_chunk$set(message=FALSE,warning=FALSE,results='asis')
 
 ## Scatter 散点图
 
-### Singular-series Scatter 单系列散点图
+### Mono-series Scatter 单系列散点图
 
 
 ```r
@@ -119,7 +123,7 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width,
         xlab = 'Sepal Width', ylab = 'Petal Width')
 ```
 
-![](files/figure-html/3.png)
+![](files/figure-html/scatter1.png)
 
 ### Multi-series Scatter 多系列散点图
 
@@ -128,31 +132,46 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width,
 
 ```r
 echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, series = ~Species,
-        type = 'scatter', palette='aetnaviolet', symbolList='circle', scale=F,
-        title = 'Scatter - Sepal Width vs Petal Width, by Species (iris)',
-        xlab = 'Sepal Width', ylab = 'Petal Width')
+        type = 'scatter', palette='wsj_dem_rep', symbolList='circle',
+        scale=F, xlab = 'Sepal Width', ylab = 'Petal Width',
+        title = 'Scatter - Sepal Width vs Petal Width, by Species (iris)')
 ```
 
-![](files/figure-html/4.png)
+![](files/figure-html/scatter2.png)
 
-使用三套非标准图形(箭头、心形、八角星)区分数据系列
+使用三套非标准图形(箭头、心形、八角星)区分数据系列(`c('arrow','heart','star8')`)。命令指定随机选择excel_old色版中的1种颜色，但由于数据集有3个水平(series)，颜色个数限制被忽略。
 
 
 ```r
 echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, series = ~Species,
-        type = 'scatter', palette='aetnateal',
+        type = 'scatter', palette='excel_old(1)',
         symbolList=c('arrow','heart','star8'),
         title = 'Scatter - Sepal Width vs Petal Width, by Species (iris)',
         xlab = 'Sepal Width', ylab = 'Petal Width')
 ```
 
-![](files/figure-html/5.png)
+![](files/figure-html/scatter3.png)
+
+大规模散点图(5000个点以上)同样可以秒级出图(但html文件会变得很大)。
+
+```r
+x <- rnorm(5001)*2
+e <- vector()
+for (i in 1:5001)  e <- c(e,rnorm(1,0,x[i]+abs(min(x))))
+df <- data.frame(x, sin=sin(x)+e/20, cos=cos(x)+e/20)
+df <- melt(df,id="x")
+echartR(df,x=~x,y=~value,series=~variable,type='scatter',
+        palette='wsj_red_green',symbolList='circle',
+        title='Scatter of 5,001 points')
+```
+
+![](files/figure-html/scatter4.png)
 
 ## Bubble 气泡图
 
 气泡图同样来源于散点图。type改为`bubble`即可，如不指定`weight`变量，函数默认指定y为气泡权重。
 
-### Singular-series Bubble 单系列气泡图
+### Mono-series Bubble 单系列气泡图
 
 
 ```r
@@ -164,7 +183,7 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width,
         xlab = 'Sepal Width', ylab = 'Petal Width')
 ```
 
-![](files/figure-html/6.png)
+![](files/figure-html/bubble1.png)
 
 ### Multi-series Bubble 多系列气泡图
 
@@ -181,7 +200,7 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width,
         xlab = 'Sepal Width', ylab = 'Petal Width')
 ```
 
-![](files/figure-html/7.png)
+![](files/figure-html/bubble2.png)
 
 ## Column 柱图
 
@@ -248,7 +267,7 @@ echartR(data = dtiris, x = ~Param, y = ~Mean,  series = ~Species,
         xlab = 'Parameter', ylab = 'Mean', legend_pos=c('right','center'))
 ```
 
-![](files/figure-html/8.png)
+![](files/figure-html/column1.png)
 
 ### Stacked Column 堆积柱图
 
@@ -261,7 +280,7 @@ echartR(data = dtiris, x = ~Param, y = ~Mean,
         xlab = 'Parameter', ylab = 'Mean', legend_pos=c('right','center'))
 ```
 
-![](files/figure-html/9.png)
+![](files/figure-html/column2.png)
 
 堆积与否，也可以简单地通过工具栏的`平铺`和`堆积`按钮切换。非常强大(但也得在函数配置项里正确地码出代码)。
 
@@ -274,12 +293,12 @@ echartR(data = dtiris, x = ~Param, y = ~Mean,
 
 ```r
 echartR(data = dtiris, x = ~Species, y = ~Mean, series = ~Param, 
-        type = 'bar', palette='stata', xyflip=T,
+        type = 'bar', palette='stata1', xyflip=T,
         title = 'Species-specific Mean by Parameters (iris)', 
         xlab = 'Species', ylab = 'Mean', legend_pos=c('right','center'))
 ```
 
-![](files/figure-html/10.png)
+![](files/figure-html/bar1.png)
 
 ### Stacked Bar 堆积条图
 
@@ -289,12 +308,12 @@ palette设为calc的随机4种颜色。打开stack (`stack=TRUE`)。
 ```r
 echartR(data = dtiris, x = ~Param, y = ~Mean, 
         series = ~Species, stack=T, xyflip=T,
-        type = 'bar', palette='calc',
+        type = 'bar', palette='calc(5)',
         title = 'Parameter Mean by Species (iris)', 
         xlab = 'Parameter', ylab = 'Mean', legend_pos=c('right','center'))
 ```
 
-![](files/figure-html/11.png)
+![](files/figure-html/bar2.png)
 
 ## Histogram 直方图
 
@@ -308,7 +327,7 @@ echartR(airquality, y=~Temp, type='histogram', splitNumber=13,
         palette='pastel2', title='Histogram of temperature (airquality)')
 ```
 
-![](files/figure-html/12.png)
+![](files/figure-html/hist.png)
 
 ## Pie 饼图
 
@@ -331,7 +350,7 @@ echartR(dtcars, x = ~transmission,  y = ~car, type='pie',
         title='Number of cars by transmission (mtcars)')
 ```
 
-![](files/figure-html/13.png)
+![](files/figure-html/pie.png)
 
 ## Ring 环图
 
@@ -343,28 +362,31 @@ echartR(dtcars, x = ~cylinder,  y = ~car, type='ring',
         palette='hc', title='Number of Cylinders (mtcars)')
 ```
 
-![](files/figure-html/14.png)
+![](files/figure-html/ring.png)
 
 ## Line 线图
 
-### Unstacked Line 平铺线图
+### Tiled Line 平铺线图
 
 打开数据缩放`dataZoom=T`
 
 
 ```r
-data(airquality)
-airquality$Date <- strptime(paste(2015,airquality$Month,airquality$Day,sep="-")
-                            ,format="%Y-%m-%d")
+airquality$Date <- strptime(paste(2015,airquality$Month,airquality$Day,sep="-"),
+                            format="%F", tz="Asia/Taipei")
 airquality$strDate <- with(airquality,paste(2015,Month,Day,sep="-"))
 airquality$TempG <- cut(airquality$Temp,breaks=c(0,60,70,80,100))
+#echartR(airquality, x = ~Date, y= ~Wind,
+#          type='linesmooth', dataZoom=T, 
+#        xlab = 'Date', ylab = 'Wind',
+#        title='Wind by day (airquality)')
 echartR(airquality, x = ~Day, y= ~Wind, series=~Month,
           type='line', dataZoom=T, dataZoomRange=c(30,70),
         palette='tableauBlRd', xlab = 'Days', ylab = 'Wind',
         title='Day-specific Wind by month (airquality)', symbolList='none')
 ```
 
-![](files/figure-html/15.png)
+![](files/figure-html/line1.png)
 
 线段平滑(`type='linesmooth'`)，不显示标志图形(`symbolList='none'`)。Echarts对缺失值默认不填补，因此有很多断线。需要在数据前处理时自行作插值运算。
 
@@ -378,7 +400,7 @@ echartR(airq, x = ~strDate, y= ~value, series= ~variable, type='linesmooth',
         title='Climate measures by day (airquality)')
 ```
 
-![](files/figure-html/16.png)
+![](files/figure-html/ling2.png)
 
 ### Stacked Line 堆积线图
 
@@ -388,7 +410,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='line',stack=T,
         title='Parameter measures (iris)')
 ```
 
-![](files/figure-html/17.png)
+![](files/figure-html/line3.png)
 
 线段平滑，不显示标志图形
 
@@ -399,7 +421,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='linesmooth',stack=T,
         title='Parameter measures (iris)')
 ```
 
-![](files/figure-html/18.png)
+![](files/figure-html/line4.png)
 
 ## Area 面积图
 Echarts中，面积图本质上被定义为线图，只需通过`itemStyle`参数渲染颜色。
@@ -412,8 +434,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',
         symbolList='emptyDiamond',title='Parameter measures (iris)')
 ```
 
-
-![](files/figure-html/19.png)
+![](files/figure-html/area1.png)
 
 线段平滑`type='areasmooth'`，并打开数据缩放`dataZoom=TRUE`，初始显示40%-80%。
 
@@ -424,8 +445,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',
         title='Parameter measures (iris)')
 ```
 
-
-![](files/figure-html/20.png)
+![](files/figure-html/area.png)
 
 ### Stacked Area 堆积面积图
 
@@ -436,7 +456,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',stack=T,
         title='Parameter measures (iris)')
 ```
 
-![](files/figure-html/21.png)
+![](files/figure-html/area3.png)
 
 线段平滑(`type='areasmooth'`)。自定义色板向量。
 
@@ -448,7 +468,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',stack=T,
         title='Parameter measures (iris)')
 ```
 
-![](files/figure-html/22.png)
+![](files/figure-html/area4.png)
 
 ## Funnel 漏斗图
 
@@ -460,7 +480,7 @@ echartR(dtcars, x = ~carburetor,  y = ~car, type='funnel',
         palette='RdBu', title='Number of carburetors of cars (mtcars)')
 ```
 
-![](files/figure-html/23.png)
+![](files/figure-html/funnel.png)
 
 ### Pyramid 金字塔图
 金字塔图即逆序漏斗图。
@@ -471,7 +491,7 @@ echartR(dtcars, x = ~carburetor,  y = ~car, type='pyramid',
         palette='RdGy', title='Number of carburetors of cars (mtcars)')
 ```
 
-![](files/figure-html/24.png)
+![](files/figure-html/pyramid.png)
 
 ## Radar 雷达图
 
@@ -495,7 +515,7 @@ echartR(player, x= ~para, y= ~value, series= ~name, type='radar',
         title='Lahm vs Alves (by @mixedknuts)')
 ```
 
-![](files/figure-html/25.png)
+![](files/figure-html/radar1.png)
 
 ### Solid Radar 实心雷达
 
@@ -506,7 +526,7 @@ echartR(player, x= ~para, y= ~value, series= ~name, type='radarfill',
         title='Lahm vs Alves (by @mixedknuts)')
 ```
 
-![](files/figure-html/26.png)
+![](files/figure-html/radar2.png)
 
 ## Map 地图
 
@@ -742,7 +762,7 @@ echartR(dtgdp, x = ~Prov, y = ~GDP, series= ~Year,
         dataRange=c('High',"Low"),toolbox_pos=c('right','center'))
 ```
 
-![](files/figure-html/27.png)
+![](files/figure-html/map1.png)
 
 用世界GDP前20粗糙演示世界地图。漫游轴切分为10档(`splitNumber=10`)。
 
@@ -762,7 +782,7 @@ echartR(worldgdp, x = ~country, y = ~GDP, type=c('map','world','area'),
         splitNumber=10, toolbox_pos=c('right','center'))
 ```
 
-![](files/figure-html/28.png)
+![](files/figure-html/map2.png)
 
 ### Point 点标注
 

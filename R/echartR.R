@@ -216,17 +216,17 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
-                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
-                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
+                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
+                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
+                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
-                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
+                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
+                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="æ•°æ®è§†å›¾ Data view"),
+                                title="Êý¾ÝÊÓÍ¼ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
-                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
+                restore = list(show= TRUE,title="»¹Ô­ Restore"),
+                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
             )
         )
         if (toolbox_pos[1] %in% c('left','right','center') & 
@@ -250,13 +250,13 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
-                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
-                stack="å †ç§¯ Stack", 
-                tiled="å¹³é“º Tile",
-                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
-                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
-                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
+                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
+                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
+                stack="¶Ñ»ý Stack", 
+                tiled="Æ½ÆÌ Tile",
+                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
+                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
+                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
             )
         }
     }else{
@@ -406,226 +406,226 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
                     JS('function (value){
                        return Math.round(value[2]*',symbolSizeFold,');}')
         }
-        }else{
-            for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
-                lstSeries[[i]] <- list(
-                    type='scatter',
-                    data=as.matrix(data[data[,svar]==
-                                            levels(as.factor(series))[i],
-                                        c(xvar,yvar)]),
-                    large=ifelse(nrow(data)>5000,T,F)
-                )
-                if (nlevels(as.factor(series))>1){
-                    lstSeries[[i]][['name']] <-
-                        as.vector(levels(as.factor(series))[i])
-                }
-                if (type[1]=='bubble'){
-                    lstSeries[[i]][['data']] <-
-                        as.matrix(data[data[,svar]==
-                                           levels(as.factor(series))[i],
-                                       c(xvar,yvar,wvar)])
-                    lstSeries[[i]][['symbolSize']] <- 
-                        JS('function (value){
-                           return Math.round(value[2]*',symbolSizeFold,');
-                }')
+            }else{
+                for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
+                    lstSeries[[i]] <- list(
+                        type='scatter',
+                        data=as.matrix(data[data[,svar]==
+                                                levels(as.factor(series))[i],
+                                            c(xvar,yvar)]),
+                        large=ifelse(nrow(data)>5000,T,F)
+                    )
+                    if (nlevels(as.factor(series))>1){
+                        lstSeries[[i]][['name']] <-
+                            as.vector(levels(as.factor(series))[i])
+                    }
+                    if (type[1]=='bubble'){
+                        lstSeries[[i]][['data']] <-
+                            as.matrix(data[data[,svar]==
+                                               levels(as.factor(series))[i],
+                                           c(xvar,yvar,wvar)])
+                        lstSeries[[i]][['symbolSize']] <- 
+                            JS('function (value){
+                               return Math.round(value[2]*',symbolSizeFold,');
+                    }')
             }
-            }
                 }
-            }else if (type[1] %in% c('ring','pie')){
-                lstSeries[[1]] <- list(
-                    name=svar,
-                    type='pie',
-                    data=list()
-                )
-                if (type[1]=='ring'){
-                    lstSeries[[1]][['radius']] <- c('60%','80%')
-                    lstSeries[[1]][['itemStyle']] <- list(
-                        emphasis = list(
-                            label=list(
-                                show=TRUE, position='center',
-                                textStyle=list(fontSize='30',fontWeight='bold')
+                    }
+                }else if (type[1] %in% c('ring','pie')){
+                    lstSeries[[1]] <- list(
+                        name=svar,
+                        type='pie',
+                        data=list()
+                    )
+                    if (type[1]=='ring'){
+                        lstSeries[[1]][['radius']] <- c('60%','80%')
+                        lstSeries[[1]][['itemStyle']] <- list(
+                            emphasis = list(
+                                label=list(
+                                    show=TRUE, position='center',
+                                    textStyle=list(fontSize='30',fontWeight='bold')
+                                )
                             )
                         )
-                    )
-                }else{
-                    lstSeries[[1]][['radius']] <- '70%'
-                    lstSeries[[1]][['center']] <- c('50%','50%')
-                }
-                for (i in 1:nrow(data)){
-                    lstSeries[[1]][['data']][[i]]<- list(
-                        value=data[i,yvar],name=as.character(data[i,svar])
-                    )
-                }
-    }else if (type[1] %in% c('funnel','pyramid')){
-        lstSeries[[1]] <- list(
-            name=svar,
-            type='funnel',
-            data=list()
-        )
-        if (type[1]=='funnel'){
-            lstSeries[[1]][['x']] <- '10%'
-        }else{
-            lstSeries[[1]][['x']] <- '25%'
-            lstSeries[[1]][['sort']] <- 'ascending'
-        }
-        for (i in 1:nrow(data)){
-            lstSeries[[1]][['data']][[i]]<- list(
-                value=data[i,yvar],name=as.character(data[i,svar])
-            )
-        }
-    }else if (type[1] %in% c('line','area','linesmooth','areasmooth')){
-        #---------reformat missing value----------
-        y[is.na(y)] <- data[is.na(data[,yvar]),yvar] <- '-'  
-        
-        if (is.null(series)){
+                    }else{
+                        lstSeries[[1]][['radius']] <- '70%'
+                        lstSeries[[1]][['center']] <- c('50%','50%')
+                    }
+                    for (i in 1:nrow(data)){
+                        lstSeries[[1]][['data']][[i]]<- list(
+                            value=data[i,yvar],name=as.character(data[i,svar])
+                        )
+                    }
+        }else if (type[1] %in% c('funnel','pyramid')){
             lstSeries[[1]] <- list(
-                type='line',
-                data=data[,yvar]
+                name=svar,
+                type='funnel',
+                data=list()
             )
-            if (type[1] %in% c("area",'areasmooth')){
-                lstSeries[[1]][['itemStyle']] <-
-                    list(normal=list(areaStyle=list(type='default')))
+            if (type[1]=='funnel'){
+                lstSeries[[1]][['x']] <- '10%'
+            }else{
+                lstSeries[[1]][['x']] <- '25%'
+                lstSeries[[1]][['sort']] <- 'ascending'
             }
-            if (type[1] %in% c('linesmooth','areasmooth')){
-                lstSeries[[1]][['smooth']] <- TRUE
-            }
-            if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
-                lstSeries[[1]][['name']] <- yvar
-                lstSeries[[1]][['showAllSymbol']] <- T
-                #lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
-                lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
-            }
-        }else{
-            for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
-                lstSeries[[i]] <- list(
-                    name=as.vector(levels(as.factor(series))[i]),
-                    type='line',
-                    data=data[data[,svar]==levels(as.factor(series))[i],
-                              yvar]
+            for (i in 1:nrow(data)){
+                lstSeries[[1]][['data']][[i]]<- list(
+                    value=data[i,yvar],name=as.character(data[i,svar])
                 )
-                if (stack) lstSeries[[i]][['stack']] <- 'Stack'
+            }
+        }else if (type[1] %in% c('line','area','linesmooth','areasmooth')){
+            #---------reformat missing value----------
+            y[is.na(y)] <- data[is.na(data[,yvar]),yvar] <- '-'  
+            
+            if (is.null(series)){
+                lstSeries[[1]] <- list(
+                    type='line',
+                    data=data[,yvar]
+                )
                 if (type[1] %in% c("area",'areasmooth')){
-                    lstSeries[[i]][['itemStyle']] <-
+                    lstSeries[[1]][['itemStyle']] <-
                         list(normal=list(areaStyle=list(type='default')))
                 }
-                if (type[1] %in% c('linesmooth','areasmooth')) {
-                    lstSeries[[i]][['smooth']] <- TRUE
+                if (type[1] %in% c('linesmooth','areasmooth')){
+                    lstSeries[[1]][['smooth']] <- TRUE
                 }
                 if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
-                    lstSeries[[i]][['name']] <- levels(as.factor(series))[i]
-                    lstSeries[[i]][['showAllSymbol']] <- T
-                    lstSeries[[i]][['data']] <- as.matrix(
-                        data[data[,svar]==levels(as.factor(series))[i],
-                             c(xvar,yvar)])
+                    lstSeries[[1]][['name']] <- yvar
+                    lstSeries[[1]][['showAllSymbol']] <- T
+                    #lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
+                    lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
+                }
+            }else{
+                for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
+                    lstSeries[[i]] <- list(
+                        name=as.vector(levels(as.factor(series))[i]),
+                        type='line',
+                        data=data[data[,svar]==levels(as.factor(series))[i],
+                                  yvar]
+                    )
+                    if (stack) lstSeries[[i]][['stack']] <- 'Stack'
+                    if (type[1] %in% c("area",'areasmooth')){
+                        lstSeries[[i]][['itemStyle']] <-
+                            list(normal=list(areaStyle=list(type='default')))
+                    }
+                    if (type[1] %in% c('linesmooth','areasmooth')) {
+                        lstSeries[[i]][['smooth']] <- TRUE
+                    }
+                    if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
+                        lstSeries[[i]][['name']] <- levels(as.factor(series))[i]
+                        lstSeries[[i]][['showAllSymbol']] <- T
+                        lstSeries[[i]][['data']] <- as.matrix(
+                            data[data[,svar]==levels(as.factor(series))[i],
+                                 c(xvar,yvar)])
+                    }
                 }
             }
-        }
-    }else if (type[1] %in% c('radar','radarfill')){
-        if (is.null(series)){
-            lstSeries[[1]] <- list(
-                name=yvar,
-                type='radar',
-                data=list(value=data[,yvar],
-                          name=yvar)
-            )
-            if (type[1]=='radarfill'){
-                lstSeries[[1]][['itemStyle']] <- list(
-                    normal=list(areaStyle=list(type='default'))
+        }else if (type[1] %in% c('radar','radarfill')){
+            if (is.null(series)){
+                lstSeries[[1]] <- list(
+                    name=yvar,
+                    type='radar',
+                    data=list(value=data[,yvar],
+                              name=yvar)
                 )
-            }
-        }else{
-            lstSeries[[1]] <- list(
-                name=yvar,
-                type='radar',
-                data=list()
-            )
-            if (type[1]=='radarfill'){
-                lstSeries[[1]][['itemStyle']] <- list(
-                    normal=list(areaStyle=list(type='default'))
-                )
-            }
-            for (i in 1:nlevels(as.factor(series))){
-                lstSeries[[1]][['data']][[i]]<-list(
-                    value = data[data[,svar]==
-                                     levels(as.factor(series))[i],yvar],
-                    name = as.vector(levels(as.factor(series))[i])
-                )
-            }
-        }
-    }else if (type[1] %in% c('map')){
-        mapType <- ifelse(is.null(type[2]),'china',tolower(type[2]))
-        mapMode <- ifelse(is.null(type[3]),'area',tolower(type[3]))
-        for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
-            lstSeries[[i]] <- list(
-                type='map',
-                mapType=mapType,
-                roam=T,
-                data=list()
-            )
-            if (is.null(series) | nlevels(as.factor(series))==1){
-                dset <- data
-                lstSeries[[i]][['name']] <- yvar
-            }else{
-                dset <- data[data[,svar]==levels(as.factor(series))[i],
-                             c(xvar,yvar,svar)]
-                lstSeries[[i]][['name']] <- levels(as.factor(series))[i]
-            }
-            
-            if (mapMode=='area'){
-                lstSeries[[i]][['itemStyle']]=list(
-                    normal=list(label=list(show=F)),
-                    emphasis=list(label=list(show=T))
-                )
-                for (j in 1:nrow(dset)){
-                    lstSeries[[i]][['data']][[j]]<- list(
-                        value=dset[j,yvar],name=as.character(dset[j,xvar])
+                if (type[1]=='radarfill'){
+                    lstSeries[[1]][['itemStyle']] <- list(
+                        normal=list(areaStyle=list(type='default'))
                     )
                 }
             }else{
-                lstSeries[[i]][['markPoint']] <- list(
-                    itemStyle=list(
-                        normal=list(borderColor='#87cefa',
-                                    borderWidth=1,
-                                    label=list(show=F)),
-                        emphasis=list(borderColor='#1e90ff',
-                                      borderWidth=3,
-                                      label=list(show=T))
-                    ),
+                lstSeries[[1]] <- list(
+                    name=yvar,
+                    type='radar',
+                    data=list()
+                )
+                if (type[1]=='radarfill'){
+                    lstSeries[[1]][['itemStyle']] <- list(
+                        normal=list(areaStyle=list(type='default'))
+                    )
+                }
+                for (i in 1:nlevels(as.factor(series))){
+                    lstSeries[[1]][['data']][[i]]<-list(
+                        value = data[data[,svar]==
+                                         levels(as.factor(series))[i],yvar],
+                        name = as.vector(levels(as.factor(series))[i])
+                    )
+                }
+            }
+        }else if (type[1] %in% c('map')){
+            mapType <- ifelse(is.null(type[2]),'china',tolower(type[2]))
+            mapMode <- ifelse(is.null(type[3]),'area',tolower(type[3]))
+            for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
+                lstSeries[[i]] <- list(
+                    type='map',
+                    mapType=mapType,
+                    roam=T,
+                    data=list()
+                )
+                if (is.null(series) | nlevels(as.factor(series))==1){
+                    dset <- data
+                    lstSeries[[i]][['name']] <- yvar
+                }else{
+                    dset <- data[data[,svar]==levels(as.factor(series))[i],
+                                 c(xvar,yvar,svar)]
+                    lstSeries[[i]][['name']] <- levels(as.factor(series))[i]
+                }
+                
+                if (mapMode=='area'){
+                    lstSeries[[i]][['itemStyle']]=list(
+                        normal=list(label=list(show=F)),
+                        emphasis=list(label=list(show=T))
+                    )
                     for (j in 1:nrow(dset)){
-                        lstSeries[[i]][['markPoint']][['data']][[j]]<- list(
+                        lstSeries[[i]][['data']][[j]]<- list(
                             value=dset[j,yvar],name=as.character(dset[j,xvar])
                         )
                     }
-                )
+                }else{
+                    lstSeries[[i]][['markPoint']] <- list(
+                        itemStyle=list(
+                            normal=list(borderColor='#87cefa',
+                                        borderWidth=1,
+                                        label=list(show=F)),
+                            emphasis=list(borderColor='#1e90ff',
+                                          borderWidth=3,
+                                          label=list(show=T))
+                        ),
+                        for (j in 1:nrow(dset)){
+                            lstSeries[[i]][['markPoint']][['data']][[j]]<- list(
+                                value=dset[j,yvar],name=as.character(dset[j,xvar])
+                            )
+                        }
+                    )
+                }
             }
-        }
-    }else{              # the rest charts
-        if (is.null(series)){
-            lstSeries[[1]] <- list(
-                type=type[1],
-                data=data[,yvar]
-            )
-            if (type[1]=='histogram'){
-                lstSeries[[1]][['type']] <- 'bar'
-                lstSeries[[1]][['barGap']] <- '1%'
-            }
-        }else{
-            for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
-                lstSeries[[i]] <- list(
-                    name=as.vector(levels(as.factor(series))[i]),
+        }else{              # the rest charts
+            if (is.null(series)){
+                lstSeries[[1]] <- list(
                     type=type[1],
-                    data=data[data[,svar]==levels(as.factor(series))[i],yvar]
+                    data=data[,yvar]
                 )
-                if (stack){
-                    lstSeries[[i]][['stack']] <- 'Stack'
-                }
                 if (type[1]=='histogram'){
-                    lstSeries[[i]][['type']] <- 'bar'
-                    lstSeries[[i]][['barGap']] <- '1%'
+                    lstSeries[[1]][['type']] <- 'bar'
+                    lstSeries[[1]][['barGap']] <- '1%'
+                }
+            }else{
+                for (i in 1:ifelse(is.null(series),1,nlevels(as.factor(series)))){
+                    lstSeries[[i]] <- list(
+                        name=as.vector(levels(as.factor(series))[i]),
+                        type=type[1],
+                        data=data[data[,svar]==levels(as.factor(series))[i],yvar]
+                    )
+                    if (stack){
+                        lstSeries[[i]][['stack']] <- 'Stack'
+                    }
+                    if (type[1]=='histogram'){
+                        lstSeries[[i]][['type']] <- 'bar'
+                        lstSeries[[i]][['barGap']] <- '1%'
+                    }
                 }
             }
         }
-    }
     
     #-------SymbolList----------
     if (!is.null(series)){
@@ -670,23 +670,23 @@ echartR<-function(data,x=NULL,y,z=NULL,series=NULL,weight=NULL,
 #-----Aetna palettes---------
 aetnaPal <- function(palname,n=6){
     brewer <- c('BrBG','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu',
-              'RdYlGn','Spectral','Accent','Dark2','Paired','Pastel1',
-              'Pastel2','Set1','Set2','Set3','Blues','BuGn','BuPu',
-              'GnBu','Greens','Greys','Oranges','OrRd','PuBu','PuBuGn',
-              'PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr',
-              'YlOrRd')
+                'RdYlGn','Spectral','Accent','Dark2','Paired','Pastel1',
+                'Pastel2','Set1','Set2','Set3','Blues','BuGn','BuPu',
+                'GnBu','Greens','Greys','Oranges','OrRd','PuBu','PuBuGn',
+                'PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr',
+                'YlOrRd')
     tableau <- data.frame(
         nick=c('tableau20','tableau10medium','tableaugray', 'tableauprgy',
-                 'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
-                 'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
-                 'tableaucolorblind','trafficlight'),
+               'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
+               'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
+               'tableaucolorblind','trafficlight'),
         pal=c('tableau20','tableau10medium','gray5', 'purplegray6',
               'bluered6','greenorange6','cyclic','tableau10light', 
               'bluered12','purplegray12','greenorange12','tableau10',
               'colorblind10','trafficlight'))
     palname <- tolower(palname)
     if (palname %in% paste0("aetna",
-                           c('green','blue','teal','cranberry','orange','violet'))){
+                            c('green','blue','teal','cranberry','orange','violet'))){
         switch(palname,
                aetnagreen=c("#7AC143","#7D3F98","#F47721","#D20962","#00A78E",
                             "#00BCE4","#B8D936","#EE3D94","#FDB933","#F58F9F",

@@ -400,7 +400,7 @@ echartR(airq, x = ~strDate, y= ~value, series= ~variable, type='linesmooth',
         title='Climate measures by day (airquality)')
 ```
 
-![](files/figure-html/ling2.png)
+![](files/figure-html/line2.png)
 
 ### Stacked Line 堆积线图
 
@@ -445,7 +445,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',
         title='Parameter measures (iris)')
 ```
 
-![](files/figure-html/area.png)
+![](files/figure-html/area2.png)
 
 ### Stacked Area 堆积面积图
 

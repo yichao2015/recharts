@@ -2,13 +2,13 @@
 Author: `r Sys.info()[['user']]`  
 Edited: `r format(Sys.time(),'%x %X')`  
 
-# Intro Ç°ÑÔ
+# Intro å‰è¨€
 
-±¾¹¤¾ßÀ´Ô´ÓÚ°Ù¶È¿ª·¢µÄ¹úÄÚ¶¥¼âË®Æ½µÄ¿ªÔ´`d3-js`¿ÉÊÓÏîÄ¿[Echarts](http://echarts.baidu.com/)([Github Repo](https://github.com/ecomfe/echarts))¡£Yang ZhouºÍTaiyun Wei»ùÓÚ¸Ã¹¤¾ß¿ª·¢ÁË[recharts](https://github.com/taiyun/recharts)°ü£¬¾­Yihui Xie[ĞŞ¸Ä](https://github.com/yihui/recharts)ºó£¬¿ÉÍ¨¹ı`htmlwidgets`´«µİjs²ÎÊı£¬´ó´ó¼ò»¯ÁË¿ª·¢ÄÑ¶È¡£µ«´Ë°ü¿ª·¢ÈÔÎ´Íê³É¡£ÎªÁË¸Ï½ôÉÏÊÖÓÃ£¬»ùÓÚ¸Ã°ü×öÁËÒ»¸öº¯Êı`echartR`£¬ÓÃÓÚÖÆ×÷»ù´¡Echart½»»¥Í¼¡£ĞèÒªR°æ±¾>=3.2.0.
+æœ¬å·¥å…·æ¥æºäºç™¾åº¦å¼€å‘çš„å›½å†…é¡¶å°–æ°´å¹³çš„å¼€æº`d3-js`å¯è§†é¡¹ç›®[Echarts](http://echarts.baidu.com/)([Github Repo](https://github.com/ecomfe/echarts))ã€‚Yang Zhouå’ŒTaiyun WeiåŸºäºè¯¥å·¥å…·å¼€å‘äº†[recharts](https://github.com/taiyun/recharts)åŒ…ï¼Œç»Yihui Xie[ä¿®æ”¹](https://github.com/yihui/recharts)åï¼Œå¯é€šè¿‡`htmlwidgets`ä¼ é€’jså‚æ•°ï¼Œå¤§å¤§ç®€åŒ–äº†å¼€å‘éš¾åº¦ã€‚ä½†æ­¤åŒ…å¼€å‘ä»æœªå®Œæˆã€‚ä¸ºäº†èµ¶ç´§ä¸Šæ‰‹ç”¨ï¼ŒåŸºäºè¯¥åŒ…åšäº†ä¸€ä¸ªå‡½æ•°`echartR`ï¼Œç”¨äºåˆ¶ä½œåŸºç¡€Echartäº¤äº’å›¾ã€‚éœ€è¦Rç‰ˆæœ¬>=3.2.0.
 
 This tool originates from a top-tier `d3-js` visualization project of China: [Baidu Echarts](http://echarts.baidu.com/)([Github Repo](https://github.com/ecomfe/echarts)). Yang Zhou and Taiyun Wei developed an experimental R package [recharts](https://github.com/taiyun/recharts) based on it, which then evoluted into [yihui/recharts](https://github.com/yihui/recharts) by Yihui Xie to pass js parameters through `htmlwidgets`. The package is sill uder development. I developed a function `echartR` based on this package to make basic Echarts interation charts. This function requires R>=3.2.0.
 
-`echartR`µÄÖ÷Òª¹¤×÷ÊÇ½«Echarts²ÎÊı·â×°³Élist£¬Yihui XieµÄÔ­ĞÍº¯Êı`echart`±»ÓÃÀ´´¦ÀíÕâ¸ölist¡£`echart`º¯ÊıµÄ[»ù±¾ÓÃ·¨](http://yihui.name/recharts)ÈçÏÂ£¬³ıÁËÊı¾İ±¾Éí£¬²¢Ã»ÓĞÌá¹©ÆäËû²ÎÊıµÄÎ»ÖÃ¡£
+`echartR`çš„ä¸»è¦å·¥ä½œæ˜¯å°†Echartså‚æ•°å°è£…æˆlistï¼ŒYihui Xieçš„åŸå‹å‡½æ•°`echart`è¢«ç”¨æ¥å¤„ç†è¿™ä¸ªlistã€‚`echart`å‡½æ•°çš„[åŸºæœ¬ç”¨æ³•](http://yihui.name/recharts)å¦‚ä¸‹ï¼Œé™¤äº†æ•°æ®æœ¬èº«ï¼Œå¹¶æ²¡æœ‰æä¾›å…¶ä»–å‚æ•°çš„ä½ç½®ã€‚
 
 `echartR` majorly packs Echarts parameters into a list while `echart`, the prototype function developed by Yihui Xie, is used to parse the list. The [basic examples](http://yihui.name/recharts) of `echart` is as follows, which does not provide parameters entry other than dataset itself.
 
@@ -30,99 +30,117 @@ echart(iris, ~Sepal.Length, ~Sepal.Width, series = ~Species)
 
 ![](files/figure-html/intro2.png)
 
-# Usage ÓÃ·¨
-- Ê×ÏÈ£¬°²×°ºÃ×îĞÂ°æµÄ[R](http://www.r-project.org)ºÍ[Rstudio](http://www.rstudio.com)
-- ÁË½â×î»ù±¾µÄRÓïÑÔ¼¼ÇÉ£¬ÄÜ¹»ÓÃRÕûÀí¡¢¶ÁĞ´Êı¾İ¼¯
-- ×îºÃ»áÓÃ`knitr`£¬»áĞ´[`rmarkdown`](http://rmarkdown.rstudio.com/)
+# Usage ç”¨æ³•
+- é¦–å…ˆï¼Œå®‰è£…å¥½æœ€æ–°ç‰ˆçš„[R](http://www.r-project.org)å’Œ[Rstudio](http://www.rstudio.com)
+- äº†è§£æœ€åŸºæœ¬çš„Rè¯­è¨€æŠ€å·§ï¼Œèƒ½å¤Ÿç”¨Ræ•´ç†ã€è¯»å†™æ•°æ®é›†
+- æœ€å¥½ä¼šç”¨`knitr`ï¼Œä¼šå†™[`rmarkdown`](http://rmarkdown.rstudio.com/)
 
-## Installation °²×°
-- °²×° Install `devtools` (`install.packages('devtools')`)
-- °²×° Insall recharts (`install_github('yihui/recharts')`)
-- ÏÂÔØ Download `echartR.R`½Å±¾ÎÄ¼şµ½±¾µØÎ»ÖÃ script file to local disk:  [https://github.com/madlogos/recharts/blob/master/R/echartR.R](https://github.com/madlogos/recharts/blob/master/R/echartR.R))
-- µ÷ÓÃ Source `echartR` ½Å±¾ script (¼ÙÉèÎÒ½«½Å±¾·ÅÔÚ±¾µØ suppose I stored the script to local GitHub Repo: `source("~/Github/recharts/R/echartR.R")`)
+## Installation å®‰è£…
+- å®‰è£… Install `devtools` (`install.packages('devtools')`)
+- å®‰è£… Insall recharts (`install_github('yihui/recharts')`)
+- ä¸‹è½½ Download `echartR.R`è„šæœ¬æ–‡ä»¶åˆ°æœ¬åœ°ä½ç½® script file to local disk:  [https://github.com/madlogos/recharts/blob/master/R/echartR.R](https://github.com/madlogos/recharts/blob/master/R/echartR.R))
+- è°ƒç”¨ Source `echartR` è„šæœ¬ script (å‡è®¾æˆ‘å°†è„šæœ¬æ”¾åœ¨æœ¬åœ° suppose I stored the script to local GitHub Repo: `source("~/Github/recharts/R/echartR.R")`)
 
-## Grammar Óï·¨
+## Grammar è¯­æ³•
 
 ```
 echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL, 
         xcoord=NULL, ycoord=NULL,
         type="scatter", stack=FALSE,
-        title=NULL, subtitle=NULL, title_pos=c('center','bottom'),
+        title=NULL, subtitle=NULL, title_pos=6,
         title_url=NULL, subtitle_url=NULL,
         symbolList=NULL, dataZoom=NULL, dataZoomRange=NULL,
         dataRange=NULL, splitNumber=NULL, dataRangePalette=NULL,
         xlab=NULL, ylab=NULL, xyflip=FALSE, AxisAtZero=TRUE, scale=TRUE,
         palette='aetnagreen', tooltip=TRUE, 
-        legend=TRUE, legend_pos=c('center','top'), 
-        toolbox=TRUE, toolbox_pos=c('right','top'), 
+        legend=TRUE, legend_pos=11, 
+        toolbox=TRUE, toolbox_pos=1, 
         calculable=TRUE, asImage=FALSE,
         markLine=NULL, markPoint=NULL, ...))
 ```
 
-- **data**: Êı¾İ¼¯ dataset
-- x: x±äÁ¿£¬Ö±·½Í¼¿ÉÊ¡ÂÔ¡£x variable, only omitable for histograms¡£
-- **y**: y±äÁ¿ y variable
-- z: z±äÁ¿£¬Ö»½ÓÊÜÊ±¼ä/ÈÕÆÚ±äÁ¿£¬²¢´ò¿ªÊ±¼äÖá¡£z variable, only accept data/time variable to open time axis
-- series: Series(ÏµÁĞ)±äÁ¿ series variable
-- weight: È¨ÖØ±äÁ¿£¬¿ÉÓÃÓÚÖ±·½Í¼¡¢ÆøÅİÍ¼µÈ weight variable, used in histogram, bubble, etc
-- xcoord: Î³¶È×ø±ê±äÁ¿£¬½öÓÃÓÚµã±ê×¢µÄmap¡£Lattitude variable, only for point-marking map.
-- ycoord: ¾­¶È×ø±ê±äÁ¿£¬½öÓÃÓÚµã±ê×¢µÄmap¡£Longitude variable, only for point-marking map.
-- type: Ä¬ÈÏ default `scatter`£¬¿ÉÑ¡ options 'scatter', 'bubble', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie', 'ring', 'rose','area', 'areasmooth', 'chord', 'force', 'tree', 'treemap', 'wordcloud', 'heatmap', 'histogram', 'funnel', 'pyramid', 'radar', 'radarfill'
-    - ÈçÑ¡Ôñmap£¬Ôò¿ØÖÆÏî±ØĞëĞ´×÷Ò»¸ö³¤¶ÈÎª3µÄÏòÁ¿£ºc('map',`mapType`,`area/point`)¡£mapType¿ÉÑ¡'world'¡¢'china'£¬»ò¼òÌåÖĞÎÄ±íÊ¾µÄ¾ßÌåÖĞ¹úµØÃû¡£area/pointÎªareaÊ±£¬ÓÃÇø¿éÑÕÉ«±íÊ¾Ğ§Ó¦´óĞ¡£»ÎªpointÊ±£¬ÓÃµãÔÚµØÍ¼ÉÏ×ö±ê×¢¡£Ä¬ÈÏÎªc('map','china','area')¡£If `map` was chosen, the control option should be a vector of length 3: c('map',`mapType`,`area/point`). `mapType` could be either 'world' or 'china', of which simplified Chinese names are required for 'china'. When `area/point` equals to 'area', the function colors polygons to show the effects; while equals to 'point', it ticks droplets on the map.
-- stack: Ä¬ÈÏFALSE£¬ÊÇ·ñ¶Ñ»ı¡£ÓÃÓÚÖÆ×÷¶Ñ»ıÌõÍ¼¡¢ÖùÍ¼¡¢ÏßÍ¼ºÍÃæ»ıÍ¼µÈÖ±½Ç×ø±êÏµÍ¼ĞÎ¡£Default to FALSE (do not stack). Used in stacked column, bar, line and area chart, etc.
-- title: ±êÌâ 
-- subtitle: ¸±±êÌâ
-- title_pos: ±êÌâÎ»ÖÃ£¬¿ÉÓÃc('left|center|right','top|center|bottom')£¬Ä¬ÈÏc("center","bottom")±íÊ¾µ×²¿¾ÓÖĞÎ»ÖÃ¡£Legend position which is a vector of length 2 (c('left|center|right','top|center|bottom')). Default to c('center','bottom') which means bottom meiddle.
-- title_url: ±êÌâÁ´½Ó£¬url of the title
-- subtitle_url: ¸±±êÌâÁ´½Ó, url of the subtitle
-- symbolList: Í¼ĞÎ±êÖ¾¡£¿ÉÊ¹ÓÃÊı×éÑ­»·Ê¹ÓÃ£¬ÈçÊı×é³¤¶ÈĞ¡ÓÚseriesË®Æ½Êı£¬ÔòÒÔ×îºóÒ»¸ö±êÖ¾Ìî³ä¡£ÈçÉèÖÃÎªNULL»ò²»ÉèÖÃ£¬ÔòÑ­»·ÏÔÊ¾EchartsÄ¬ÈÏµÄ±êÖ¾Í¼ĞÎÁĞ±í£ºc('circle','rectangle','triangle','diamond','emptyCircle','emptyRectangle','emptyTriangle','emptyDiamond')¡£Ò²¿ÉÈÎÒâÖ¸¶¨'heart','droplet','pin','arrow','star5','star6'µÈ·Ç±êÍ¼ĞÎ¡£ÉèÎª'none'Ôò²»ÏÔÊ¾¡£A vector assigning symbols. You can use an array of symbols. If the length of the symbols array is smaller than number of levels of the series, the last symbol will be used to extend the array. If you set symbolList NULL or leave it unset, the function circulates the default symbol list of Echarts: c('circle','rectangle','triangle','diamond','emptyCircle','emptyRectangle','emptyTriangle','emptyDiamond'). You can also assign non-standard symbols, such as 'heart','droplet','pin','arrow','star5','star6', 'star7', etc. When assigned to 'none', no symbols are shown.
-- dataZoom: Êı¾İËõ·ÅÖá£¬Ä¬ÈÏFALSE. The axis to zoom data. Default to FALSE.
-- dataZoomRange: Èç`dataZoom=TRUE`£¬Ä¬ÈÏ·¶Î§Îª0-100%¡£¿ÉÓÃÒ»¸ö³¤¶ÈÎª2µÄÏòÁ¿¿ØÖÆ³õÊ¼·¶Î§£¬Èç`c(30,70)`ÏÔÊ¾³õÊ¼30-70%¡£If `dataZoom=TRUE`, the default range is 0-100%. You can assign a vector with length of 2 to `dataZoomRange` to control the initial range. E.g.,`c(30,70)` means from 30% to 70% at the initial view.
-- dataRange: Êı¾İ·¶Î§ÂşÓÎ·¶Î§£¬Ä¬ÈÏ²»´ò¿ª¡£ÈçÒª´ò¿ª£¬ÉèÖÃdataRange=c(`¸ßÖµ±êÇ©`,`µÍÖµ±êÇ©`) The range to zoom the data. Default to FALSE. Set dataRange=c(`High value label`,`Low value label`) to enable dataRange.
-- splitNumber: Èç´ò¿ªÊı¾İÂşÓÎ£¬¿ÉÖ¸¶¨Êı¾İ·¶Î§ÇĞ·Ö¶ÎÊı£¬Ä¬ÈÏÎªÁ¬ĞøÂşÓÎÖá(0)¡£ÔÚÖ±·½Í¼Àï£¬ÈçÉè¶¨splitNumber£¬Ôò½«Êı¾İÇĞ·Ö³ÉsplitNumber¸ö¿é¡£When dataRange is on, assign splitNumber to cut the range into discrete sections. Default to 0 (continuous range). In histogram, if splitNumber is set, the y variable will be cut into splitNumber groups.
-- dataRangePalette: Èç´ò¿ªÊı¾İÂşÓÎ£¬¿Éµ¥¶ÀÖ¸¶¨ÂşÓÎÉ«°å(Í¬palette¹¦ÄÜ)£¬·ñÔò²ÉÓÃEchartsÄ¬ÈÏÖµ¡£You can independently assign palettes to dataRange (similar to overall palette). Default to NULL (applies echarts defaults).
-- xlab: xÖá±êÌâ title of x-axis
-- ylab: yÖá±êÌâ title of y-axis
-- xyflip: Ä¬ÈÏFALSE£¬ÊÇ·ñ·­×ª×ø±êÖá¡£Flip x,y-axies. Default to FALSE.
-- AxisAtZero: Ä¬ÈÏFALSE£¬×ø±êÖáÊÇ·ñ½»²æÓÚÁãµã¡£Axes cross at zero. Default to FALSE.
-- scale: Ä¬ÈÏTRUE£¬ÊÇ·ñ»ùÓÚ×î´ó¡¢×îĞ¡Öµµ÷Õû×ø±ê³ß¶È¡£Rescale the axes based on min and max values. Default to TRUE.
-- palette: µ÷É«°å¡£Ä¬ÈÏaetnagreen¡£Overall palette. Default to 'aetnagreen'.
-    - ÖÖÀà Palette names:
-        - Aetna palettes: ¿ÉÓÃ Including 'aetnagreen', 'aetnablue', 'aetnaviolet', 'aetnaorange', 'aetnateal', 'aetnacranberry'
-        - RColorBrewer palettes: ¿ÉÓÃ Including 'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'
+- **data**: æ•°æ®é›† dataset
+- x: xå˜é‡ï¼Œç›´æ–¹å›¾å¯çœç•¥ã€‚x variable, only omitable for histogramsã€‚
+- **y**: yå˜é‡ y variable
+- z: zå˜é‡ï¼Œåªæ¥å—æ—¶é—´/æ—¥æœŸå˜é‡ï¼Œå¹¶æ‰“å¼€æ—¶é—´è½´ã€‚z variable, only accept data/time variable to open time axis
+- series: Series(ç³»åˆ—)å˜é‡ series variable
+- weight: æƒé‡å˜é‡ï¼Œå¯ç”¨äºç›´æ–¹å›¾ã€æ°”æ³¡å›¾ç­‰ weight variable, used in histogram, bubble, etc
+- xcoord: çº¬åº¦åæ ‡å˜é‡ï¼Œä»…ç”¨äºç‚¹æ ‡æ³¨çš„mapã€‚Lattitude variable, only for point-marking map.
+- ycoord: ç»åº¦åæ ‡å˜é‡ï¼Œä»…ç”¨äºç‚¹æ ‡æ³¨çš„mapã€‚Longitude variable, only for point-marking map.
+- type: é»˜è®¤ default `scatter`ï¼Œå¯é€‰ options 'scatter', 'bubble', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie', 'ring', 'rose','area', 'areasmooth', 'chord', 'force', 'tree', 'treemap', 'wordcloud', 'heatmap', 'histogram', 'funnel', 'pyramid', 'radar', 'radarfill'
+    - å¦‚é€‰æ‹©mapï¼Œåˆ™æ§åˆ¶é¡¹å¿…é¡»å†™ä½œä¸€ä¸ªé•¿åº¦ä¸º3çš„å‘é‡ï¼šc('map',`mapType`,`area/point`)ã€‚mapTypeå¯é€‰'world'ã€'china'ï¼Œæˆ–ç®€ä½“ä¸­æ–‡è¡¨ç¤ºçš„å…·ä½“ä¸­å›½åœ°åã€‚area/pointä¸ºareaæ—¶ï¼Œç”¨åŒºå—é¢œè‰²è¡¨ç¤ºæ•ˆåº”å¤§å°ï¼›ä¸ºpointæ—¶ï¼Œç”¨ç‚¹åœ¨åœ°å›¾ä¸Šåšæ ‡æ³¨ã€‚é»˜è®¤ä¸ºc('map','china','area')ã€‚If `map` was chosen, the control option should be a vector of length 3: c('map',`mapType`,`area/point`). `mapType` could be either 'world' or 'china', of which simplified Chinese names are required for 'china'. When `area/point` equals to 'area', the function colors polygons to show the effects; while equals to 'point', it ticks droplets on the map.
+- stack: é»˜è®¤FALSEï¼Œæ˜¯å¦å †ç§¯ã€‚ç”¨äºåˆ¶ä½œå †ç§¯æ¡å›¾ã€æŸ±å›¾ã€çº¿å›¾å’Œé¢ç§¯å›¾ç­‰ç›´è§’åæ ‡ç³»å›¾å½¢ã€‚Default to FALSE (do not stack). Used in stacked column, bar, line and area chart, etc.
+- title: æ ‡é¢˜ 
+- subtitle: å‰¯æ ‡é¢˜
+- title_pos: æ ‡é¢˜ä½ç½®ï¼Œå¯ç”¨1-12ç‚¹é’Ÿæ–¹å‘æŒ‡ç¤ºï¼Œé»˜è®¤6ç‚¹ä½ï¼Œå³åº•éƒ¨å±…ä¸­ä½ç½®ã€‚Legend position which is an integer 1-12. Default to 6 (o'clock), which means bottom middle.
+- title_url: æ ‡é¢˜é“¾æ¥ï¼Œurl of the title
+- subtitle_url: å‰¯æ ‡é¢˜é“¾æ¥, url of the subtitle
+- symbolList: å›¾å½¢æ ‡å¿—ã€‚å¯ä½¿ç”¨æ•°ç»„å¾ªç¯ä½¿ç”¨ï¼Œå¦‚æ•°ç»„é•¿åº¦å°äºseriesæ°´å¹³æ•°ï¼Œåˆ™ä»¥æœ€åä¸€ä¸ªæ ‡å¿—å¡«å……ã€‚å¦‚è®¾ç½®ä¸ºNULLæˆ–ä¸è®¾ç½®ï¼Œåˆ™å¾ªç¯æ˜¾ç¤ºEchartsé»˜è®¤çš„æ ‡å¿—å›¾å½¢åˆ—è¡¨ï¼šc('circle','rectangle','triangle','diamond','emptyCircle','emptyRectangle','emptyTriangle','emptyDiamond')ã€‚ä¹Ÿå¯ä»»æ„æŒ‡å®š'heart','droplet','pin','arrow','star5','star6'ç­‰éæ ‡å›¾å½¢ã€‚è®¾ä¸º'none'åˆ™ä¸æ˜¾ç¤ºã€‚A vector assigning symbols. You can use an array of symbols. If the length of the symbols array is smaller than number of levels of the series, the last symbol will be used to extend the array. If you set symbolList NULL or leave it unset, the function circulates the default symbol list of Echarts: c('circle','rectangle','triangle','diamond','emptyCircle','emptyRectangle','emptyTriangle','emptyDiamond'). You can also assign non-standard symbols, such as 'heart','droplet','pin','arrow','star5','star6', 'star7', etc. When assigned to 'none', no symbols are shown.
+- dataZoom: æ•°æ®ç¼©æ”¾è½´ï¼Œé»˜è®¤FALSE. The axis to zoom data. Default to FALSE.
+- dataZoomRange: å¦‚`dataZoom=TRUE`ï¼Œé»˜è®¤èŒƒå›´ä¸º0-100%ã€‚å¯ç”¨ä¸€ä¸ªé•¿åº¦ä¸º2çš„å‘é‡æ§åˆ¶åˆå§‹èŒƒå›´ï¼Œå¦‚`c(30,70)`æ˜¾ç¤ºåˆå§‹30-70%ã€‚If `dataZoom=TRUE`, the default range is 0-100%. You can assign a vector with length of 2 to `dataZoomRange` to control the initial range. E.g.,`c(30,70)` means from 30% to 70% at the initial view.
+- dataRange: æ•°æ®èŒƒå›´æ¼«æ¸¸èŒƒå›´ï¼Œé»˜è®¤ä¸æ‰“å¼€ã€‚å¦‚è¦æ‰“å¼€ï¼Œè®¾ç½®dataRange=c(`é«˜å€¼æ ‡ç­¾`,`ä½å€¼æ ‡ç­¾`) The range to zoom the data. Default to FALSE. Set dataRange=c(`High value label`,`Low value label`) to enable dataRange.
+- splitNumber: å¦‚æ‰“å¼€æ•°æ®æ¼«æ¸¸ï¼Œå¯æŒ‡å®šæ•°æ®èŒƒå›´åˆ‡åˆ†æ®µæ•°ï¼Œé»˜è®¤ä¸ºè¿ç»­æ¼«æ¸¸è½´(0)ã€‚åœ¨ç›´æ–¹å›¾é‡Œï¼Œå¦‚è®¾å®šsplitNumberï¼Œåˆ™å°†æ•°æ®åˆ‡åˆ†æˆsplitNumberä¸ªå—ã€‚When dataRange is on, assign splitNumber to cut the range into discrete sections. Default to 0 (continuous range). In histogram, if splitNumber is set, the y variable will be cut into splitNumber groups.
+- dataRangePalette: å¦‚æ‰“å¼€æ•°æ®æ¼«æ¸¸ï¼Œå¯å•ç‹¬æŒ‡å®šæ¼«æ¸¸è‰²æ¿(åŒpaletteåŠŸèƒ½)ï¼Œå¦åˆ™é‡‡ç”¨Echartsé»˜è®¤å€¼ã€‚You can independently assign palettes to dataRange (similar to overall palette). Default to NULL (applies echarts defaults).
+- xlab: xè½´æ ‡é¢˜ title of x-axis
+- ylab: yè½´æ ‡é¢˜ title of y-axis
+- xyflip: é»˜è®¤FALSEï¼Œæ˜¯å¦ç¿»è½¬åæ ‡è½´ã€‚Flip x,y-axies. Default to FALSE.
+- AxisAtZero: é»˜è®¤FALSEï¼Œåæ ‡è½´æ˜¯å¦äº¤å‰äºé›¶ç‚¹ã€‚Axes cross at zero. Default to FALSE.
+- scale: é»˜è®¤TRUEï¼Œæ˜¯å¦åŸºäºæœ€å¤§ã€æœ€å°å€¼è°ƒæ•´åæ ‡å°ºåº¦ã€‚Rescale the axes based on min and max values. Default to TRUE.
+- palette: è°ƒè‰²æ¿ã€‚é»˜è®¤aetnagreenã€‚Overall palette. Default to 'aetnagreen'.
+    - ç§ç±» Palette names:
+        - Aetna palettes: å¯ç”¨ Including 'aetnagreen', 'aetnablue', 'aetnaviolet', 'aetnaorange', 'aetnateal', 'aetnacranberry'
+        - RColorBrewer palettes: å¯ç”¨ Including 'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'
         - ggthemes palettes: 'calc', 'economist', 'economist_white', 'economist_stata','excel', 'exel_fill', 'excel_old', 'excel_new', 'few', 'fivethirtyeight', 'gdocs', 'pander', 'tableau', 'stata', 'stata1','stata1r','statamono', 'tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy', 'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light', 'tableaublrd12', 'tableauprgy12', 'tableaugnor12','hc','darkunica', 'solarized','solarized_red', 'solarized_yellow', 'solarized_orange','solarized_magenta','solarized_violet', 'solarized_blue', 'solarized_cyan', 'solarized_green', 'wsj', 'wsj_rgby', 'wsj_red_green', 'wsj_black_green', 'wsj_dem_rep', 'colorblind', 'trafficlight'
-        - ÆäËûOther palettes: 'rainbow', 'terrain', 'topo', 'heat', 'cm'
-    - ÓÃ·¨ Usage:
-        - ¿ÉÒÔ²»Ö¸¶¨£¬Ê¹ÓÃº¯ÊıÄ¬ÈÏ¡£Do not set the value and function defaults will be loaded
-        - ¿ÉÒÔ`palette=NULL`£¬Ê¹ÓÃEchartsÄ¬ÈÏ¡£Set `palette=NULL` to use Echarts defaults
-        - ¿ÉÒÔ`palette=palette name`Ö¸¶¨ÉÏÊöÈÎºÎÒ»ÖÖÉ«°å¡£Set `palette=palette name` to assign any palette listed above
-        - ¹æ¶¨É«°åµÄÍ¬Ê±¸ú¸öÊıÏŞ¶¨£¬ÏŞ¶¨É«°åÑÕÉ«µÄ¸öÊı£¬Èç`palette='calc(3)'`£¬»á´ÓcalcÉ«°åÖĞ**Ëæ»ú**È¡3ÖÖÑÕÉ«¡£Set `palette=palette name(number)` to restrict number of colors within the palette (e.g., `palette='calc(3)'` picks 3 colors out of 'calc' **RANDOMLY**)
-        - ¿ÉÒÔ`palette=c(color1,color2,color3,...)`×Ô¶¨ÒåÉ«°åÏòÁ¿£¬ÏòÁ¿¿ÉÒÔÊÇÑÕÉ«Ãû£¬Ò²¿ÉÒÔÊÇHex±í´ïÊ½¡£¿ÉÒÔÓÃ`colors()`º¯Êı²é¿´ËùÓĞÖ§³ÖµÄÑÕÉ«Ãû³Æ£¬`demo(colors)`²é¿´ÑÕÉ«Ğ§¹û¡£Set `palette=c(color1,color2,color3,...)` to define a palette vector, made of which either color names or Hex expressions. Use `colors()` to check available color names and check the effects using `demo(colors)`.
-- tooltip: Ä¬ÈÏTRUE£¬Êó±êÖ¸ÕëÌØĞ§¡£Mouse tip effects swtich. Default to TRUE.
-- legend: Ä¬ÈÏTRUE£¬ÊÇ·ñÏÔÊ¾Í¼Àı¡£Whether show the legend. Default to TRUE.
-- legend_pos: Í¼ÀıÎ»ÖÃ£¬³¤¶ÈÎª2µÄÏòÁ¿£¬ÉèÖÃ·½·¨²Î¿¼`title_pos`¡£Legend position, a vector of length 2. Refer to `title_pos` for configuration.
-- toolbox: Ä¬ÈÏTRUE£¬ÊÇ·ñÏÔÊ¾¹¤¾ßÏä¡£Echarts Tool box switch. Default to TRUE.
-- toolbox_pos: ¹¤¾ßÏäÎ»ÖÃ£¬Ä¬ÈÏÓÒÉÏ·½¡£²Î¿¼`title_pos`µÄÉèÖÃ·½·¨¡£Toolbox position, default to c('right','top'). Refer to `title_pos` for configuration.
-- calculable: Ä¬ÈÏTRUE£¬ÊÇ·ñÖ§³ÖÍÏÒ·ÖØËã(Echarts×¨Àû) Calculable switch (Echarts patent).
-- asImage: Ä¬ÈÏFALSE£¬ÊÇ·ñÏÔÊ¾Îª¾²Ì¬Í¼¡£renderAsImage switch.Deafult to FALSE.
-- markLine: ÏÔÊ¾±êÏß£¬Ä¬ÈÏ²»ÏÔÊ¾¡£¸ñÊ½Ğ´×÷Ò»¸öÁĞ±í Show markline, default to NULL. The grammar is a list:
-    - ËõÂÔ¸ñÊ½ Short form (³¤¶È3»ò4 length 3 or 4)£º
-    `list(c('data series 1 name|index','line name','min|max|average|lm',TRUE|NULL),c('data series 2 name|index','line name','min|max|average|lm',TRUE|NULL),...)`
-    Èçlist('male',NA,'average')»òlist(1,NA,'average')¶¼¿É±íÊ¾maleÊı¾İÏµÁĞÆ½¾ùÖµ±êÏß£¬Ö»ÓÃÓÚline, linesmooth, bar, scatter, bubble¡£`lm`¿É³öÏßĞÔ»Ø¹é±êÏß£¬Ö»ÓÃÓÚÉ¢µã»òÆøÅİÍ¼¡£Èçlist('male',NA,'average',T)Ôò±íÊ¾maleÏµÁĞ¿ªÆôìÅ¹âÌØĞ§¡£
-    E.g., both list('male',NA,'average') and list(1,NA,'average') could refer to an average markline of the series 'male', only available for line, linesmooth, bar, scatter, bubble charts. 'lm' refers to linear regresson markline which is only available for scatters and bubbles. list('male',NA,'average',T) opens aurora effects of series 'male'.
-    - ÍêÕû¸ñÊ½ Full form (³¤¶È7»ò8 length 7 or 8): 
-    list(c('data series 1 name|index','line name','value 1','x1 begin','y1 begin','x1 end','y1 end',TRUE|NULL),c('data series 2 name|index','line name','value 2','x2 begin','y2 begin','x2 end','y2 end',TRUE|NULL),...)
-    Èçlist(c('male',NA,100,0,5,100,5))±íÊ¾ÔÚ'male'Êı¾İÏµÁĞÖĞ»­Ò»Ìõ´©Ô½P(0,5)ºÍP(100,5)µÄÖ±Ïß¡£E.g., list(c('male',NA,100,0,5,100,5)) refers to a markline through P(0,5) and P(100,5) as of sereis 'male'. ÔÚline, bar, k, scatterÍ¼ÖĞ£¬'x1 begin','y1 begin','x1 end','y1 end'¾ù±»Àí½âÎªÖ±½Ç×ø±êÏµµÄ¶¨Î»¡£ÔÚmapÖĞ£¬ÕâĞ©×ø±êÖµ±ØĞëĞ´×÷¾­Î³¶È¡£ list(c('male',NA,100,0,5,100,5,T))¿É´ò¿ªmaleÏµÁĞµÄìÅ¹âÌØĞ§¡£ In line, bar, k and scatter charts, 'x1 begin','y1 begin','x1 end','y1 end' are comprehended as coordinates. In map charts, these coordinates should be lattitudes and longitudes. list(c('male',NA,100,0,5,100,5,T)) opens aurora effects of series 'male'.
-- markPoint: ÏÔÊ¾±ê×¢µã£¬Ä¬ÈÏ²»ÏÔÊ¾¡£¸ñÊ½Ğ´×÷Ò»¸öÁĞ±í Show markline, default to NULL. The grammar is a list:
-    - ËõÂÔ¸ñÊ½ Short form (³¤¶È3»ò4 length 3 or 4)£º
-    `list(c('data series 1 name|index','point name','min|max',TRUE|NULL),c('data series 2 name|index','point name','min|max',TRUE|NULL),...)`
-    Èçlist('male',,'min')»òlist(1,,'min')¶¼¿É±íÊ¾maleÊı¾İÏµÁĞ×îĞ¡Öµ±ê×¢£¬Ö»ÓÃÓÚline, linesmooth, bar, scatter, bubble¡£list('male',,'min',T)Ôò±íÊ¾maleÏµÁĞ¿ªÆôìÅ¹âÌØĞ§¡£
-    E.g., both list('male',NA,'min') and list(1,NA,'min') refer to a min markpoint of the series 'male', only available for line, linesmooth, bar, scatter, bubble charts. list('male',NA,'min',T) opens aurora effects of series 'male'.
-    - ÍêÕû¸ñÊ½ Full form (³¤¶È5»ò6 length 5 or 6): 
-    list(c('data series 1 name|index','point name','value 1','x1','y1',TRUE|NULL),c('data series 2 name|index',;point name','value 2','x2','y2',TRUE|NULL),...)
-    Èçlist(c('male',NA,100,0,5))±íÊ¾ÔÚ'male'Êı¾İÏµÁĞÖĞ±ê×¢µãP(0,5)¡£E.g., list(c('male',NA,100,0,5)) refers to a markpoint at P(0,5) as of sereis 'male'. ÔÚline, bar, k, scatterÍ¼ÖĞ£¬'x1','y1',...¾ù±»Àí½âÎªÖ±½Ç×ø±êÏµµÄ¶¨Î»¡£ÔÚmapÖĞ£¬ÕâĞ©×ø±êÖµ±ØĞëĞ´×÷¾­Î³¶È¡£ list(c('male',NA,100,0,5,T))¿É´ò¿ªmaleÏµÁĞµÄìÅ¹âÌØĞ§¡£ In line, bar, k and scatter charts, 'x1','y1',... are comprehended as coordinates. In map charts, these coordinates should be lattitudes and longitudes. list(c('male',NA,100,0,5,T)) opens aurora effects of sereis 'male'.
+        - å…¶ä»–Other palettes: 'rainbow', 'terrain', 'topo', 'heat', 'cm'
+    - ç”¨æ³• Usage:
+        - å¯ä»¥ä¸æŒ‡å®šï¼Œä½¿ç”¨å‡½æ•°é»˜è®¤ã€‚Do not set the value and function defaults will be loaded
+        - å¯ä»¥`palette=NULL`ï¼Œä½¿ç”¨Echartsé»˜è®¤ã€‚Set `palette=NULL` to use Echarts defaults
+        - å¯ä»¥`palette=palette name`æŒ‡å®šä¸Šè¿°ä»»ä½•ä¸€ç§è‰²æ¿ã€‚Set `palette=palette name` to assign any palette listed above
+        - è§„å®šè‰²æ¿çš„åŒæ—¶è·Ÿä¸ªæ•°é™å®šï¼Œé™å®šè‰²æ¿é¢œè‰²çš„ä¸ªæ•°ï¼Œå¦‚`palette='calc(3)'`ï¼Œä¼šä»calcè‰²æ¿ä¸­**éšæœº**å–3ç§é¢œè‰²ã€‚Set `palette=palette name(number)` to restrict number of colors within the palette (e.g., `palette='calc(3)'` picks 3 colors out of 'calc' **RANDOMLY**)
+        - å¯ä»¥`palette=c(color1,color2,color3,...)`è‡ªå®šä¹‰è‰²æ¿å‘é‡ï¼Œå‘é‡å¯ä»¥æ˜¯é¢œè‰²åï¼Œä¹Ÿå¯ä»¥æ˜¯Hexè¡¨è¾¾å¼ã€‚å¯ä»¥ç”¨`colors()`å‡½æ•°æŸ¥çœ‹æ‰€æœ‰æ”¯æŒçš„é¢œè‰²åç§°ï¼Œ`demo(colors)`æŸ¥çœ‹é¢œè‰²æ•ˆæœã€‚Set `palette=c(color1,color2,color3,...)` to define a palette vector, made of which either color names or Hex expressions. Use `colors()` to check available color names and check the effects using `demo(colors)`.
+- tooltip: é»˜è®¤TRUEï¼Œé¼ æ ‡æŒ‡é’ˆç‰¹æ•ˆã€‚Mouse tip effects swtich. Default to TRUE.
+- legend: é»˜è®¤TRUEï¼Œæ˜¯å¦æ˜¾ç¤ºå›¾ä¾‹ã€‚Whether show the legend. Default to TRUE.
+- legend_pos: å›¾ä¾‹ä½ç½®ï¼Œé»˜è®¤11ï¼Œè®¾ç½®æ–¹æ³•å‚è€ƒ`title_pos`ã€‚Legend position, an integer 1-12. Default to 11. Refer to `title_pos` for configuration.
+- toolbox: é»˜è®¤TRUEï¼Œæ˜¯å¦æ˜¾ç¤ºå·¥å…·ç®±ã€‚Echarts Tool box switch. Default to TRUE.
+- toolbox_pos: å·¥å…·ç®±ä½ç½®ï¼Œé»˜è®¤1ï¼Œå‚è€ƒ`title_pos`çš„è®¾ç½®æ–¹æ³•ã€‚Toolbox position, default to 1. Refer to `title_pos` for configuration.
+- calculable: é»˜è®¤TRUEï¼Œæ˜¯å¦æ”¯æŒæ‹–æ›³é‡ç®—(Echartsä¸“åˆ©) Calculable switch (Echarts patent).
+- asImage: é»˜è®¤FALSEï¼Œæ˜¯å¦æ˜¾ç¤ºä¸ºé™æ€å›¾ã€‚renderAsImage switch.Deafult to FALSE.
+- markLine: æ˜¾ç¤ºæ ‡çº¿ï¼Œé»˜è®¤ä¸æ˜¾ç¤ºã€‚æ ¼å¼å†™ä½œä¸€ä¸ª4æˆ–8åˆ—çš„æ•°æ®æ¡†æˆ–çŸ©é˜µ Show markline, default to NULL. The grammar is a data.frame or matrix with 4 or 8 columns:
+    - ç¼©ç•¥æ ¼å¼ Short form ï¼š
     
-# Examples Ê¾Àı
+    series name/index * | line name | Line type | Aurora effect
+    :-------------------|-----------|------------|-------------
+    String or number   | String / NA | min/max/average/lm | TRUE/FALSE
+
+    - å®Œæ•´æ ¼å¼ Full form :
+    
+    series name/index * | line name | Value | P0 x | P0 y | P1 x| P1 y | Aurora effect
+    :------------------|-----------|-------|-------|------|-----|------|-----------
+    String or number  | String/NA | num  | x val | y val | x val| y val | TRUE/FALSE 
+
+    - ä¾‹å­ Examples
+    1. å¦‚`t(c('male',NA,'average',F))`æˆ–`t(c(1,NA,'average',F))`éƒ½å¯è¡¨ç¤ºmaleæ•°æ®ç³»åˆ—å¹³å‡å€¼æ ‡çº¿ï¼Œåªç”¨äºline, linesmooth, bar, scatter, bubbleã€‚`lm`å¯å‡ºçº¿æ€§å›å½’æ ‡çº¿ï¼Œåªç”¨äºæ•£ç‚¹æˆ–æ°”æ³¡å›¾ã€‚å¦‚`t(c(1,NA,'average',T))`åˆ™è¡¨ç¤ºmaleç³»åˆ—å¼€å¯ç‚«å…‰ç‰¹æ•ˆã€‚E.g., both `t(c('male',NA,'average',F))` and `t(c(1,NA,'average',F))` refer to an average markline of the series 'male', only available for line, linesmooth, bar, scatter, bubble charts. 'lm' refers to linear regresson markline which is only available for scatters and bubbles. `t(c(1,NA,'average',T))` opens aurora effects of series 'male'.
+    1. å¦‚`t(c('male',NA,100,0,5,100,5,F))`è¡¨ç¤ºåœ¨'male'æ•°æ®ç³»åˆ—ä¸­ç”»ä¸€æ¡ç©¿è¶ŠP0(0,5)å’ŒP1(100,5)çš„ç›´çº¿ã€‚E.g., `t(c('male',NA,100,0,5,100,5,F))` refers to a markline through P0(0,5) and P1(100,5) as of sereis 'male'. åœ¨line, bar, k, scatterå›¾ä¸­ï¼Œ'P0 x','P0 y','P1 x','P1 y'å‡è¢«ç†è§£ä¸ºç›´è§’åæ ‡ç³»çš„å®šä½ã€‚åœ¨mapä¸­ï¼Œè¿™äº›åæ ‡å€¼å¿…é¡»å†™ä½œç»çº¬åº¦ã€‚ `t(c('male',NA,100,0,5,100,5,T))`å¯æ‰“å¼€maleç³»åˆ—çš„ç‚«å…‰ç‰¹æ•ˆã€‚ In line, bar, k and scatter charts, 'P0 x','P0 y','P1 x','P1 y' are comprehended as coordinates. In map charts, these coordinates should be lattitudes and longitudes. `t(c('male',NA,100,0,5,100,5,T))` opens aurora effects of series 'male'.
+    
+- markPoint: æ˜¾ç¤ºæ ‡æ³¨ç‚¹ï¼Œé»˜è®¤ä¸æ˜¾ç¤ºã€‚æ ¼å¼å†™ä½œä¸€ä¸ª4æˆ–6åˆ—çš„æ•°æ®æ¡†æˆ–çŸ©é˜µ Show markpoints, default to NULL. The grammar is a data.frame or matrix with 4 or 6 columns:
+    - ç¼©ç•¥æ ¼å¼ Short form ï¼š
+    
+    series name/index * | Point name | Point type | Aurora effect
+    -------------------|-----------|------------|-------------
+    String or number   | String / NA | min/max/ | TRUE/FALSE
+    
+    - å®Œæ•´æ ¼å¼ Full form :
+    
+    series name/index * | Point name | Value | P x | P y | Aurora effect
+    ------------------|------------|--------|-----|-----|------------
+    String or number  | String / NA | num   | x val | y val | TRUE/FALSE
+
+    - ä¾‹å­ Examples
+    1. å¦‚`t(c('male',NA,'min',F))`æˆ–`t(c(1,NA,'min',F))`éƒ½å¯è¡¨ç¤ºmaleæ•°æ®ç³»åˆ—æœ€å°å€¼æ ‡æ³¨ï¼Œåªç”¨äºline, linesmooth, bar, scatter, bubbleã€‚`t('male',NA,'min',T)`åˆ™è¡¨ç¤ºmaleç³»åˆ—å¼€å¯ç‚«å…‰ç‰¹æ•ˆã€‚E.g., both `t(c('male',NA,'min',F))` and `t(c(1,NA,'min',F))` refer to a min markpoint of the series 'male', only available for line, linesmooth, bar, scatter, bubble charts. `t(c('male',NA,'min',T))` opens aurora effects of series 'male'.
+    1. å¦‚`t(c('male',NA,100,0,5,F))`è¡¨ç¤ºåœ¨'male'æ•°æ®ç³»åˆ—ä¸­æ ‡æ³¨ç‚¹P(0,5)ã€‚E.g., `t(c('male',NA,100,0,5,F))` refers to a markpoint at P(0,5) as of sereis 'male'. åœ¨line, bar, k, scatterå›¾ä¸­ï¼Œ'P x','P y', ...å‡è¢«ç†è§£ä¸ºç›´è§’åæ ‡ç³»çš„å®šä½ã€‚åœ¨mapä¸­ï¼Œè¿™äº›åæ ‡å€¼å¿…é¡»å†™ä½œç»çº¬åº¦ã€‚ `t(c('male',NA,100,0,5,T))`å¯æ‰“å¼€maleç³»åˆ—çš„ç‚«å…‰ç‰¹æ•ˆã€‚ In line, bar, k and scatter charts, 'P x','P y',... are comprehended as coordinates. In map charts, these coordinates should be lattitudes and longitudes. `t(c('male',NA,100,0,5,T))` opens aurora effects of sereis 'male'.
+
+
+# Examples ç¤ºä¾‹
 
 
 ```r
@@ -132,10 +150,10 @@ source("~/Github/recharts/R/echartR.R")
 knitr::opts_chunk$set(message=FALSE,warning=FALSE,results='asis')
 ```
 
-## Scatter É¢µãÍ¼
+## Scatter æ•£ç‚¹å›¾
 
-### Mono-series Scatter µ¥ÏµÁĞÉ¢µãÍ¼
-Ã»ÓĞÊı¾İÏµÁĞ£¬Òò´ËÖ¸¶¨ÏÔÊ¾µÚ1¸öÏµÁĞµÄ¾ùÊıÏß(`markLine=list(c(1,NA,'average'`)¡£
+### Mono-series Scatter å•ç³»åˆ—æ•£ç‚¹å›¾
+æ²¡æœ‰æ•°æ®ç³»åˆ—ï¼Œå› æ­¤æŒ‡å®šæ˜¾ç¤ºç¬¬1ä¸ªç³»åˆ—çš„å‡æ•°çº¿(`markLine=c(1,NA,'average',F)`)ã€‚
 
 
 ```r
@@ -143,14 +161,14 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width,
         type = 'scatter', palette='solarized_magenta',
         title = 'Scatter - Sepal Width vs Petal Width', 
         subtitle = "(source: iris)", xlab = 'Sepal Width', ylab = 'Petal Width',
-        markLine=list(c(1,NA,"average")))
+        markLine=t(c(1,NA,"average",F)))
 ```
 
 ![](files/figure-html/scatter1.png)
 
-### Multi-series Scatter ¶àÏµÁĞÉ¢µãÍ¼
+### Multi-series Scatter å¤šç³»åˆ—æ•£ç‚¹å›¾
 
-Ö¸¶¨series£¬ÇÒÏÔÊ¾·¶Î§´ÓÁãµã¿ªÊ¼(`scale=FALSE`)¡£ÔÚµÚ2¸öÊı¾İÏµÁĞ(versicolor)ÖĞ´ò¿ª×î´ó(max)¡¢×îĞ¡(min)¡¢¾ùÏß(average)Èı¸ù±êÏß£»ÔÚµÚ1¡¢2¡¢3Êı¾İÏµÁĞÖĞ·Ö±ğ±ê×¢max¡¢min¡¢maxµã£¬ÇÒ´ò¿ªµÚ3¸öÏµÁĞµÄÑ£¹âÌØĞ§(`markPoint=list(c(1,'Max','max'),c(2,'Min','min'),c(3,'Max','max',T))`)¡£
+æŒ‡å®šseriesï¼Œä¸”æ˜¾ç¤ºèŒƒå›´ä»é›¶ç‚¹å¼€å§‹(`scale=FALSE`)ã€‚åœ¨ç¬¬2ä¸ªæ•°æ®ç³»åˆ—(versicolor)ä¸­æ‰“å¼€æœ€å¤§(max)ã€æœ€å°(min)ã€å‡çº¿(average)ä¸‰æ ¹æ ‡çº¿ï¼›åœ¨ç¬¬1ã€2ã€3æ•°æ®ç³»åˆ—ä¸­åˆ†åˆ«æ ‡æ³¨maxã€minã€maxç‚¹ï¼Œä¸”æ‰“å¼€ç¬¬3ä¸ªç³»åˆ—çš„çœ©å…‰ç‰¹æ•ˆ(`markPoint=rbind(c(1,'Max','max',F),c(2,'Min','min',F), c(3,'Max','max',T))`)ã€‚
 
 
 ```r
@@ -159,15 +177,16 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, series = ~Species,
         scale=F, xlab = 'Sepal Width', ylab = 'Petal Width',
         title = 'Scatter - Sepal Width vs Petal Width, by Species',
         subtitle ='(source: iris)', 
-        markLine=list(c(2,'average'),c('versicolor','max'),c(2,'min')),
-        markPoint=list(c(1,'Max','max'),c(2,'Min','min'),c(3,'Max','max',T)))
+        markLine=rbind(c(2,'Mean','average',F),c('versicolor','Maximum','max',F),
+                       c(2,'Minimum','min',F)),
+        markPoint=rbind(c(1,'Max','max',F),c(2,'Min','min',F), c(3,'Max','max',T)))
 ```
 
 ![](files/figure-html/scatter2.png)
 
-Ê¹ÓÃÈıÌ×·Ç±ê×¼Í¼ĞÎ(¼ıÍ·¡¢ĞÄĞÎ¡¢°Ë½ÇĞÇ)Çø·ÖÊı¾İÏµÁĞ(`c('arrow','heart','star8')`)¡£ÃüÁîÖ¸¶¨Ëæ»úÑ¡Ôñexcel_oldÉ«°æÖĞµÄ1ÖÖÑÕÉ«£¬µ«ÓÉÓÚÊı¾İ¼¯ÓĞ3¸öË®Æ½(series)£¬ÑÕÉ«¸öÊıÏŞÖÆÔÚÖ´ĞĞÖĞ±»ºöÂÔ¡£
+ä½¿ç”¨ä¸‰å¥—éæ ‡å‡†å›¾å½¢(ç®­å¤´ã€å¿ƒå½¢ã€å…«è§’æ˜Ÿ)åŒºåˆ†æ•°æ®ç³»åˆ—(`c('arrow','heart','star8')`)ã€‚å‘½ä»¤æŒ‡å®šéšæœºé€‰æ‹©excel_oldè‰²ç‰ˆä¸­çš„1ç§é¢œè‰²ï¼Œä½†ç”±äºæ•°æ®é›†æœ‰3ä¸ªæ°´å¹³(series)ï¼Œé¢œè‰²ä¸ªæ•°é™åˆ¶åœ¨æ‰§è¡Œä¸­è¢«å¿½ç•¥ã€‚
 
-Í¬Ê±ÄâºÏ3Ìõ»Ø¹éÏß(markLineÁĞ±íĞ´×÷short form£¬ÀàĞÍÖ¸¶¨Îª'lm'£¬²¢¿ªÆôìÅ¹âÌØĞ§)¡£
+åŒæ—¶æ‹Ÿåˆ3æ¡å›å½’çº¿(markLineåˆ—è¡¨å†™ä½œshort formï¼Œç±»å‹æŒ‡å®šä¸º'lm'ï¼Œå¹¶å¼€å¯ç‚«å…‰ç‰¹æ•ˆ)ã€‚
 
 
 ```r
@@ -176,12 +195,12 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, series = ~Species,
         symbolList=c('arrow','heart','star8'),
         title = 'Scatter - Sepal Width vs Petal Width, by Species',
         subtitle = '(source: iris)', xlab = 'Sepal Width', ylab = 'Petal Width',
-        markLine = list(c(1,NA,'lm',T),c(2,NA,'lm',T),c(3,NA,'lm',T)))
+        markLine = rbind(c(1,NA,'lm',T),c(2,NA,'lm',T),c(3,NA,'lm',T)))
 ```
 
 ![](files/figure-html/scatter3.png)
 
-´ó¹æÄ£É¢µãÍ¼(2000¸öµãÒÔÉÏ)Í¬Ñù¿ÉÒÔÃë¼¶³öÍ¼(µ«htmlÎÄ¼ş»á±äµÃºÜ´ó)¡£
+å¤§è§„æ¨¡æ•£ç‚¹å›¾(2000ä¸ªç‚¹ä»¥ä¸Š)åŒæ ·å¯ä»¥ç§’çº§å‡ºå›¾(ä½†htmlæ–‡ä»¶ä¼šå˜å¾—å¾ˆå¤§)ã€‚
 
 
 ```r
@@ -197,11 +216,11 @@ echartR(df,x=~x,y=~value,series=~variable,type='scatter',
 
 ![](files/figure-html/scatter4.png)
 
-## Bubble ÆøÅİÍ¼
+## Bubble æ°”æ³¡å›¾
 
-ÆøÅİÍ¼Í¬ÑùÀ´Ô´ÓÚÉ¢µãÍ¼¡£type¸ÄÎª`bubble`¼´¿É£¬Èç²»Ö¸¶¨`weight`±äÁ¿£¬º¯ÊıÄ¬ÈÏÖ¸¶¨yÎªÆøÅİÈ¨ÖØ¡£
+æ°”æ³¡å›¾åŒæ ·æ¥æºäºæ•£ç‚¹å›¾ã€‚typeæ”¹ä¸º`bubble`å³å¯ï¼Œå¦‚ä¸æŒ‡å®š`weight`å˜é‡ï¼Œå‡½æ•°é»˜è®¤æŒ‡å®šyä¸ºæ°”æ³¡æƒé‡ã€‚
 
-### Mono-series Bubble µ¥ÏµÁĞÆøÅİÍ¼
+### Mono-series Bubble å•ç³»åˆ—æ°”æ³¡å›¾
 
 
 ```r
@@ -215,11 +234,11 @@ echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, weight = ~Petal.Length,
 
 ![](files/figure-html/bubble1.png)
 
-### Multi-series Bubble ¶àÏµÁĞÆøÅİÍ¼
+### Multi-series Bubble å¤šç³»åˆ—æ°”æ³¡å›¾
 
-ÓÃ`symbolList=c('circle','emptyCircle')`ÉèÖÃµÚ1¸öÊı¾İÏµÁĞÎªÊµĞÄÔ²¡¢Ê£ÏÂµÄÊı¾İÏµÁĞÒÔ¿ÕĞÄÔ²×÷Îª±êÖ¾Í¼ĞÎ¡£paletteÉèÖÃÎªtableauGnOr(3)£¬Ö»Ëæ»úÈ¡¸ÃÉ«°åµÄ3ÖÖÑÕÉ«¡£
+ç”¨`symbolList=c('circle','emptyCircle')`è®¾ç½®ç¬¬1ä¸ªæ•°æ®ç³»åˆ—ä¸ºå®å¿ƒåœ†ã€å‰©ä¸‹çš„æ•°æ®ç³»åˆ—ä»¥ç©ºå¿ƒåœ†ä½œä¸ºæ ‡å¿—å›¾å½¢ã€‚paletteè®¾ç½®ä¸ºtableauGnOr(3)ï¼Œåªéšæœºå–è¯¥è‰²æ¿çš„3ç§é¢œè‰²ã€‚
 
-ÔÙ×öÒ»¸ö»ùÓÚÈ«¼¯µÄÏßĞÔ»Ø¹é(`lm()`)¡£ÓÉÓÚÎŞ·¨ÏÔÊ¾ÔÚÈÎºÎÒ»¸öÏµÁĞÉÏ£¬Òò´ËechartRÉú³ÉÁËÒ»¸öĞÂµÄÊı¾İÏµÁĞ¡£Ç°Ò»½Ú¶àÏµÁĞÉ¢µãÍ¼ÖĞ£¬Èı¸öÏµÁĞSepal WidthÓëPetal Width¶¼ÕıÏà¹Ø£¬¶ø±¾ÀıÖĞ£¬ºÏ²¢ÆğÀ´Á½ÕßÈ´³Ê¸ºÏà¹Ø¡£Õâ¸öÀı×ÓĞÎÏóµØÕ¹Ê¾ÁË·Ö²ã·ÖÎöµÄÖØÒªĞÔ¡£
+å†åšä¸€ä¸ªåŸºäºå…¨é›†çš„çº¿æ€§å›å½’(`lm()`)ã€‚ç”±äºæ— æ³•æ˜¾ç¤ºåœ¨ä»»ä½•ä¸€ä¸ªç³»åˆ—ä¸Šï¼Œå› æ­¤echartRç”Ÿæˆäº†ä¸€ä¸ªæ–°çš„æ•°æ®ç³»åˆ—ã€‚å‰ä¸€èŠ‚å¤šç³»åˆ—æ•£ç‚¹å›¾ä¸­ï¼Œä¸‰ä¸ªç³»åˆ—Sepal Widthä¸Petal Widthéƒ½æ­£ç›¸å…³ï¼Œè€Œæœ¬ä¾‹ä¸­ï¼Œåˆå¹¶èµ·æ¥ä¸¤è€…å´å‘ˆè´Ÿç›¸å…³ã€‚è¿™ä¸ªä¾‹å­å½¢è±¡åœ°å±•ç¤ºäº†åˆ†å±‚åˆ†æçš„é‡è¦æ€§ã€‚
 
 
 ```r
@@ -228,21 +247,20 @@ pred <- data.frame(Sepal.Width=c(min(iris$Sepal.Width),max(iris$Sepal.Width)))
 yhat <- round(predict(fit,pred),2)
 echartR(data = iris, x = ~Sepal.Width, y = ~Petal.Width, 
         weight = ~Petal.Length, series = ~Species, 
-        symbolList=c('emptyCircle','circle'),
+        symbolList=c('emptyCircle','circle'), 
         type = 'bubble', palette='tableaugnor(4)',
         title = paste('Bubble - Sepal Width vs Petal Width, by Species,',
                       'weighed by Petal Length'), 
-        subtitle = '(source: iris)',
-        xlab = 'Sepal Width', ylab = 'Petal Width',
-        markLine=list(c('Coef.','Linerar Reg',round(fit$coefficients[[2]],2),
-                        pred[1,1],yhat[[1]],pred[2,1],yhat[[2]])))
+        subtitle = '(source: iris)', xlab = 'Sepal Width', ylab = 'Petal Width',
+        markLine=t(c('Reg Coef.','slope',round(fit$coefficients[[2]],2), 
+                     pred[1,1],yhat[[1]],pred[2,1], yhat[[2]],F)))
 ```
 
 ![](files/figure-html/bubble2.png)
 
-## Column ÖùÍ¼
+## Column æŸ±å›¾
 
-ÏÈÉú³ÉÒ»¸ö»ã×ÜÊı¾İ¼¯`dtiris`¡£
+å…ˆç”Ÿæˆä¸€ä¸ªæ±‡æ€»æ•°æ®é›†`dtiris`ã€‚
 
 
 ```r
@@ -295,20 +313,20 @@ knitr::kable(dcast(dtiris,Param~Species,sum,value.var="Mean"),
 </tbody>
 </table>
 
-### Tiled Column Æ½ÆÌÖùÍ¼
+### Tiled Column å¹³é“ºæŸ±å›¾
 
 
 ```r
 echartR(data = dtiris, x = ~Param, y = ~Mean,  series = ~Species,
         type = 'bar', palette='fivethirtyeight',
         title = "Column - Parameter Mean by Species", 
-        subtitle = '(source: iris)',legend_pos=c('right','center'),
+        subtitle = '(source: iris)',legend_pos=3,
         xlab = 'Parameter', ylab = 'Mean')
 ```
 
 ![](files/figure-html/column1.png)
 
-### Stacked Column ¶Ñ»ıÖùÍ¼
+### Stacked Column å †ç§¯æŸ±å›¾
 
 
 ```r
@@ -317,33 +335,33 @@ echartR(data = dtiris, x = ~Param, y = ~Mean,
         type = 'bar', palette='pander',
         title = "Column - Parameter Mean by Species",
         subtitle = '(source: iris)',
-        xlab = 'Parameter', ylab = 'Mean', legend_pos=c('right','center'))
+        xlab = 'Parameter', ylab = 'Mean', legend_pos=3)
 ```
 
 ![](files/figure-html/column2.png)
 
-¶Ñ»ıÓë·ñ£¬Ò²¿ÉÒÔ¼òµ¥µØÍ¨¹ı¹¤¾ßÀ¸µÄ`Æ½ÆÌ`ºÍ`¶Ñ»ı`°´Å¥ÇĞ»»¡£·Ç³£Ç¿´ó(µ«Ò²µÃÔÚº¯ÊıÅäÖÃÏîÀïÕıÈ·µØÂë³ö´úÂë)¡£
+å †ç§¯ä¸å¦ï¼Œä¹Ÿå¯ä»¥ç®€å•åœ°é€šè¿‡å·¥å…·æ çš„`å¹³é“º`å’Œ`å †ç§¯`æŒ‰é’®åˆ‡æ¢ã€‚éå¸¸å¼ºå¤§ã€‚
 
-## Bar ÌõÍ¼
+## Bar æ¡å›¾
 
-ÌõÍ¼ºÍÖùÍ¼µÄÇø±ğÖ»ÔÚÓÚ`xyflip`¿ª¹ØÑ¡Ïî¡£
+æ¡å›¾å’ŒæŸ±å›¾çš„åŒºåˆ«åªåœ¨äº`xyflip`å¼€å…³é€‰é¡¹ã€‚
 
-### Tiled Bar Æ½ÆÌÌõÍ¼
+### Tiled Bar å¹³é“ºæ¡å›¾
 
 
 ```r
 echartR(data = dtiris, x = ~Species, y = ~Mean, series = ~Param, 
         type = 'bar', palette='stata1', xyflip=T,
         title = 'Species-specific Mean by Parameters',
-        subtitle = '(source: iris)', legend_pos=c('right','center'),
+        subtitle = '(source: iris)', legend_pos=3,
         xlab = 'Species', ylab = 'Mean')
 ```
 
 ![](files/figure-html/bar1.png)
 
-### Stacked Bar ¶Ñ»ıÌõÍ¼
+### Stacked Bar å †ç§¯æ¡å›¾
 
-paletteÉèÎªcalcµÄËæ»ú4ÖÖÑÕÉ«¡£´ò¿ªstack (`stack=TRUE`)¡£
+paletteè®¾ä¸ºcalcçš„éšæœº4ç§é¢œè‰²ã€‚æ‰“å¼€stack (`stack=TRUE`)ã€‚
 
 
 ```r
@@ -352,16 +370,16 @@ echartR(data = dtiris, x = ~Param, y = ~Mean,
         type = 'bar', palette='calc(5)',
         title = 'Parameter Mean by Species',
         subtitle = '(source: iris)',
-        xlab = 'Parameter', ylab = 'Mean', legend_pos=c('right','center'))
+        xlab = 'Parameter', ylab = 'Mean', legend_pos=3)
 ```
 
 ![](files/figure-html/bar2.png)
 
-## Histogram Ö±·½Í¼
+## Histogram ç›´æ–¹å›¾
 
-Ö±·½Í¼ÊÇÖùÍ¼µÄÒ»ÖÖÌØÀı£¬Ö»ĞèÒªÖ¸¶¨y±äÁ¿¡£¿ÉÍ¨¹ı`splitNumber`Ö¸¶¨Ö±·½Êı(Ä¬ÈÏ9)¡£`xyflip`ÉèÎªTRUEÔò³ÉÎªµÈ¼ÛµÄºáÌõÍ¼¡£
+ç›´æ–¹å›¾æ˜¯æŸ±å›¾çš„ä¸€ç§ç‰¹ä¾‹ï¼Œåªéœ€è¦æŒ‡å®šyå˜é‡ã€‚å¯é€šè¿‡`splitNumber`æŒ‡å®šç›´æ–¹æ•°(é»˜è®¤9)ã€‚`xyflip`è®¾ä¸ºTRUEåˆ™æˆä¸ºç­‰ä»·çš„æ¨ªæ¡å›¾ã€‚
 
-> Echarts¹æ¶¨Öù/ÌõÍ¼ºÍÉ¢µãÍ¼µÄ×Ô±äÁ¿Öá¾ùÎªcategoryÀàĞÍ£¬Òò´ËÔİÊ±ÎŞ·¨¼òµ¥µØ×ö³ö´«Í³Íâ¹ÛµÄÖ±·½Í¼¡£
+> Echartsè§„å®šæŸ±/æ¡å›¾å’Œæ•£ç‚¹å›¾çš„è‡ªå˜é‡è½´å‡ä¸ºcategoryç±»å‹ï¼Œå› æ­¤æš‚æ—¶æ— æ³•ç®€å•åœ°åšå‡ºä¼ ç»Ÿå¤–è§‚çš„ç›´æ–¹å›¾ã€‚
 
 
 ```r
@@ -372,9 +390,9 @@ echartR(airquality, y=~Temp, type='histogram', splitNumber=13,
 
 ![](files/figure-html/hist.png)
 
-## Pie ±ıÍ¼
+## Pie é¥¼å›¾
 
-ÓÃ`mtcars`×÷Îª×÷Í¼Êı¾İ¼¯¡£
+ç”¨`mtcars`ä½œä¸ºä½œå›¾æ•°æ®é›†ã€‚
 
 
 ```r
@@ -396,9 +414,9 @@ echartR(dtcars, x = ~transmission,  y = ~car, type='pie',
 
 ![](files/figure-html/pie.png)
 
-## Ring »·Í¼
+## Ring ç¯å›¾
 
-»·ĞÎÍ¼ÊÇ±ıÍ¼µÄ±äĞÎ£¬Ö»Ğè½«`type`¸ÄÎª'ring'¡£EchartsÖĞÖ»ĞèÒª°Ñ±ıÍ¼µÄ°ë¾¶²ÎÊıÀ©Õ¹Îª°üº¬ÄÚ¡¢Íâ¾¶µÄ³¤¶ÈÎª2µÄÏòÁ¿¼´¿É¡£
+ç¯å½¢å›¾æ˜¯é¥¼å›¾çš„å˜å½¢ï¼Œåªéœ€å°†`type`æ”¹ä¸º'ring'ã€‚Echartsä¸­åªéœ€è¦æŠŠé¥¼å›¾çš„åŠå¾„å‚æ•°æ‰©å±•ä¸ºåŒ…å«å†…ã€å¤–å¾„çš„é•¿åº¦ä¸º2çš„å‘é‡å³å¯ã€‚
 
 
 ```r
@@ -409,7 +427,7 @@ echartR(dtcars, x = ~cylinder,  y = ~car, type='ring',
 
 ![](files/figure-html/ring.png)
 
-### Rose NightingaleÃµ¹åÍ¼
+### Rose Nightingaleç«ç‘°å›¾
 
 
 ```r
@@ -420,11 +438,11 @@ echartR(dtcars, x = ~cylinder,  y = ~car, type='rose',
 
 ![](files/figure-html/rose.png)
 
-## Line ÏßÍ¼
+## Line çº¿å›¾
 
-### Unstacked Line Æ½ÆÌÏßÍ¼
+### Unstacked Line å¹³é“ºçº¿å›¾
 
-´ò¿ªÊı¾İËõ·Å`dataZoom=T`
+æ‰“å¼€æ•°æ®ç¼©æ”¾`dataZoom=T`
 
 
 ```r
@@ -445,7 +463,7 @@ echartR(airquality, x = ~Day, y= ~Wind, series=~Month, type='line',
 
 ![](files/figure-html/line1.png)
 
-Ïß¶ÎÆ½»¬(`type='linesmooth'`)£¬²»ÏÔÊ¾±êÖ¾Í¼ĞÎ(`symbolList='none'`)¡£Echarts¶ÔÈ±Ê§ÖµÄ¬ÈÏ²»Ìî²¹£¬Òò´ËÓĞºÜ¶à¶ÏÏß¡£ĞèÒªÔÚÊı¾İÇ°´¦ÀíÊ±×ÔĞĞ×÷²åÖµÔËËã¡£
+çº¿æ®µå¹³æ»‘(`type='linesmooth'`)ï¼Œä¸æ˜¾ç¤ºæ ‡å¿—å›¾å½¢(`symbolList='none'`)ã€‚Echartså¯¹ç¼ºå¤±å€¼é»˜è®¤ä¸å¡«è¡¥ï¼Œå› æ­¤æœ‰å¾ˆå¤šæ–­çº¿ã€‚éœ€è¦åœ¨æ•°æ®å‰å¤„ç†æ—¶è‡ªè¡Œä½œæ’å€¼è¿ç®—ã€‚
 
 
 ```r
@@ -459,7 +477,7 @@ echartR(airq, x = ~strDate, y= ~value, series= ~variable, type='linesmooth',
 
 ![](files/figure-html/line2.png)
 
-### Stacked Line ¶Ñ»ıÏßÍ¼
+### Stacked Line å †ç§¯çº¿å›¾
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='line',stack=T,
@@ -469,7 +487,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='line',stack=T,
 
 ![](files/figure-html/line3.png)
 
-Ïß¶ÎÆ½»¬£¬²»ÏÔÊ¾±êÖ¾Í¼ĞÎ
+çº¿æ®µå¹³æ»‘ï¼Œä¸æ˜¾ç¤ºæ ‡å¿—å›¾å½¢
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='linesmooth',stack=T,
@@ -480,10 +498,10 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='linesmooth',stack=T,
 
 ![](files/figure-html/line4.png)
 
-## Area Ãæ»ıÍ¼
-EchartsÖĞ£¬Ãæ»ıÍ¼±¾ÖÊÉÏ±»¶¨ÒåÎªÏßÍ¼£¬Ö»ĞèÍ¨¹ı`itemStyle`²ÎÊıäÖÈ¾ÑÕÉ«¡£
+## Area é¢ç§¯å›¾
+Echartsä¸­ï¼Œé¢ç§¯å›¾æœ¬è´¨ä¸Šè¢«å®šä¹‰ä¸ºçº¿å›¾ï¼Œåªéœ€é€šè¿‡`itemStyle`å‚æ•°æ¸²æŸ“é¢œè‰²ã€‚
 
-### Tiled Area Æ½ÆÌÃæ»ıÍ¼
+### Tiled Area å¹³é“ºé¢ç§¯å›¾
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',
@@ -494,7 +512,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',
 
 ![](files/figure-html/area1.png)
 
-Ïß¶ÎÆ½»¬`type='areasmooth'`£¬²¢´ò¿ªÊı¾İËõ·Å`dataZoom=TRUE`£¬³õÊ¼ÏÔÊ¾40%-80%¡£
+çº¿æ®µå¹³æ»‘`type='areasmooth'`ï¼Œå¹¶æ‰“å¼€æ•°æ®ç¼©æ”¾`dataZoom=TRUE`ï¼Œåˆå§‹æ˜¾ç¤º40%-80%ã€‚
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',
@@ -505,7 +523,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',
 
 ![](files/figure-html/area2.png)
 
-### Stacked Area ¶Ñ»ıÃæ»ıÍ¼
+### Stacked Area å †ç§¯é¢ç§¯å›¾
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',stack=T,
@@ -516,7 +534,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='area',stack=T,
 
 ![](files/figure-html/area3.png)
 
-Ïß¶ÎÆ½»¬(`type='areasmooth'`)¡£×Ô¶¨ÒåÉ«°åÏòÁ¿¡£
+çº¿æ®µå¹³æ»‘(`type='areasmooth'`)ã€‚è‡ªå®šä¹‰è‰²æ¿å‘é‡ã€‚
 
 ```r
 echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',stack=T,
@@ -528,9 +546,9 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='areasmooth',stack=T,
 
 ![](files/figure-html/area4.png)
 
-## Funnel Â©¶·Í¼
+## Funnel æ¼æ–—å›¾
 
-### Funnel ÆÕÍ¨Â©¶·Í¼
+### Funnel æ™®é€šæ¼æ–—å›¾
 
 
 ```r
@@ -541,8 +559,8 @@ echartR(dtcars, x = ~carburetor,  y = ~car, type='funnel',
 
 ![](files/figure-html/funnel.png)
 
-### Pyramid ½ğ×ÖËşÍ¼
-½ğ×ÖËşÍ¼¼´ÄæĞòÂ©¶·Í¼¡£
+### Pyramid é‡‘å­—å¡”å›¾
+é‡‘å­—å¡”å›¾å³é€†åºæ¼æ–—å›¾ã€‚
 
 
 ```r
@@ -553,11 +571,11 @@ echartR(dtcars, x = ~carburetor,  y = ~car, type='pyramid',
 
 ![](files/figure-html/pyramid.png)
 
-## Radar À×´ïÍ¼
+## Radar é›·è¾¾å›¾
 
-À×´ïÍ¼¾ÍÊÇ¼«×ø±êÏµÏÂµÄÏßÍ¼/Ãæ»ıÍ¼£¬Í¨¹ıEchartsµÄ`polar`²ÎÊıÄ£¿é¿ØÖÆ¡£
+é›·è¾¾å›¾å°±æ˜¯æåæ ‡ç³»ä¸‹çš„çº¿å›¾/é¢ç§¯å›¾ï¼Œé€šè¿‡Echartsçš„`polar`å‚æ•°æ¨¡å—æ§åˆ¶ã€‚
 
-### Hollow Radar ¿ÕĞÄÀ×´ï
+### Hollow Radar ç©ºå¿ƒé›·è¾¾
 
 
 ```r
@@ -577,13 +595,13 @@ names(browser) <- c("Year","IE8-","IE9+","Safari","Firefox","Chrome")
 browser <- melt(browser,id="Year")
 echartR(browser, x= ~variable, y= ~value, series= ~Year, type='radar',
         palette=paste0('heat(',nlevels(as.factor(browser$Year)),")"),
-        legend_pos=c('left','center'), symbolList='none',
+        legend_pos=9, symbolList='none',
         title='Browser Mkt Occup Ratio', subtitle= 'Totally virtual data')
 ```
 
 ![](files/figure-html/radar1.png)
 
-### Solid Radar ÊµĞÄÀ×´ï
+### Solid Radar å®å¿ƒé›·è¾¾
 
 
 ```r
@@ -600,11 +618,11 @@ echartR(player, x= ~para, y= ~value, series= ~name, type='radarfill',
 
 ![](files/figure-html/radar2.png)
 
-## Map µØÍ¼
+## Map åœ°å›¾
 
-RºÍRstudioµÄÖĞÎÄ×ªÂëÔÚWindowsÀïÒ»Ö±ÊÇÀÏ´óÄÑ¡£ÔÚ±¾ÎÄµµ£¬RstudioµÄÄ¬ÈÏ±àÂë²ÉÓÃCP936±àÂë£¬ÎÄµµÓÃUTF-8¡£ÈçÖ±½ÓÔÚ³ÌĞòÄÚ¶ÁÊı¾İ¼¯£¬ÓÃiconv×ªÂëºó£¬Âäµ¥µÄºº×ÖÈÔÈ»»áÏÔÊ¾ÎªÂÒÂë¡£¿ÉÏÈÏÂÔØ[ChinaGDP.txt](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/ChinaGDP.txt)µ½±¾µØ£¬`readLines`¶ÁÈë¡£
+Rå’ŒRstudioçš„ä¸­æ–‡è½¬ç åœ¨Windowsé‡Œä¸€ç›´æ˜¯è€å¤§éš¾ã€‚åœ¨æœ¬æ–‡æ¡£ï¼ŒRstudioçš„é»˜è®¤ç¼–ç é‡‡ç”¨CP936ç¼–ç ï¼Œæ–‡æ¡£ç”¨UTF-8ã€‚å¦‚ç›´æ¥åœ¨ç¨‹åºå†…è¯»æ•°æ®é›†ï¼Œç”¨iconvè½¬ç åï¼Œè½å•çš„æ±‰å­—ä»ç„¶ä¼šæ˜¾ç¤ºä¸ºä¹±ç ã€‚å¯å…ˆä¸‹è½½[ChinaGDP.txt](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/ChinaGDP.txt)åˆ°æœ¬åœ°ï¼Œ`readLines`è¯»å…¥ã€‚
 
-×îÁîÈËorzµÄµØ·½ÊÇChrome²»ÄÜÕıÈ·ÏÔÊ¾µØÍ¼£¬±ä³ÉÁËÒ»¶Ñ¾â³İ¡£
+æœ€ä»¤äººorzçš„åœ°æ–¹æ˜¯Chromeä¸èƒ½æ­£ç¡®æ˜¾ç¤ºåœ°å›¾ï¼Œå˜æˆäº†ä¸€å †é”¯é½¿ã€‚
 
 
 ```r
@@ -630,187 +648,187 @@ knitr::kable(dcast(dtgdp,Prov~Year,sum,value.var="GDP"), format='html',
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> °²»Õ </td>
+   <td style="text-align:left;"> å®‰å¾½ </td>
    <td style="text-align:right;"> 272666 </td>
    <td style="text-align:right;"> 307416 </td>
    <td style="text-align:right;"> 339401 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ±±¾© </td>
+   <td style="text-align:left;"> åŒ—äº¬ </td>
    <td style="text-align:right;"> 283238 </td>
    <td style="text-align:right;"> 314871 </td>
    <td style="text-align:right;"> 347249 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¸£½¨ </td>
+   <td style="text-align:left;"> ç¦å»º </td>
    <td style="text-align:right;"> 312107 </td>
    <td style="text-align:right;"> 351347 </td>
    <td style="text-align:right;"> 391609 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¸ÊËà </td>
+   <td style="text-align:left;"> ç”˜è‚ƒ </td>
    <td style="text-align:right;"> 89508 </td>
    <td style="text-align:right;"> 101208 </td>
    <td style="text-align:right;"> 111273 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¹ã¶« </td>
+   <td style="text-align:left;"> å¹¿ä¸œ </td>
    <td style="text-align:right;"> 904046 </td>
    <td style="text-align:right;"> 1003746 </td>
    <td style="text-align:right;"> 1103605 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¹ãÎ÷ </td>
+   <td style="text-align:left;"> å¹¿è¥¿ </td>
    <td style="text-align:right;"> 206497 </td>
    <td style="text-align:right;"> 232158 </td>
    <td style="text-align:right;"> 255144 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¹óÖİ </td>
+   <td style="text-align:left;"> è´µå· </td>
    <td style="text-align:right;"> 108550 </td>
    <td style="text-align:right;"> 129284 </td>
    <td style="text-align:right;"> 150599 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> º£ÄÏ </td>
+   <td style="text-align:left;"> æµ·å— </td>
    <td style="text-align:right;"> 45236 </td>
    <td style="text-align:right;"> 50805 </td>
    <td style="text-align:right;"> 56989 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ºÓ±± </td>
+   <td style="text-align:left;"> æ²³åŒ— </td>
    <td style="text-align:right;"> 420990 </td>
    <td style="text-align:right;"> 456976 </td>
    <td style="text-align:right;"> 478953 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ºÓÄÏ </td>
+   <td style="text-align:left;"> æ²³å— </td>
    <td style="text-align:right;"> 468900 </td>
    <td style="text-align:right;"> 519212 </td>
    <td style="text-align:right;"> 568786 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ºÚÁú½­ </td>
+   <td style="text-align:left;"> é»‘é¾™æ±Ÿ </td>
    <td style="text-align:right;"> 216896 </td>
    <td style="text-align:right;"> 232237 </td>
    <td style="text-align:right;"> 244829 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ºş±± </td>
+   <td style="text-align:left;"> æ¹–åŒ— </td>
    <td style="text-align:right;"> 352482 </td>
    <td style="text-align:right;"> 398316 </td>
    <td style="text-align:right;"> 445514 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ºşÄÏ </td>
+   <td style="text-align:left;"> æ¹–å— </td>
    <td style="text-align:right;"> 350958 </td>
    <td style="text-align:right;"> 395622 </td>
    <td style="text-align:right;"> 440328 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¼ªÁÖ </td>
+   <td style="text-align:left;"> å‰æ— </td>
    <td style="text-align:right;"> 189136 </td>
    <td style="text-align:right;"> 209608 </td>
    <td style="text-align:right;"> 224715 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ½­ËÕ </td>
+   <td style="text-align:left;"> æ±Ÿè‹ </td>
    <td style="text-align:right;"> 856368 </td>
    <td style="text-align:right;"> 955269 </td>
    <td style="text-align:right;"> 1059587 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ½­Î÷ </td>
+   <td style="text-align:left;"> æ±Ÿè¥¿ </td>
    <td style="text-align:right;"> 205131 </td>
    <td style="text-align:right;"> 231520 </td>
    <td style="text-align:right;"> 255724 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÁÉÄş </td>
+   <td style="text-align:left;"> è¾½å® </td>
    <td style="text-align:right;"> 393607 </td>
    <td style="text-align:right;"> 437216 </td>
    <td style="text-align:right;"> 466018 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄÚÃÉ¹Å </td>
+   <td style="text-align:left;"> å†…è’™å¤ </td>
    <td style="text-align:right;"> 251574 </td>
    <td style="text-align:right;"> 271788 </td>
    <td style="text-align:right;"> 289274 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄşÏÄ </td>
+   <td style="text-align:left;"> å®å¤ </td>
    <td style="text-align:right;"> 37090 </td>
    <td style="text-align:right;"> 41417 </td>
    <td style="text-align:right;"> 44802 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Çàº£ </td>
+   <td style="text-align:left;"> é’æµ· </td>
    <td style="text-align:right;"> 29997 </td>
    <td style="text-align:right;"> 33925 </td>
    <td style="text-align:right;"> 37460 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> É½¶« </td>
+   <td style="text-align:left;"> å±±ä¸œ </td>
    <td style="text-align:right;"> 792289 </td>
    <td style="text-align:right;"> 882974 </td>
    <td style="text-align:right;"> 967419 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> É½Î÷ </td>
+   <td style="text-align:left;"> å±±è¥¿ </td>
    <td style="text-align:right;"> 191886 </td>
    <td style="text-align:right;"> 203485 </td>
    <td style="text-align:right;"> 207714 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÉÂÎ÷ </td>
+   <td style="text-align:left;"> é™•è¥¿ </td>
    <td style="text-align:right;"> 228969 </td>
    <td style="text-align:right;"> 259078 </td>
    <td style="text-align:right;"> 287978 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÉÏº£ </td>
+   <td style="text-align:left;"> ä¸Šæµ· </td>
    <td style="text-align:right;"> 319710 </td>
    <td style="text-align:right;"> 348804 </td>
    <td style="text-align:right;"> 383554 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ËÄ´¨ </td>
+   <td style="text-align:left;"> å››å· </td>
    <td style="text-align:right;"> 378183 </td>
    <td style="text-align:right;"> 424026 </td>
    <td style="text-align:right;"> 464555 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ìì½ò </td>
+   <td style="text-align:left;"> å¤©æ´¥ </td>
    <td style="text-align:right;"> 204259 </td>
    <td style="text-align:right;"> 232031 </td>
    <td style="text-align:right;"> 255950 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Î÷²Ø </td>
+   <td style="text-align:left;"> è¥¿è— </td>
    <td style="text-align:right;"> 11105 </td>
    <td style="text-align:right;"> 13041 </td>
    <td style="text-align:right;"> 14990 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ĞÂ½® </td>
+   <td style="text-align:left;"> æ–°ç–† </td>
    <td style="text-align:right;"> 118896 </td>
    <td style="text-align:right;"> 134991 </td>
    <td style="text-align:right;"> 150812 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÔÆÄÏ </td>
+   <td style="text-align:left;"> äº‘å— </td>
    <td style="text-align:right;"> 163318 </td>
    <td style="text-align:right;"> 189255 </td>
    <td style="text-align:right;"> 208612 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Õã½­ </td>
+   <td style="text-align:left;"> æµ™æ±Ÿ </td>
    <td style="text-align:right;"> 549154 </td>
    <td style="text-align:right;"> 606609 </td>
    <td style="text-align:right;"> 653668 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÖØÇì </td>
+   <td style="text-align:left;"> é‡åº† </td>
    <td style="text-align:right;"> 180746 </td>
    <td style="text-align:right;"> 204364 </td>
    <td style="text-align:right;"> 232230 </td>
@@ -823,9 +841,9 @@ dtgdp$Prov <- as.factor(enc2native(dtgdp$Prov))
 dtgdp$Year<- as.factor(dtgdp$Year)
 ```
 
-### Area Çø¿é±ê×¢
+### Area åŒºå—æ ‡æ³¨
 
-¿ªÆôÊı¾İÂşÓÎ£¬²¢¶¨ÒåÉ«°å¡£`subtitle_url`Á´½ÓÎª±¾ÀıÊı¾İÔ´¡£
+å¼€å¯æ•°æ®æ¼«æ¸¸ï¼Œå¹¶å®šä¹‰è‰²æ¿ã€‚`subtitle_url`é“¾æ¥ä¸ºæœ¬ä¾‹æ•°æ®æºã€‚
 
 
 ```r
@@ -835,12 +853,12 @@ echartR(dtgdp, x = ~Prov, y = ~GDP, series= ~Year,
         subtitle='(source: Wikipedia)',
         subtitle_url="https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/ChinaGDP.txt",
         dataRangePalette=c('red','orange','yellow','green','limegreen'),
-        dataRange=c('High',"Low"),toolbox_pos=c('right','center'))
+        dataRange=c('High',"Low"),toolbox_pos=3)
 ```
 
 ![](files/figure-html/map1.png)
 
-ÓÃÊÀ½çGDPÇ°20´Ö²ÚÑİÊ¾ÊÀ½çµØÍ¼¡£ÂşÓÎÖáÇĞ·ÖÎª10µµ(`splitNumber=10`)¡£
+ç”¨ä¸–ç•ŒGDPå‰20ç²—ç³™æ¼”ç¤ºä¸–ç•Œåœ°å›¾ã€‚æ¼«æ¸¸è½´åˆ‡åˆ†ä¸º10æ¡£(`splitNumber=10`)ã€‚
 
 
 ```r
@@ -857,13 +875,13 @@ echartR(worldgdp, x = ~country, y = ~GDP, type=c('map','world','area'),
         subtitle = '(source: Wikipedia)', 
         subtitle_url="https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(nominal)",
         dataRangePalette='rainbow(5)', dataRange=c("High","Low"), 
-        splitNumber=10, toolbox_pos=c('right','center'))
+        splitNumber=10, toolbox_pos=3)
 ```
 
 ![](files/figure-html/map2.png)
 
-### Point µã±ê×¢
-½«[China PM2.5Êı¾İ¼¯](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/China%20PM2.5.txt)ÏÂÔØµ½±¾µØ£¬`readLines`¶ÁÈë¡£
+### Point ç‚¹æ ‡æ³¨
+å°†[China PM2.5æ•°æ®é›†](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/China%20PM2.5.txt)ä¸‹è½½åˆ°æœ¬åœ°ï¼Œ`readLines`è¯»å…¥ã€‚
 
 
 ```r
@@ -876,22 +894,19 @@ top5 <- head(chinapm25[order(chinapm25$PM25,decreasing=T),],5)
 top5$Name <- "Top 5"
 top5$effect <- T
 top5 <- top5[,c(5,1,2,4,3,6)]
-m <- list()
-for (i in 1:5){
-    m[[i]] <- unlist(top5[i,])
-}
 
 echartR(chinapm25, x=~City, y=~PM25, xcoord=~xcoord, ycoord=~ycoord,
         type=c('map','china','point'),title='PM2.5 in Chinese cities',
         subtitle="(source: PM25.in)",subtitle_url="http://pm25.in/",
-        dataRange=c("High","Low"),
-        dataRangePalette=c('maroon','red','orange','yellow','lightgreen','green'))
+        dataRange=c("High","Low"), toolbox_pos=3, 
+        dataRangePalette=c('maroon','red','orange','yellow','lightgreen','green'),
+        markPoint=top5)
 ```
 
 ![](files/figure-html/map3.png)
 
-## Wordcloud ´ÊÔÆ
-Ö±½ÓknitrÊ±readLines¶ÁÈ¡ÍøÒ³»á±¨´í£¬´ËÀı½«ÍøÒ³ 'http://top.baidu.com/buzz?b=1' µÄÔ´´úÂë±£´æÎª±¾µØtxtºóÔÙ¶ÁÈ¡¡£
+## Wordcloud è¯äº‘
+ç›´æ¥knitræ—¶readLinesè¯»å–ç½‘é¡µä¼šæŠ¥é”™ï¼Œæ­¤ä¾‹å°†ç½‘é¡µ 'http://top.baidu.com/buzz?b=1' çš„æºä»£ç ä¿å­˜ä¸ºæœ¬åœ°txtåå†è¯»å–ã€‚
 
 
 ```r
@@ -918,203 +933,203 @@ knitr::kable(hotword, format='html', row.names=F,
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> öª·æÈÃÑîÃİÆï²±×Ó </td>
+   <td style="text-align:left;"> éœ†é”‹è®©æ¨å¹‚éª‘è„–å­ </td>
    <td style="text-align:right;"> 545761 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÎÄÕÂ³ÎÇåÇ£ÊÖÃÅ </td>
+   <td style="text-align:left;"> æ–‡ç« æ¾„æ¸…ç‰µæ‰‹é—¨ </td>
    <td style="text-align:right;"> 329896 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ó×Í¯ÔÚ³µÀïÈÈËÀ </td>
+   <td style="text-align:left;"> å¹¼ç«¥åœ¨è½¦é‡Œçƒ­æ­» </td>
    <td style="text-align:right;"> 194836 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¸ğÌì·´»÷ÁõÏè·ÛË¿ </td>
+   <td style="text-align:left;"> è‘›å¤©åå‡»åˆ˜ç¿”ç²‰ä¸ </td>
    <td style="text-align:right;"> 187192 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÀÏºº±»Ö¸Ç¿¼éÈëÓü </td>
+   <td style="text-align:left;"> è€æ±‰è¢«æŒ‡å¼ºå¥¸å…¥ç‹± </td>
    <td style="text-align:right;"> 185177 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄĞ×Ó²ÒÔâ¼·Ñ¹ÉíÍö </td>
+   <td style="text-align:left;"> ç”·å­æƒ¨é­æŒ¤å‹èº«äº¡ </td>
    <td style="text-align:right;"> 178935 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÔĞ¸¾ÀëÆæËÀÍö </td>
+   <td style="text-align:left;"> å­•å¦‡ç¦»å¥‡æ­»äº¡ </td>
    <td style="text-align:right;"> 106216 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> º£²ÎÔÄ±øÕÕ±¬ºì </td>
+   <td style="text-align:left;"> æµ·å‚é˜…å…µç…§çˆ†çº¢ </td>
    <td style="text-align:right;"> 103025 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ´óÂèÎª¹·Ë¢¿¨Õ¼×ù </td>
+   <td style="text-align:left;"> å¤§å¦ˆä¸ºç‹—åˆ·å¡å åº§ </td>
    <td style="text-align:right;"> 96443 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Å®×Ó¼ÒÃÅ¿Ú±»ĞÔÇÖ </td>
+   <td style="text-align:left;"> å¥³å­å®¶é—¨å£è¢«æ€§ä¾µ </td>
    <td style="text-align:right;"> 85931 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¾Ü¼ÓÁìµ¼Î¢ĞÅ±»³´ </td>
+   <td style="text-align:left;"> æ‹’åŠ é¢†å¯¼å¾®ä¿¡è¢«ç‚’ </td>
    <td style="text-align:right;"> 83213 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÆØÍõË¼´Ï½øÓéÀÖÈ¦ </td>
+   <td style="text-align:left;"> æ›ç‹æ€èªè¿›å¨±ä¹åœˆ </td>
    <td style="text-align:right;"> 76823 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Å®¿ÍÃÎÖĞ¾ªĞÑ </td>
+   <td style="text-align:left;"> å¥³å®¢æ¢¦ä¸­æƒŠé†’ </td>
    <td style="text-align:right;"> 54671 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄĞ×Ó´óÄÔÏûÊ§¹ı°ë </td>
+   <td style="text-align:left;"> ç”·å­å¤§è„‘æ¶ˆå¤±è¿‡åŠ </td>
    <td style="text-align:right;"> 43599 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÖĞ¹ú¹ú¼ÊĞ¡½ã´óÈü </td>
+   <td style="text-align:left;"> ä¸­å›½å›½é™…å°å§å¤§èµ› </td>
    <td style="text-align:right;"> 39775 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> È«¹úÒË¾Ó³ÇÊĞÅÅĞĞ </td>
+   <td style="text-align:left;"> å…¨å›½å®œå±…åŸå¸‚æ’è¡Œ </td>
    <td style="text-align:right;"> 33747 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ¿¹Õ½¼ÍÄî±Ò·¢ĞĞ </td>
+   <td style="text-align:left;"> æŠ—æˆ˜çºªå¿µå¸å‘è¡Œ </td>
    <td style="text-align:right;"> 33563 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ìì½ò±¬Õ¨Í·Æß </td>
+   <td style="text-align:left;"> å¤©æ´¥çˆ†ç‚¸å¤´ä¸ƒ </td>
    <td style="text-align:right;"> 28963 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> 9ÔÂ3ÈÕË«±¶¹¤×Ê </td>
+   <td style="text-align:left;"> 9æœˆ3æ—¥åŒå€å·¥èµ„ </td>
    <td style="text-align:right;"> 27298 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ±¼³ÛÅ®¾Ü½»Í£³µ·Ñ </td>
+   <td style="text-align:left;"> å¥”é©°å¥³æ‹’äº¤åœè½¦è´¹ </td>
    <td style="text-align:right;"> 22560 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> 65ËêÅ®×Ó²ú4°ûÌ¥ </td>
+   <td style="text-align:left;"> 65å²å¥³å­äº§4èƒèƒ </td>
    <td style="text-align:right;"> 21674 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ó¢¹ú·èÇÀ×´Ôª±Ê¼Ç </td>
+   <td style="text-align:left;"> è‹±å›½ç–¯æŠ¢çŠ¶å…ƒç¬”è®° </td>
    <td style="text-align:right;"> 17742 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÍõË¼´ÏÁµÇé×øÊµ </td>
+   <td style="text-align:left;"> ç‹æ€èªæ‹æƒ…åå® </td>
    <td style="text-align:right;"> 16641 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ñî¶°Áº±»²é </td>
+   <td style="text-align:left;"> æ¨æ ‹æ¢è¢«æŸ¥ </td>
    <td style="text-align:right;"> 16311 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÔúÆÆÊÖÖ¸ÏÕËÍÃü </td>
+   <td style="text-align:left;"> æ‰ç ´æ‰‹æŒ‡é™©é€å‘½ </td>
    <td style="text-align:right;"> 15738 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Âü¹ÈÊĞÖĞĞÄ±¬Õ¨ </td>
+   <td style="text-align:left;"> æ›¼è°·å¸‚ä¸­å¿ƒçˆ†ç‚¸ </td>
    <td style="text-align:right;"> 15444 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄĞÍ¯µøÈë¿ªË®Åè </td>
+   <td style="text-align:left;"> ç”·ç«¥è·Œå…¥å¼€æ°´ç›† </td>
    <td style="text-align:right;"> 14827 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ³Ç¹ÜÅö´ÉÖ´·¨ </td>
+   <td style="text-align:left;"> åŸç®¡ç¢°ç“·æ‰§æ³• </td>
    <td style="text-align:right;"> 13619 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ã÷ĞÇÕæÈËĞãÆ¬³ê </td>
+   <td style="text-align:left;"> æ˜æ˜ŸçœŸäººç§€ç‰‡é…¬ </td>
    <td style="text-align:right;"> 12979 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> 2ÍòÂô³õÒ¹·´ÔâÇÀ </td>
+   <td style="text-align:left;"> 2ä¸‡å–åˆå¤œåé­æŠ¢ </td>
    <td style="text-align:right;"> 12249 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> °çòùòğÏÀĞĞÉÆÉíÍö </td>
+   <td style="text-align:left;"> æ‰®è™è ä¾ è¡Œå–„èº«äº¡ </td>
    <td style="text-align:right;"> 11928 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ìì½ò»ØÓ¦¶¾Æø´«ÎÅ </td>
+   <td style="text-align:left;"> å¤©æ´¥å›åº”æ¯’æ°”ä¼ é—» </td>
    <td style="text-align:right;"> 11305 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ½ğĞÇÅç·¶±ù±ù·ÛË¿ </td>
+   <td style="text-align:left;"> é‡‘æ˜Ÿå–·èŒƒå†°å†°ç²‰ä¸ </td>
    <td style="text-align:right;"> 9470 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÍøÆØºÎéà¾ı½«´ó»é </td>
+   <td style="text-align:left;"> ç½‘æ›ä½•çŒ·å›å°†å¤§å©š </td>
    <td style="text-align:right;"> 9115 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ô¬Ó½ÒÇ¶ù×ÓÉÏÑ§ </td>
+   <td style="text-align:left;"> è¢å’ä»ªå„¿å­ä¸Šå­¦ </td>
    <td style="text-align:right;"> 7282 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÄĞ×Óµ±½Ö×¢Éä¶¾Æ· </td>
+   <td style="text-align:left;"> ç”·å­å½“è¡—æ³¨å°„æ¯’å“ </td>
    <td style="text-align:right;"> 6530 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÊÀ½ç´óÑ§Ñ§ÊõÅÅÃû </td>
+   <td style="text-align:left;"> ä¸–ç•Œå¤§å­¦å­¦æœ¯æ’å </td>
    <td style="text-align:right;"> 6488 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ö£ÖİĞ¡»ï³ö×âÔÆ¶ä </td>
+   <td style="text-align:left;"> éƒ‘å·å°ä¼™å‡ºç§Ÿäº‘æœµ </td>
    <td style="text-align:right;"> 6454 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ĞÜÔ¾»Ô±»µ÷²é </td>
+   <td style="text-align:left;"> ç†Šè·ƒè¾‰è¢«è°ƒæŸ¥ </td>
    <td style="text-align:right;"> 6232 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> °²±¶»ò·Ã»ª </td>
+   <td style="text-align:left;"> å®‰å€æˆ–è®¿å </td>
    <td style="text-align:right;"> 6123 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ìì½òÏÂÓê³öÏÖÅİÄ­ </td>
+   <td style="text-align:left;"> å¤©æ´¥ä¸‹é›¨å‡ºç°æ³¡æ²« </td>
    <td style="text-align:right;"> 5884 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÈıĞÇÉÏº£·¢²¼»á </td>
+   <td style="text-align:left;"> ä¸‰æ˜Ÿä¸Šæµ·å‘å¸ƒä¼š </td>
    <td style="text-align:right;"> 5137 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÕÅÒÕĞËÒÑ±»Í¿ºÚ </td>
+   <td style="text-align:left;"> å¼ è‰ºå…´å·²è¢«æ¶‚é»‘ </td>
    <td style="text-align:right;"> 4990 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> »Ñ³Æ×ÔÉ±±»¾ÈË÷Åâ </td>
+   <td style="text-align:left;"> è°ç§°è‡ªæ€è¢«æ•‘ç´¢èµ” </td>
    <td style="text-align:right;"> 4301 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÌÆæÌ±»Ö¸³´×÷ÁµÇé </td>
+   <td style="text-align:left;"> å”å«£è¢«æŒ‡ç‚’ä½œæ‹æƒ… </td>
    <td style="text-align:right;"> 3722 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Ó×Ê¦ÓÃ½ÅÃÍ¼ĞÄĞÍ¯ </td>
+   <td style="text-align:left;"> å¹¼å¸ˆç”¨è„šçŒ›å¤¹ç”·ç«¥ </td>
    <td style="text-align:right;"> 3683 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> ÍøÆØ°ØÇàËï×ÓÊ§Áª </td>
+   <td style="text-align:left;"> ç½‘æ›æŸé’å­™å­å¤±è” </td>
    <td style="text-align:right;"> 3538 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Å®×Ó±ÆĞ¡Ñ§ÉúÈÃ×ù </td>
+   <td style="text-align:left;"> å¥³å­é€¼å°å­¦ç”Ÿè®©åº§ </td>
    <td style="text-align:right;"> 3245 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> È«Çò»ªÈË¸»ºÀ°ñ </td>
+   <td style="text-align:left;"> å…¨çƒåäººå¯Œè±ªæ¦œ </td>
    <td style="text-align:right;"> 3010 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> »İÈôç÷´í¹ıÊÀ½ç±­ </td>
+   <td style="text-align:left;"> æƒ è‹¥çªé”™è¿‡ä¸–ç•Œæ¯ </td>
    <td style="text-align:right;"> 2981 </td>
   </tr>
 </tbody>
@@ -1130,21 +1145,21 @@ echartR(hotword[1:30,], x=~Keyword, y=~Freq, type="wordcloud",
 
 ![](files/figure-html/wordcloud.png)
 
-## Chord ºÍÏÒÍ¼
+## Chord å’Œå¼¦å›¾
 
 
-## Force Á¦µ¼Ïò²¼¾ÖÍ¼
+## Force åŠ›å¯¼å‘å¸ƒå±€å›¾
 
 
-# Recognized Issues ÒÑÖªµÄÎÊÌâ
+# Recognized Issues å·²çŸ¥çš„é—®é¢˜
 
-1. `echartR`±È½Ï½Ó½üÓÚ`lattice`£¬¶ø²»ÊÇ`ggplot2`Í¼²ãµş¼ÓµÄË¼Â·¡£Ã¿´ÎÊ¹ÓÃ¶¼ÒªÒ»´ÎĞÔ±à¼­ËùÓĞĞèÒªµÄ²ÎÊı£»
-1. º¯Êı±¾ÉíĞ´µÃ±È½Ï±¿ÖØ£¬¼¼Êõ»¹²»ĞĞ£»
-1. µ±Ã»ÓĞÊı¾İÏµÁĞµÄÊ±ºò£¬ÈçÏÔÊ¾Í¼Àı£¬»á±»²ğ³ÉÒ»´®µ¥×Ö½Ú×Ö·û£»
-1. Î´ÊµÏÖµÄ¹¦ÄÜ£º
-    1. Force£¬Chord£¬candlestick(k)ºÍµã±ê×¢µØÍ¼»¹Ã»ÓĞ¿ª·¢£»
-    1. ÈÔÈ»²»Ö§³ÖÊ±¼ä¸ñÊ½µÄ×ø±êÖá£¨seriesÖĞÊı¾İ½á¹¹ÓĞÎÊÌâ£©£»
-    1. ÈÔÈ»²»Ö§³Ö¶¯Ì¬Ê±¼äÖá£»
-    1. tooltip²»¹»ÖÇÄÜ£»
-    1. ½ø½×¹¦ÄÜ£¨°üÀ¨¶àÍ¼Áª¶¯¡¢Ë«×ø±êÖáµÈ£©ÈÔÎ´¿ª·¢£»
-1. **×¢Òâ**£ºÈçÒª¸Ä½ø£¬Ç§Íò²»ÒªÔÚº¯Êı´úÂëÖĞ`set.seed()`£¬Õâ»áÈ«¾ÖËø¶¨ÖÖ×ÓÊı£¬µ¼ÖÂknitrÊ±Ã¿×öÒ»Í¼¶¼°´¸ÃÖÖ×ÓËæ»ú»¯`htmlwidget id`¡£×îÖÕµÄÎÄµµÖĞ£¬Ä³Ğ©Í¼¿ÉÄÜ»áÎŞ·¨°´Ö¸¶¨´úÂë³öÍ¼£¬¶øÊÇÖØ¸´ÆäËûµÄÍ¼£¨´®id£©¡£
+1. `echartR`æ¯”è¾ƒæ¥è¿‘äº`lattice`ï¼Œè€Œä¸æ˜¯`ggplot2`å›¾å±‚å åŠ çš„æ€è·¯ã€‚æ¯æ¬¡ä½¿ç”¨éƒ½è¦ä¸€æ¬¡æ€§ç¼–è¾‘æ‰€æœ‰éœ€è¦çš„å‚æ•°ï¼›
+1. å‡½æ•°æœ¬èº«å†™å¾—æ¯”è¾ƒç¬¨é‡ï¼ŒæŠ€æœ¯è¿˜ä¸è¡Œï¼›
+1. å½“æ²¡æœ‰æ•°æ®ç³»åˆ—çš„æ—¶å€™ï¼Œå¦‚æ˜¾ç¤ºå›¾ä¾‹ï¼Œä¼šè¢«æ‹†æˆä¸€ä¸²å•å­—èŠ‚å­—ç¬¦ï¼›
+1. æœªå®ç°çš„åŠŸèƒ½ï¼š
+    1. Forceï¼ŒChordï¼Œcandlestick(k)å’Œç‚¹æ ‡æ³¨åœ°å›¾è¿˜æ²¡æœ‰å¼€å‘ï¼›
+    1. ä»ç„¶ä¸æ”¯æŒæ—¶é—´æ ¼å¼çš„åæ ‡è½´ï¼ˆseriesä¸­æ•°æ®ç»“æ„æœ‰é—®é¢˜ï¼‰ï¼›
+    1. ä»ç„¶ä¸æ”¯æŒåŠ¨æ€æ—¶é—´è½´ï¼›
+    1. tooltipä¸å¤Ÿæ™ºèƒ½ï¼›
+    1. è¿›é˜¶åŠŸèƒ½ï¼ˆåŒ…æ‹¬å¤šå›¾è”åŠ¨ã€åŒåæ ‡è½´ç­‰ï¼‰ä»æœªå¼€å‘ï¼›
+1. **æ³¨æ„**ï¼šå¦‚è¦æ”¹è¿›ï¼Œåƒä¸‡ä¸è¦åœ¨å‡½æ•°ä»£ç ä¸­`set.seed()`ï¼Œè¿™ä¼šå…¨å±€é”å®šç§å­æ•°ï¼Œå¯¼è‡´knitræ—¶æ¯åšä¸€å›¾éƒ½æŒ‰è¯¥ç§å­éšæœºåŒ–`htmlwidget id`ã€‚æœ€ç»ˆçš„æ–‡æ¡£ä¸­ï¼ŒæŸäº›å›¾å¯èƒ½ä¼šæ— æ³•æŒ‰æŒ‡å®šä»£ç å‡ºå›¾ï¼Œè€Œæ˜¯é‡å¤å…¶ä»–çš„å›¾ï¼ˆä¸²idï¼‰ã€‚

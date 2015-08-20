@@ -53,21 +53,21 @@ isTime <- function(x,origin=NULL,tz='CST'){
 echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                   xcoord=NULL, ycoord=NULL,
                   type="scatter", stack=FALSE,
-                  title=NULL, subtitle=NULL, title_pos=c('center','bottom'),
+                  title=NULL, subtitle=NULL, title_pos=6,
                   title_url=NULL, subtitle_url=NULL,
                   symbolList=NULL, dataZoom=NULL, dataZoomRange=NULL,
                   dataRange=NULL, splitNumber=NULL, dataRangePalette=NULL,
                   xlab=NULL, ylab=NULL, xyflip=FALSE, AxisAtZero=FALSE, scale=TRUE,
                   palette='aetnagreen', tooltip=TRUE,
-                  legend=TRUE, legend_pos=c('left','top'),
-                  toolbox=TRUE, toolbox_pos=c('right','top'),
+                  legend=TRUE, legend_pos=11,
+                  toolbox=TRUE, toolbox_pos=1,
                   calculable=TRUE, asImage=FALSE, 
                   markLine=NULL, markPoint=NULL,
                   ...){
     type <- tolower(type)
-    title_pos <- tolower(title_pos)
-    toolbox_pos <- tolower(toolbox_pos)
-    legend_pos <- tolower(legend_pos)
+    if (!as.numeric(title_pos) %in% 1:12) stop("title_pos must be an integer 1-12")
+    if (!as.numeric(toolbox_pos) %in% 1:12) stop("toolbox_pos must be an integer 1-12")
+    if (!as.numeric(legend_pos) %in% 1:12) stop("legend_pos must be an integer 1-12")
     supportedTypes <- c('scatter', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie',
                         'ring', 'rose', 'chord', 'area', 'areasmooth', 'force',
                         'bubble', 'funnel', 'pyramid', 'tree','treemap',
@@ -169,11 +169,9 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     #--------Title and subtitle--------
     lstTitle <- list(text=ifelse(is.null(title),"",title),
                      subtext=ifelse(is.null(subtitle),"",subtitle))
-    if (tolower(title_pos[1]) %in% c('left','right','center') & 
-        tolower(title_pos[2]) %in% c('top','bottom','center')){
-        lstTitle[['x']] <- title_pos[1]
-        lstTitle[['y']] <- title_pos[2]
-    }
+    lstTitle[['x']] <- vecPos(title_pos)[1]
+    lstTitle[['y']] <- vecPos(title_pos)[2]
+    lstTitle[['orient']] <- vecPos(title_pos)[3]
     if (!is.null(title_url)) lstTitle[['link']] <- title_url
     if (!is.null(subtitle_url)) lstTitle[['sublink']] <- subtitle_url
     
@@ -236,27 +234,23 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
-                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
-                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
+                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
+                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
+                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
-                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
+                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
+                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="Êý¾ÝÊÓÍ¼ Data view"),
+                                title="æ•°æ®è§†å›¾ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="»¹Ô­ Restore"),
-                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
+                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
+                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
             )
         )
-        if (toolbox_pos[1] %in% c('left','right','center') & 
-            toolbox_pos[2] %in% c('top','bottom','center')){
-            lstToolbox[['x']] <- toolbox_pos[1]
-            lstToolbox[['y']] <- toolbox_pos[2]
-            if (toolbox_pos[2] %in% c('center')){
-                lstToolbox[['orient']] <- 'vertical'
-            }
-        }
+
+        lstToolbox[['x']] <- vecPos(toolbox_pos)[1]
+        lstToolbox[['y']] <- vecPos(toolbox_pos)[2]
+        lstToolbox[['orient']] <- vecPos(toolbox_pos)[3]
         
         if (type[1] %in% c('line','linesmooth','bar','area','areasmooth',
                            'histogram')){
@@ -270,13 +264,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
-                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
-                stack="¶Ñ»ý Stack", 
-                tiled="Æ½ÆÌ Tile",
-                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
-                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
-                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
+                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
+                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
+                stack="å †ç§¯ Stack", 
+                tiled="å¹³é“º Tile",
+                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
+                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
+                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
             )
         }
     }else{
@@ -295,14 +289,10 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             lstLegend= list(show=TRUE, data=lvlseries)
         }
     }
-    if (legend_pos[1] %in% c('left','right','center') & 
-        legend_pos[2] %in% c('top','bottom','center')){
-        lstLegend[['x']] <- legend_pos[1]
-        lstLegend[['y']] <- legend_pos[2]
-    }
-    if (legend_pos[1] %in% c('left','right') & legend_pos[2]=='center'){
-        lstLegend[['orient']] <- 'vertical'
-    }
+    lstLegend[['x']] <- vecPos(legend_pos)[1]
+    lstLegend[['y']] <- vecPos(legend_pos)[2]
+    lstLegend[['orient']] <- vecPos(legend_pos)[3]
+
     
     #----------dataZoom----------
     lstdataZoom <- NULL
@@ -389,7 +379,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     
     #---------Grid------------------
     
-    if (title_pos[2]=='bottom' & !is.null(subtitle)){
+    if (title_pos %in% 5:7 & !is.null(subtitle)){
         lstGrid <- list(y2=80)
         if (type[1] %in% c('pie','ring','rose','funnel','pyramid','map',
                            'radar','radarfill','wordcloud')){
@@ -641,7 +631,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         lstSeries[[i]][['data']] <- vector(mode='numeric')
                         lstSeries[[i]][['hoverable']] <- FALSE
                         lstSeries[[i]][['markPoint']] <- list(
-                            symbolSize=floor(10/log10(nrow(dset))),
+                            symbolSize=ceiling(10/log10(nrow(dset))),
                             itemStyle=list(
                                 normal=list(borderColor='#87cefa',
                                             borderWidth=1,
@@ -690,95 +680,108 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     
     #-------markLine-----------------
     if (!is.null(markLine)){
-        serIdx <- NA
-        for (i in 1:length(markLine)){  # loop over markLine list
+        if (! is.data.frame(markLine) & ! is.matrix(markLine)){
+            stop("markLine should be a data.frame or a matrix.")
+            if (!ncol(markLine) %in% c(4,8)) {
+                stop("markLine should be of 4 or 6 columns")
+            }
+        }
+        markLine <- as.data.frame(markLine,stringsAsFactors=F)
+        if (ncol(markLine)==8){
+            for (col in 3:7) markLine[,col]<-as.numeric(markLine[,col])
+        }
+        sermarkLine <- data.frame(name=levels(as.factor(markLine[,1])),
+                                  ser=NA)
+        for (i in 1:nrow(sermarkLine)){
             # locate the index of lstseries to update markline
-            if (!is.na(as.integer(markLine[[i]][[1]]))){  # series index
-                if (as.integer(markLine[[i]][[1]]) <= 
+            if (!is.na(as.numeric(as.character(sermarkLine[i,1])))){# series is index
+                if (as.numeric(markLine[i,1]) <= 
                     ifelse(is.null(series),1,length(lvlseries))){
-                    serIdx <- ifelse(is.null(series),1,as.integer(markLine[[i]][[1]]))
+                    sermarkLine[i,2] <- 
+                        ifelse(is.null(series),1,sermarkLine[i,1])
                 }
             }else{
                 if (!is.null(lvlseries)){
-                    if (markLine[[i]][[1]] %in% lvlseries){
-                        serIdx <- which(lvlseries==markLine[[i]][[1]])
+                    if (sermarkLine[i,1] %in% lvlseries){
+                        sermarkLine[i,2] <- which(lvlseries==sermarkLine[i,1])
                     }
                 }
                 for (hor in 1:length(lstSeries)){
-                    if (markLine[[i]][[1]]==ifelse(is.null(lstSeries[[hor]][['name']]),
-                                                    "",lstSeries[[hor]][['name']])){
-                        serIdx <- hor
+                    if (sermarkLine[i,1]==ifelse(is.null(lstSeries[[hor]][['name']]),
+                                              "",lstSeries[[hor]][['name']])){
+                        sermarkLine[i,2] <- hor
                     }
                 }
-                if (is.na(serIdx)) serIdx <- length(lstSeries)+1
             }
-            nElem <- length(markLine[[i]])
-            if (nElem %in% c(7,8)){ # full form
-                if (any(is.na(as.numeric(markLine[[i]][3:7])))){
-                    stop(paste("The",i,"th markLine list is not in correct format."))
-                }else{
-                    markLine[[i]][3:7] <- as.numeric(markLine[[i]][3:7])
+            if (is.na(sermarkLine[i,2])){
+                sermarkLine[i,2] <- length(lstSeries)+1
+                lstSeries[[sermarkLine[i,2]]] <- list(
+                    name=markLine[i,1],
+                    type="scatter", 
+                    data=matrix(markLine[i,4:7],byrow=T,nrow=2)
+                )
+                lstLegend[['data']][[sermarkLine[i,2]]] <- markLine[i,1]
+            }
+        }
+        markLine <- merge(markLine,sermarkLine,by.x=names(markLine)[1],by.y="name",
+                          all.x=T)
+        
+        for (i in 1:nrow(markLine)){  # loop over markLine
+            if (ncol(markLine) %in% c(9)){ # full form
+                if (any(is.na(as.numeric(markLine[i,3:7])))){
+                    stop(paste("The",i,"th row of markLine is not in correct format."))
                 }
+                serIdx <- markLine[i,9]
                 if (serIdx==1 | serIdx<=length(lstSeries)){
-                    nLines <- length(lstSeries[[serIdx]][['markLine']])
+                    nLines <- length(lstSeries[[serIdx]][['markLine']][['data']])
                     lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]] <-
-                        list(list(name=ifelse(is.na(markLine[[i]][[2]]),
-                                              paste("P(",round(markLine[[i]][[3]],2),",",
-                                                    round(markLine[[i]][[4]],2),")"),
-                                              markLine[[i]][[2]]),
-                                  value=markLine[[i]][[3]],
-                                  x=markLine[[i]][[4]],
-                                  y=markLine[[i]][[5]]),
-                             list(name=ifelse(is.na(markLine[[i]][[2]]),
-                                              paste("P(",round(markLine[[i]][[6]],2),",",
-                                                    round(markLine[[i]][[7]],2),")"),
-                                              NULL),
-                                  x=markLine[[i]][[6]],
-                                  y=markLine[[i]][[7]]))
-                    if (type[1] %in% c('line','linesmooth','bar','k','scatter')){
+                        list(list(name=ifelse(is.na(markLine[i,2]),
+                                              paste("P(",round(markLine[i,3],2),",",
+                                                    round(markLine[i,4],2),")"),
+                                              markLine[i,2]),
+                                  value=markLine[i,3],
+                                  x=markLine[i,4],
+                                  y=markLine[i,5]),
+                             list(name=ifelse(is.na(markLine[i,2]),
+                                              paste("P(",round(markLine[i,6],2),",",
+                                                    round(markLine[i,7],2),")"),
+                                              ""),
+                                  x=markLine[i,6],
+                                  y=markLine[i,7]))
+                    if (type[1] %in% c('line','linesmooth','bar','k','scatter','bubble')){
                         lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]] <-
-                            list(list(name=ifelse(is.na(markLine[[i]][[2]]),
-                                                  paste("P(",round(markLine[[i]][[3]],2),",",
-                                                        round(markLine[[i]][[4]],2),")"),
-                                                  markeLine[[i]][[2]]),
-                                      value=markLine[[i]][[3]],
-                                      xAxis=markLine[[i]][[4]],
-                                      yAxis=markLine[[i]][[5]]),
-                                 list(name=ifelse(is.na(markLine[[i]][[2]]),
-                                                  paste("P(",round(markLine[[i]][[6]],2),",",
-                                                        round(markLine[[i]][[7]],2),")"),
-                                                  NULL),
-                                      xAxis=markLine[[i]][[6]],
-                                      yAxis=markLine[[i]][[7]]))
-                    }
-                }else{ # a new series, create one
-                    lstSeries[[serIdx]] <- list(
-                        name=paste0(markLine[[i]][[1]]," (",markLine[[i]][[2]],")"),
-                        type="line", itemStyle=list(normal=list(
-                            lineStyle=list(type='dashed'))),
-                        data=matrix(markLine[[i]][4:7],byrow=T,nrow=2)
-                    )
-                    lstLegend[['data']][[serIdx]] <- 
-                        paste0(markLine[[i]][[1]]," (",markLine[[i]][[2]],")")
-                }
-                if (nElem==8) {
-                    if (markLine[[i]][[8]]==T) { # effect
-                        lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
+                            list(list(name=ifelse(is.na(markLine[i,2]),
+                                                  paste("P(",round(markLine[i,3],2),",",
+                                                        round(markLine[i,4],2),")"),
+                                                  markLine[i,2]),
+                                      value=markLine[i,3],
+                                      xAxis=markLine[i,4],
+                                      yAxis=markLine[i,5]),
+                                 list(name=ifelse(is.na(markLine[i,2]),
+                                                  paste("P(",round(markLine[i,6],2),",",
+                                                        round(markLine[i,7],2),")"),
+                                                  ""),
+                                      xAxis=markLine[i,6],
+                                      yAxis=markLine[i,7]))
                     }
                 }
-            }else if (nElem %in% c(3,4)){  # short form
+                if (markLine[i,8]==T) { # effect
+                    lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
+                }
+            }else if (ncol(markLine) %in% c(5)){  # short form
+                serIdx <- markLine[i,5]
                 if (type[1] %in% c('line','linesmooth','bar','scatter','bubble')){
-                    if (tolower(markLine[[i]][[3]]) %in% c('min','max','average')){
+                    if (tolower(markLine[i,3]) %in% c('min','max','average')){
                         if (serIdx==1 | serIdx<=length(lvlseries)){
                             nLines <- length(lstSeries[[serIdx]][['markLine']][['data']])
                             lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]] <-
-                                list(name=ifelse(is.na(markLine[[i]][[2]]),
-                                                 tolower(markLine[[i]][[3]]),
-                                                 markLine[[i]][[2]]),
-                                     type=tolower(markLine[[i]][[3]]))
+                                list(name=ifelse(is.na(markLine[i,2]),
+                                                 tolower(markLine[i,3]),
+                                                 markLine[i,2]),
+                                     type=tolower(markLine[i,3]))
                         }
                     }else if (type[1] %in% c('bubble','scatter') & 
-                              tolower(markLine[[i]][[3]]) == 'lm'){
+                              tolower(markLine[i,3]) == 'lm'){
                         nLines <- length(lstSeries[[serIdx]][['markLine']][['data']])
                         
                         if (is.null(series)){
@@ -794,24 +797,22 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         yhat <- predict(lmfit,newdata=xhat)
                         k <- lmfit$coefficients[[2]]
                         lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]] <-
-                            list(list(name=ifelse(is.na(markLine[[i]][[2]]),
+                            list(list(name=ifelse(is.na(markLine[i,2]),
                                                   paste("P(",round(x1,2),",",
                                                         round(yhat[[1]],2),")"),
-                                                  markLine[[i]][[2]]),
+                                                  markLine[i,2]),
                                       value=round(k,2),
                                       xAxis=x1,
                                       yAxis=yhat[[1]]),
-                                 list(name=ifelse(is.na(markLine[[i]][[2]]),
+                                 list(name=ifelse(is.na(markLine[i,2]),
                                                   paste("P(",round(x2,2),",",
                                                         round(yhat[[2]],2),"), slope"),
-                                                  NULL),
+                                                  ""),
                                       xAxis=x2,
                                       yAxis=yhat[[2]]))
                     }
-                    if (nElem==4) {
-                        if (markLine[[i]][[4]]==T) { # effect
-                            lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
-                        }
+                    if (markLine[i,4]==T) { # effect
+                        lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
                     }
                 }
             }
@@ -820,118 +821,116 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     
     #-------markPoint-----------------
     if (!is.null(markPoint)){
-        serIdx <- NA
-        for (i in 1:length(markPoint)){  # loop over markPoint list
+        if (! is.data.frame(markPoint) & ! is.matrix(markPoint)){
+            stop("markPoint should be a data.frame or a matrix.")
+            if (!ncol(markPoint) %in% c(4,6)) {
+                stop("markPoint should be of 4 or 6 columns")
+            }else if(ncol(markPoint)==6){
+                for (col in 3:5) markPoint[,col]<-as.numeric(markPoint[,col])
+            }
+        }
+        markPoint <- as.data.frame(markPoint,stringsAsFactors=F)
+        sermarkPoint <- data.frame(name=levels(as.factor(markPoint[,1])),
+                                  ser=NA)
+        for (i in 1:nrow(sermarkPoint)){
             # locate the index of lstseries to update markPoint
-            if (!is.na(as.integer(markPoint[[i]][[1]]))){  # series index
-                if (as.integer(markPoint[[i]][[1]]) <= 
+            if (!is.na(as.numeric(as.character(sermarkPoint[i,1])))){  # series index
+                if (as.numeric(sermarkPoint[i,1]) <= 
                     ifelse(is.null(series),1,length(lvlseries))){
-                    serIdx <- ifelse(is.null(series),1,as.integer(markPoint[[i]][[1]]))
+                    sermarkPoint[i,2] <- 
+                        ifelse(is.null(series),1,sermarkPoint[i,1])
                 }
             }else{
                 if (!is.null(lvlseries)){
-                    if (markPoint[[i]][[1]] %in% lvlseries){
-                        serIdx <- which(lvlseries==markPoint[[i]][[1]])
+                    if (sermarkPoint[i,1] %in% lvlseries){
+                        sermarkPoint[i,2] <- which(lvlseries==sermarkPoint[i,1])
                     }
                 }
                 for (hor in 1:length(lstSeries)){
-                    if (markPoint[[i]][[1]]==ifelse(is.null(lstSeries[[hor]][['name']]),
-                                                    "",lstSeries[[hor]][['name']])){
-                        serIdx<-hor
+                    if (sermarkPoint[i,1]==ifelse(is.null(lstSeries[[hor]][['name']]),
+                                               "",lstSeries[[hor]][['name']])){
+                        sermarkPoint[i,2] <- hor
                     }
                 }
-                if (is.na(serIdx)) serIdx <- length(lstSeries)+1
             }
-            nElem <- length(markPoint[[i]])
-            if (nElem %in% c(5,6)){ # full form
-                if (any(is.na(as.numeric(markPoint[[i]][3:5])))){
-                    stop(paste("The",i,"th markPoint list is not of correct format."))
-                }else{
-                    markPoint[[i]][3:5] <- as.numeric(markPoint[[i]][3:5])
+            if (is.na(sermarkPoint[i,2])){
+                sermarkPoint[i,2] <- length(lstSeries)+1
+                lstSeries[[sermarkPoint[i,2]]] <- list(
+                    name=markPoint[i,1],
+                    type="scatter", 
+                    data=vector(mode="numeric")
+                )
+                if (type[1]=='map'){
+                    lstSeries[[sermarkPoint[i,2]]][['type']] <- "map"
+                    lstSeries[[sermarkPoint[i,2]]][['mapType']] <- type[2]
+                    lstSeries[[sermarkPoint[i,2]]][['markPoint']] <- list(
+                        symbolSize=20,
+                        itemStyle=list(
+                            symbol='emptyCircle',
+                            data=list()
+                        )
+                    )
                 }
+                lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
+            }
+        }
+        markPoint <- merge(markPoint,sermarkPoint,by.x=names(markPoint)[1],by.y="name",
+                          all.x=T)
+        
+        for (i in 1:nrow(markPoint)){  # loop over markPoint
+            if (ncol(markPoint) %in% c(7)){ # full form
+                if (any(is.na(as.numeric(markPoint[i,3:5])))){
+                    stop(paste("The",i,"th row of markPoint is not of correct format."))
+                }
+                serIdx <- markPoint[i,7]
                 if (serIdx==1 | serIdx<=length(lstSeries)){
-                    nPoints <- length(lstSeries[[serIdx]][['markPoint']])
+                    nPoints <- length(lstSeries[[serIdx]][['markPoint']][['data']])
                     lstSeries[[serIdx]][['markPoint']][['data']][[nPoints+1]] <-
-                        list(name=ifelse(is.na(markPoint[[i]][[2]]),
-                                         paste("P(",round(markPoint[[i]][[4]],2),",",
-                                               round(markPoint[[i]][[5]],2),")"),
-                                         markPoint[[i]][[2]]),
-                             value=round(as.numeric(markPoint[[i]][[3]]),2),
-                             x=markPoint[[i]][[4]],
-                             y=markPoint[[i]][[5]])
+                        list(name=ifelse(is.na(markPoint[i,2]),
+                                         paste("P(",round(markPoint[i,4],2),",",
+                                               round(markPoint[i,5],2),")"),
+                                         markPoint[i,2]),
+                             value=round(as.numeric(markPoint[i,3]),2),
+                             x=markPoint[i,4],
+                             y=markPoint[i,5])
                     if (type[1] %in% c('line','linesmooth','bar','k','scatter')){
                         lstSeries[[serIdx]][['markPoint']][['data']][[nPoints+1]] <-
-                            list(name=ifelse(is.na(markPoint[[i]][[2]]),
-                                             paste("P(",round(markPoint[[i]][[4]],2),",",
-                                                   round(markPoint[[i]][[5]],2),")"),
-                                             markPoint[[i]][[2]]),
-                                 value=round(as.numeric(markPoint[[i]][[3]]),2),
-                                 xAxis=markPoint[[i]][[4]],
-                                 yAxis=markPoint[[i]][[5]])
+                            list(name=ifelse(is.na(markPoint[i,2]),
+                                             paste("P(",round(markPoint[i,4],2),",",
+                                                   round(markPoint[i,5],2),")"),
+                                             markPoint[i,2]),
+                                 value=round(as.numeric(markPoint[i,3]),2),
+                                 xAxis=markPoint[i,4],
+                                 yAxis=markPoint[i,5])
                     }else if (type[1] =='map'){
                         lstSeries[[serIdx]][['markPoint']][['data']][[nPoints+1]] <-
-                            list(name=markPoint[[i]][[2]],
-                                 value=round(as.numeric(markPoint[[i]][[3]]),2))
-                        #if (!any(is.na(markPoint[[i]][4:5]))){
-                        #    lstSeries[[serIdx]][['markPoint']][['geoCoord']][[markPoint[[i]][[1]]]] <-
-                        #        c(markPoint[[i]][[5]],markPoint[[i]][[4]])
-                        #}
+                            list(name=markPoint[i,2],
+                                 value=round(as.numeric(markPoint[i,3]),2))
+                        if (!any(is.na(markPoint[i,4:5]))){
+                            lstSeries[[serIdx]][['geoCoord']][[markPoint[i,2]]] <-
+                                c(markPoint[i,5],markPoint[i,4])
+                        }
                     }
-                }else{ # a new series, create one
-                    if (type[1]=='map'){
-                        lstSeries[[serIdx]] <- list(
-                            name=markPoint[[i]][[1]],
-                            type="map", mapType=type[2],
-                            data=vector(mode='numeric')
-                        )
-                        lstLegend[['data']][[serIdx]] <- markPoint[[i]][[1]]
-                        lstSeries[[serIdx]][['markPoint']] <- list(
-                            symbolSize=20,
-                            itemStyle=list(
-                                symbol='emptyCircle',
-                                data=list()
-                            )
-                        )
-                        lstSeries[[serIdx]][['markPoint']][['data']][[i]] <- list(
-                            value=markPoint[[i]][[3]],
-                            name=as.character(markPoint[[i]][[2]])
-                        )
-                        #if (!any(is.na(markPoint[[j]][4:5]))){
-                        #    lstSeries[[serIdx]][['geoCoord']][[markPoint[[j]][[2]]]] <-
-                        #        c(markPoint[[j]][[5]],markPoint[[j]][[4]])
-                        #}
+                }
+                if (markPoint[i,6]==T) { # effect
+                    lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T)
+                }
 
-                    }else{
-                        lstSeries[[serIdx]] <- list(
-                            name=markPoint[[i]][[1]],
-                            type="scatter", symbol='pin',
-                            data=matrix(markPoint[[i]][4:5],byrow=T,nrow=2)
-                        )
-                        lstLegend[['data']][[serIdx]] <- 
-                            markPoint[[i]][[1]]
-                    }
-                }
-                if (nElem==6) {
-                    if (markPoint[[i]][[6]]==T) { # effect
-                        lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T)
-                    }
-                }
-            }else if (nElem %in% c(3,4)){  # short form
+            }else if (ncol(markPoint) %in% c(5)){  # short form
+                serIdx <- markPoint[i,5]
                 if (type[1] %in% c('line','linesmooth','bar','scatter','bubble')){
-                    if (tolower(markPoint[[i]][[2]]) %in% c('min','max')){
+                    if (tolower(markPoint[i,2]) %in% c('min','max')){
                         if (serIdx==1 | serIdx<=length(lvlseries)){
                             nPoints <- length(lstSeries[[serIdx]][['markPoint']][['data']])
                             lstSeries[[serIdx]][['markPoint']][['data']][[nPoints+1]] <-
-                                list(name=ifelse(is.na(markPoint[[i]][[2]]),
-                                                 tolower(markPoint[[i]][[3]]),
-                                                 markPoint[[i]][[2]]),
-                                     type=tolower(markPoint[[i]][[3]]))
+                                list(name=ifelse(is.na(markPoint[i,2]),
+                                                 tolower(markPoint[i,3]),
+                                                 markPoint[i,2]),
+                                     type=tolower(markPoint[i,3]))
                         }
                     }
-                    if (nElem==4) {
-                        if (markPoint[[i]][[4]]==T) { # effect
-                            lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T)
-                        }
+                    if (markPoint[i,4]==T) { # effect
+                        lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T)
                     }
                 }
             }
@@ -945,13 +944,14 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     }
     
     #-------SymbolList----------
-    if (!is.null(series)){
+    if (!is.null(lvlseries)){
         if (length(symbolList)<length(lvlseries)){
             symbolList <- c(symbolList,
                             rep(symbolList[length(symbolList)],
                                 length(lvlseries)-length(symbolList)))
         }
     }
+
     lstSymbol <- symbolList
     
     #-------Make plot-------------
@@ -1142,4 +1142,21 @@ funcPal <- function(palette){ # build a function to extract palette info
     }else{
         return(aetnaPal(NULL))
     }
+}
+vecPos <- function(pos){
+    TblPos=as.data.frame(rbind(c("right","top","horizontal"),
+                            c("right","top","vertical"),
+                            c("right","center","vertical"),
+                            c("right","bottom","vertical"),
+                            c("right","bottom","horizontal"),
+                            c("center","bottom","horizontal"),
+                            c("left","bottom","horizontal"),
+                            c("left","bottom","vertical"),
+                            c("left","center","vertical"),
+                            c("left","top","vertical"),
+                            c("left","top","horizontal"),
+                            c("center","top","horizontal")),
+                         stringsAsFactors=F)
+    names(TblPos) <- c("x","y","z")
+    return(as.vector(unlist(TblPos[pos,])))
 }

@@ -234,20 +234,20 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
-                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
-                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
+                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
+                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
+                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
-                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
+                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
+                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="æ•°æ®è§†å›¾ Data view"),
+                                title="Êý¾ÝÊÓÍ¼ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
-                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
+                restore = list(show= TRUE,title="»¹Ô­ Restore"),
+                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
             )
         )
-
+        
         lstToolbox[['x']] <- vecPos(pos[['toolbox']])[1]
         lstToolbox[['y']] <- vecPos(pos[['toolbox']])[2]
         lstToolbox[['orient']] <- vecPos(pos[['toolbox']])[3]
@@ -264,13 +264,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
-                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
-                stack="å †ç§¯ Stack", 
-                tiled="å¹³é“º Tile",
-                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
-                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
-                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
+                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
+                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
+                stack="¶Ñ»ý Stack", 
+                tiled="Æ½ÆÌ Tile",
+                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
+                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
+                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
             )
         }
     }else{
@@ -292,7 +292,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     lstLegend[['x']] <- vecPos(pos[['legend']])[1]
     lstLegend[['y']] <- vecPos(pos[['legend']])[2]
     lstLegend[['orient']] <- vecPos(pos[['legend']])[3]
-
+    
     
     #----------dataZoom----------
     lstdataZoom <- NULL
@@ -321,7 +321,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             }
         }
     }
-
+    
     
     #--------dataRange-----------
     lstdataRange <- NULL
@@ -744,7 +744,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 }
                 for (hor in 1:length(lstSeries)){
                     if (sermarkLine[i,1]==ifelse(is.null(lstSeries[[hor]][['name']]),
-                                              "",lstSeries[[hor]][['name']])){
+                                                 "",lstSeries[[hor]][['name']])){
                         sermarkLine[i,2] <- hor
                     }
                 }
@@ -866,7 +866,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         }
         markPoint <- as.data.frame(markPoint,stringsAsFactors=F)
         sermarkPoint <- data.frame(name=levels(as.factor(markPoint[,1])),
-                                  ser=NA)
+                                   ser=NA)
         names(sermarkPoint) <- c(names(markPoint)[1],'ser')
         for (i in 1:nrow(sermarkPoint)){
             # locate the index of lstseries to update markPoint
@@ -884,7 +884,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 }
                 for (hor in 1:length(lstSeries)){
                     if (sermarkPoint[i,1]==ifelse(is.null(lstSeries[[hor]][['name']]),
-                                               "",lstSeries[[hor]][['name']])){
+                                                  "",lstSeries[[hor]][['name']])){
                         sermarkPoint[i,2] <- hor
                     }
                 }
@@ -901,14 +901,14 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     lstSeries[[sermarkPoint[i,2]]][['mapType']] <- type[2]
                     lstSeries[[sermarkPoint[i,2]]][['markPoint']] <- list(
                         symbolSize=JS('function(v){
-                                        return 10+(v-',min(markPoint[,3]),')*',
+                                      return 10+(v-',min(markPoint[,3]),')*',
                                       10/diff(range(markPoint[,3])),'}'),
                         itemStyle=list(
                             symbol='emptyCircle',
                             data=list()
                         )
                     )
-                }
+            }
                 lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
             }
         }
@@ -953,7 +953,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T,
                                                                            shadowBlur=0)
                 }
-
+                
             }else if (ncol(markPoint) %in% c(5)){  # short form
                 serIdx <- markPoint[i,5]
                 if (type[1] %in% c('line','linesmooth','bar','scatter','bubble')){
@@ -989,7 +989,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                                 length(lvlseries)-length(symbolList)))
         }
     }
-
+    
     lstSymbol <- symbolList
     
     #-------Make plot-------------
@@ -1184,17 +1184,17 @@ funcPal <- function(palette){ # build a function to extract palette info
 }
 vecPos <- function(pos){
     TblPos=as.data.frame(rbind(c("right","top","horizontal"),
-                            c("right","top","vertical"),
-                            c("right","center","vertical"),
-                            c("right","bottom","vertical"),
-                            c("right","bottom","horizontal"),
-                            c("center","bottom","horizontal"),
-                            c("left","bottom","horizontal"),
-                            c("left","bottom","vertical"),
-                            c("left","center","vertical"),
-                            c("left","top","vertical"),
-                            c("left","top","horizontal"),
-                            c("center","top","horizontal")),
+                               c("right","top","vertical"),
+                               c("right","center","vertical"),
+                               c("right","bottom","vertical"),
+                               c("right","bottom","horizontal"),
+                               c("center","bottom","horizontal"),
+                               c("left","bottom","horizontal"),
+                               c("left","bottom","vertical"),
+                               c("left","center","vertical"),
+                               c("left","top","vertical"),
+                               c("left","top","horizontal"),
+                               c("center","top","horizontal")),
                          stringsAsFactors=F)
     names(TblPos) <- c("x","y","z")
     return(as.vector(unlist(TblPos[pos,])))

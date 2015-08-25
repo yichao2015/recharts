@@ -46,12 +46,187 @@ isTime <- function(x,origin=NULL,tz='CST'){
     if (is.null(origin)){
         return(FALSE)
     }else{
-        if (!is(try(as.POSIXct(x,origin=origin,tz=tz),T),"try-error")) T else F
+        if (!is(try(as.POSIXct,T),"try-error")) T else F
     }
+}
+#-----Aetna palettes---------
+aetnaPal <- function(palname,n=6){
+    brewer <- c('BrBG','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu',
+                'RdYlGn','Spectral','Accent','Dark2','Paired','Pastel1',
+                'Pastel2','Set1','Set2','Set3','Blues','BuGn','BuPu',
+                'GnBu','Greens','Greys','Oranges','OrRd','PuBu','PuBuGn',
+                'PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr',
+                'YlOrRd')
+    tableau <- data.frame(
+        nick=c('tableau20','tableau10medium','tableaugray', 'tableauprgy',
+               'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
+               'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
+               'tableaucolorblind','trafficlight'),
+        pal=c('tableau20','tableau10medium','gray5', 'purplegray6',
+              'bluered6','greenorange6','cyclic','tableau10light', 
+              'bluered12','purplegray12','greenorange12','tableau10',
+              'colorblind10','trafficlight'))
+    if (!is.null(palname)) palname <- tolower(palname)
+    if (is.null(palname)){
+        return(c( '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed', 
+                  '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
+                  '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
+                  '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' ))
+    }else if (palname %in% paste0("aetna",
+                                  c('green','blue','teal','cranberry','orange','violet'))){
+        switch(palname,
+               aetnagreen=c("#7AC143","#7D3F98","#F47721","#D20962","#00A78E",
+                            "#00BCE4","#B8D936","#EE3D94","#FDB933","#F58F9F",
+                            "#60C3AE","#5F78BB","#5E9732","#CEA979","#EF4135",
+                            "#7090A5"),
+               aetnablue=c("#00BCE4","#D20962","#7AC143","#F47721","#7D3F98",
+                           "#00A78E","#F58F9F","#B8D936","#60C3AE","#FDB933",
+                           "#EE3D94","#5E9732","#5F78BB","#CEA979","#EF4135",
+                           "#7090A5"),
+               aetnateal=c("#00A78E","#F47721","#7AC143","#00BCE4","#D20962",
+                           "#7D3F98","#60C3AE","#FDB933","#B8D936","#5F78BB",
+                           "#F58F9F","#EE3D94","#5E9732","#CEA979","#EF4135",
+                           "#7090A5"),
+               aetnacranberry=c("#D20962","#00BCE4","#7D3F98","#7AC143","#F47721",
+                                "#00A78E","#F58F9F","#60C3AE","#EE3D94","#B8D936",
+                                "#FDB933","#5E9732","#5F78BB","#CEA979","#EF4135",
+                                "#7090A5"),
+               aetnaorange=c("#F47721","#7AC143","#00A78E","#D20962","#00BCE4",
+                             "#7D3F98","#FDB933","#B8D936","#60C3AE","#F58F9F",
+                             "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
+                             "#7090A5"),
+               aetnaviolet=c("#7D3F98","#7AC143","#F47721","#00A78E","#00BCE4",
+                             "#D20962","#F58F9F","#B8D936","#FDB933","#60C3AE",
+                             "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
+                             "#7090A5")
+        )
+    }else if (palname %in% tolower(brewer)){
+        Palname <- brewer[which(tolower(brewer)==palname)]
+        loadpkg("RColorBrewer")
+        maxcolors <- brewer.pal.info[row.names(brewer.pal.info)==Palname,
+                                     "maxcolors"]
+        return(brewer.pal(maxcolors,Palname))
+    }else{
+        if (palname %in% c('rainbow','terrain','topo','heat','cm')){
+            switch(palname,
+                   rainbow=substr(rainbow(n),1,7),
+                   terrain=substr(terrain.colors(n),1,7),
+                   heat=substr(heat.colors(n),1,7),
+                   topo=substr(topo.colors(n),1,7),
+                   cm=substr(cm.colors(n),1,7)
+            )
+        }else{
+            loadpkg("ggthemes")
+            loadpkg("scales")
+            if (palname %in% c('pander')){
+                colObj <- palette_pander(100)
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% c('excel',"excel_fill","excel_old","excel_new")){
+                palname <- unlist(strsplit(palname,"excel_"))
+                colObj <- eval(parse(text=paste0("excel_pal('",
+                                                 ifelse(is.na(palname[2]),"line",palname[2]),
+                                                 "')(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% c('economist','economist_white','economist_stata')){
+                palname <- unlist(strsplit(palname,"economist_"))
+                colObj <- eval(parse(text=paste0("economist_pal(stata=",
+                                                 ifelse(palname[2]=='stata',T,F),
+                                                 ",fill=",ifelse(palname[2]=='white',F,T),
+                                                 ")(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% c('darkunica')){
+                colObj <- eval(parse(text=paste0("hc_pal('",palname,"')(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% c('wsj','wsj_rgby','wsj_red_green','wsj_black_green',
+                                     'wsj_dem_rep')){
+                palname <- unlist(strsplit(palname,"wsj_"))
+                colObj <- eval(parse(text=paste0("wsj_pal('",
+                                                 ifelse(is.na(palname[2]),'colors6',
+                                                        palname[2]),"')(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% c('stata','stata1','stata1r','statamono')){
+                palname <- switch(palname, stata='s2color', stata1='s1color',
+                                  stata1r='s1rcolor',statamono='mono')
+                colObj <- eval(parse(text=paste0("stata_pal('",palname,"')(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% 
+                      c('calc', 'few','fivethirtyeight','gdocs',
+                        'stata','hc','colorblind')){
+                colObj <- eval(parse(text=paste0(palname,"_pal()(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% 
+                      c('tableau20','tableau10medium','tableaugray', 'tableauprgy',
+                        'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
+                        'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
+                        'tableaucolorblind','trafficlight')){
+                palname <- tableau[tableau$nick==palname,"pal"]
+                colObj <- eval(parse(text=paste0("tableau_color_pal(palette='",
+                                                 palname,"')(100)")))
+                return(colObj[!is.na(colObj)])
+            }else if (palname %in% 
+                      c('solarized','solarized_red','solarized_yellow',
+                        'solarized_orange','solarized_magenta','solarized_violet',
+                        'solarized_blue','solarized_cyan','solarized_green')){
+                palname <- unlist(strsplit(palname,"solarized_"))
+                colObj <- eval(parse(text=paste0("solarized_pal('",
+                                                 ifelse(is.null(palname[2]),'blue',palname[2]),
+                                                 "')(100)")))
+                return(colObj[!is.na(colObj)])
+            }
+        }
+    }
+}
+funcPal <- function(palette){ # build a function to extract palette info
+    if (length(palette)==1) {
+        palettes <- unlist(strsplit(palette,"[\\(\\)]",perl=T))
+        if (length(palettes)==1){
+            return(aetnaPal(palettes[1]))
+        }else{
+            aetPal <- aetnaPal(palettes[1],as.numeric(palettes[2]))
+            if (as.numeric(palettes[2])<length(aetPal)){
+                #set.seed(61936962L)
+                return(sample(aetPal,as.numeric(palettes[2])))
+            }else{
+                return(aetPal)
+            }
+        }
+    }else if(length(palette)>1){
+        aetPal <- vector()
+        for (i in 1:length(palette)){
+            if (!is(try(col2rgb(palette[i]),T),"try-error")){
+                aetPal <- c(aetPal,rgb(col2rgb(palette[i])[[1]],
+                                       col2rgb(palette[i])[[2]],
+                                       col2rgb(palette[i])[[3]],
+                                       maxColorValue = 255)
+                )
+            }
+        }
+        return(aetPal)
+    }else{
+        return(aetnaPal(NULL))
+    }
+}
+vecPos <- function(pos){
+    TblPos=as.data.frame(rbind(c("right","top","horizontal"),
+                               c("right","top","vertical"),
+                               c("right","center","vertical"),
+                               c("right","bottom","vertical"),
+                               c("right","bottom","horizontal"),
+                               c("center","bottom","horizontal"),
+                               c("left","bottom","horizontal"),
+                               c("left","bottom","vertical"),
+                               c("left","center","vertical"),
+                               c("left","top","vertical"),
+                               c("left","top","horizontal"),
+                               c("center","top","horizontal")),
+                         stringsAsFactors=F)
+    names(TblPos) <- c("x","y","z")
+    return(as.vector(unlist(TblPos[pos,])))
 }
 ##----------draw dynamic charts using recharts---------------
 echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL, 
-                  xcoord=NULL, ycoord=NULL, type="scatter", stack=FALSE,
+                  xcoord=NULL, ycoord=NULL, x1=NULL, xcoord1=NULL, ycoord1=NULL,
+                  type="scatter", stack=FALSE,
                   title=NULL, subtitle=NULL, title_url=NULL, subtitle_url=NULL,
                   symbolList=NULL, dataZoom=NULL, 
                   dataRange=NULL, splitNumber=NULL, dataRangePalette=NULL,
@@ -62,7 +237,8 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                   pos=list(title=6, legend=11, toolbox=1, dataZoom=6, 
                            dataRange=8, roam=2),
                   calculable=TRUE, asImage=FALSE,
-                  markLine=NULL, markPoint=NULL, ...){
+                  markLine=NULL, markLinesmooth=NULL, markPoint=NULL, 
+                  theme=list(backgroundColor=NULL, borderColor=NULL), ...){
     type <- tolower(type)
     supportedTypes <- c('scatter', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie',
                         'ring', 'rose', 'chord', 'area', 'areasmooth', 'force',
@@ -84,6 +260,9 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                           roam=2),pos)
     
     #-------pre-process of data-----------
+    for (var in names(data)){  # transform factors to char
+        if (is.factor(data[,var])) data[,var]<-as.character(data[,var])
+    }
     if (!is.null(y)) {      # y is mandatory
         yvar <- substr(deparse(y),2,nchar(deparse(y)))
         y <- evalFormula(y,data)
@@ -107,9 +286,24 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         xcoordvar <- substr(deparse(xcoord),2,nchar(deparse(xcoord)))
         xcoord <- evalFormula(xcoord,data)
     }
+    if (!is.null(x1)) {
+        xvar1 <- substr(deparse(x1),2,nchar(deparse(x1)))
+        x1 <- evalFormula(x1,data)
+    }
+    if (!is.null(xcoord1)) {
+        xcoordvar1 <- substr(deparse(xcoord1),2,nchar(deparse(xcoord1)))
+        xcoord1 <- evalFormula(xcoord1,data)
+    }
     if (!is.null(ycoord)) {
         ycoordvar <- substr(deparse(ycoord),2,nchar(deparse(ycoord)))
         ycoord <- evalFormula(ycoord,data)
+    }
+    if (!is.null(ycoord1)) {
+        ycoordvar1 <- substr(deparse(ycoord1),2,nchar(deparse(ycoord1)))
+        ycoord1 <- evalFormula(ycoord1,data)
+    }
+    if (!is.null(markLinesmooth)) {
+        markLine <- markLinesmooth
     }
     if (type[1] %in% c('bubble') & is.null(weight)){
         wvar <- yvar
@@ -179,7 +373,8 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     if (tooltip){
         lstTooltip <- list(
             trigger=ifelse(type[1] %in% c('pie','ring','funnel','pyramid','map',
-                                          'rose','wordcloud','radar','radarfill'),
+                                          'rose','wordcloud','radar','radarfill',
+                                          'chord','force'),
                            'item','axis'),
             axisPointer = list(
                 show= T,lineStyle= list(type= 'dashed',width= 1)
@@ -223,6 +418,14 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             )
         }else if (type[1] %in% c('ring','pie')){
             lstTooltip[['formatter']] <- "{a} <br/>{b} : {c} ({d}%)"
+        }else if (type[1] %in% c('chord','force')){
+            lstTooltip[['formatter']] <- JS('function (params) {
+                if (params.indicator2) {    // is edge
+                                            return params.indicator2 + " " + 
+                                            params.name + " " + params.indicator;
+                } else {    // is node
+                                            return params.name
+                }}')
         }
 }else{
     lstTooltip = list(show=FALSE)
@@ -234,17 +437,17 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
-                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
-                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
+                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
+                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
+                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
-                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
+                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
+                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="Êý¾ÝÊÓÍ¼ Data view"),
+                                title="æ•°æ®è§†å›¾ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="»¹Ô­ Restore"),
-                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
+                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
+                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
             )
         )
         
@@ -261,32 +464,35 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 list(show=TRUE, type= c('pie','funnel'),
                      option=list(funnel=list(x='25%',width='80%',
                                              funnelAlign='center')))
+        }else if (type[1] %in% c('force','chord')){
+            lstToolbox[['feature']][['magicType']] <- 
+                list(show=TRUE, type= c('force','chord'))
+            lstToolbox[['feature']][['dataView']]<-list(show=F)
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
-                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
-                stack="¶Ñ»ý Stack", 
-                tiled="Æ½ÆÌ Tile",
-                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
-                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
-                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
+                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
+                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
+                stack="å †ç§¯ Stack", 
+                tiled="å¹³é“º Tile",
+                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
+                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
+                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
             )
         }
     }else{
         lstToolbox=list(show=FALSE)
     }
     
-    #------Legend------------
-    if (!legend){
-        lstLegend= list(show=FALSE)
+    #------Legend 1------------
+    if (is.null(series)){
+        lstLegend= list(show=TRUE, data=as.vector(yvar))
     }else{
-        if (is.null(series)){
-            lstLegend= list(show=TRUE, data=as.vector(yvar))
-        }else if (length(lvlseries) ==1){ 
-            lstLegend= list(show=TRUE, data=levels(as.factor(x)))
-        }else{
-            lstLegend= list(show=TRUE, data=lvlseries)
+        lstLegend= list(show=TRUE, data=lvlseries)
+    }
+    if (length(legend)==1){
+        if (legend==F){
+            lstLegend= list(show=FALSE)
         }
     }
     lstLegend[['x']] <- vecPos(pos[['legend']])[1]
@@ -325,10 +531,24 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     
     #--------dataRange-----------
     lstdataRange <- NULL
-    dRange <- dcast(data,data[,xvar]~., value.var=yvar, sum)
-    dmin <- min(dRange[,2])
-    dmax <- max(dRange[,2])
     if (!is.null(dataRange)) {
+        if (!all(is.na(y))) {
+            dRange <- dcast(data,data[,xvar]~., value.var=yvar, sum)
+        }else{
+            dRange <- matrix(rep(NA,2),ncol=2)
+        }
+        if (!is.null(markLine)) {
+            dRange1 <- range(as.numeric(markLine[,3]))
+        }else{
+            dRange1 <- range(dRange[,2])
+        }
+        if (!is.null(markPoint)) {
+            dRange2 <- range(as.numeric(markPoint[,3]))
+        }else{
+            dRange2 <- range(dRange[,2])
+        }
+        dmin <- min(dRange[,2],dRange1[1],dRange2[1],na.rm=T)
+        dmax <- max(dRange[,2],dRange1[2],dRange2[2],na.rm=T)
         if (!is.null(dataRangePalette)){
             lstdataRangePalette <- funcPal(dataRangePalette)
         }
@@ -662,7 +882,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                                 value=dset[j,yvar],name=as.character(dset[j,xvar])
                             )
                         }
-                    }else{             #point mode
+                    }else if (mapMode=='point'){             #point mode
                         lstSeries[[i]][['data']] <- vector(mode='numeric')
                         lstSeries[[i]][['hoverable']] <- FALSE
                         lstSeries[[i]][['markPoint']] <- list(
@@ -680,11 +900,79 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                             lstSeries[[i]][['markPoint']][['data']][[j]] <- list(
                                 value=dset[j,yvar],name=as.character(dset[j,xvar])
                             )
-                            lstSeries[[i]][['geoCoord']][[dset[j,xvar]]] <-
+                            lstSeries[[1]][['geoCoord']][[dset[j,xvar]]] <-
                                 c(dset[j,ycoordvar],dset[j,xcoordvar])
+                        } # all geoCoord append to series 1
+                    }else if (mapMode=='line'){ #line mode
+                        lstSeries[[i]][['data']] <- vector(mode='numeric')
+                        lstSeries[[i]][['hoverable']] <- FALSE
+                        lstSeries[[i]][['markLine']] <- list(
+                            itemStyle=list(normal=list(borderWidth=1))
+                        )
+                        if (!is.null(markLinesmooth)){
+                            lstSeries[[i]][['markLine']][['smooth']] <- T
+                        }
+                        for (j in 1:nrow(dset)){
+                            lstSeries[[i]][['markLine']][['data']][[j]] <- list(
+                                list(name=as.character(dset[j,xvar])),
+                                list(name=as.character(dset[j,xvar1]))
+                            )
+                            if (!is.na(dset[j,yvar])){
+                                lstSeries[[i]][['markLine']][['data']][[j]][[2]][['value']] <-
+                                    dset[j,yvar]
+                            }
+                            lstSeries[[1]][['geoCoord']][[dset[j,xvar]]] <-
+                                c(dset[j,ycoordvar],dset[j,xcoordvar])
+                            lstSeries[[1]][['geoCoord']][[dset[j,xvar1]]] <-
+                                c(dset[j,ycoordvar1],dset[j,xcoordvar1])
                         }
                     }
                 }
+            }else if (type[1]=='chord'){
+                if (is.null(series)){  # simple chord
+                    data <- data[order(data[,xvar1]),]
+                    lvlseries <- levels(as.factor(x1))
+                    lstSeries[[1]] <- list(
+                        type=type[1],sort='ascending',sortSub='descending',
+                        itemStyle=list(normal=list(label=list(rotate=T))),
+                        nodes=list(),links=list()
+                    )
+                    if (identical(levels(as.factor(x)),levels(as.factor(x1)))){ # matrix
+                        for (j in 1:length(unique(x))){
+                            lstSeries[[1]][['data']][[j]] <- list(
+                                name=unique(x)[j])
+                        }
+                        tmpD <- data[order(data[,xvar],data[,xvar1]),]
+                        lstSeries[[1]][['matrix']] <-matrix(tmpD[,yvar],nrow=sqrt(nrow(tmpD)))
+                    }else{ # nodes and links
+                        for (j in 1:length(c(unique(x),unique(x1)))){
+                            lstSeries[[1]][['nodes']][[j]] <- list(
+                                name=c(unique(x),unique(x1))[j])
+                        }
+                        for (j in 1:nrow(data)){
+                            lstSeries[[1]][['links']][[j]] <- list(
+                                source=data[j,xvar1],target=data[j,xvar],
+                                weight=data[j,yvar]*0.9, name=xvar1
+                            )
+                        }
+                        for (j in 1:nrow(data)){ #must be mutual links
+                            lstSeries[[1]][['links']][[nrow(data)+j]] <- list(
+                                target=data[j,xvar1],source=data[j,xvar],weight=data[j,yvar]
+                            )
+                        }
+                    }
+                    lstLegend <- list(show=T,data=lvlseries)
+                    if (length(levels(as.factor(data[,yvar])))>nrow(data)/2){
+                        lstSeries[[1]][['showScale']]<-T
+                        lstSeries[[1]][['showScaleText']]<-T
+                    }else{
+                        lstSeries[[1]][['showScale']]<-F
+                    }
+                }else{    # complex chord
+                    
+                }
+
+                
             }else{              # the rest charts
                 if (is.null(series)){
                     lstSeries[[1]] <- list(
@@ -730,13 +1018,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         names(sermarkLine) <- c(names(markLine)[1],'ser')
         for (i in 1:nrow(sermarkLine)){
             # locate the index of lstseries to update markline
-            if (!is.na(as.numeric(as.character(sermarkLine[i,1])))){# series is index
+            if (!is.na(as.numeric(as.character(sermarkLine[i,1])))){ # series is index
                 if (as.numeric(as.character(sermarkLine[i,1])) <= 
                     ifelse(is.null(series),1,length(lvlseries))){
                     sermarkLine[i,2] <- 
                         ifelse(is.null(series),1,as.numeric(as.character(sermarkLine[i,1])))
                 }
-            }else{
+            }else{ #series is char
                 if (!is.null(lvlseries)){
                     if (sermarkLine[i,1] %in% lvlseries){
                         sermarkLine[i,2] <- which(lvlseries==sermarkLine[i,1])
@@ -749,23 +1037,41 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     }
                 }
             }
-            if (is.na(sermarkLine[i,2])){
+            if (is.na(sermarkLine[i,2])){ # new markLine series
                 sermarkLine[i,2] <- length(lstSeries)+1
                 lstSeries[[sermarkLine[i,2]]] <- list(
-                    name=markLine[i,1],
-                    type="scatter", 
-                    data=matrix(markLine[i,4:7],byrow=T,nrow=2)
+                    name=as.character(sermarkLine[i,1]),
+                    type="scatter",
+                    data=vector(mode="numeric")
                 )
+                if (ncol(markLine)==8){
+                    lstSeries[[sermarkLine[i,2]]][['data']]<-
+                        markLine[markLine[,1]==sermarkLine[i,1],4:7]
+                }
                 lstLegend[['data']][[sermarkLine[i,2]]] <- markLine[i,1]
+                if (type[1]=='map'){
+                    lstSeries[[sermarkLine[i,2]]][['hoverable']] <- FALSE
+                    lstSeries[[sermarkLine[i,2]]][['type']] <- type[1]
+                    lstSeries[[sermarkLine[i,2]]][['mapType']] <- type[2]
+                }
             }
         }
         markLine <- plyr::join(markLine,sermarkLine,by=names(markLine)[1])
-        
+        for (i in 1:nrow(sermarkLine)){
+            if (type[1]=='map'){
+                lstSeries[[sermarkLine[i,2]]][['markLine']] <- list(
+                    data=list(),
+                    itemStyle=list(normal=list(borderWidth=1,
+                                               lineStyle=list(type='solid',shadowBlur=10))
+                        )
+                )
+            }
+            if (!is.null(markLinesmooth)){
+                lstSeries[[sermarkLine[i,2]]][['markLine']][['smooth']] <- T
+            }
+        }
         for (i in 1:nrow(markLine)){  # loop over markLine
             if (ncol(markLine) %in% c(9)){ # full form
-                if (any(is.na(as.numeric(markLine[i,3:7])))){
-                    stop(paste("The",i,"th row of markLine is not in correct format."))
-                }
                 serIdx <- markLine[i,9]
                 if (serIdx==1 | serIdx<=length(lstSeries)){
                     nLines <- length(lstSeries[[serIdx]][['markLine']][['data']])
@@ -798,10 +1104,28 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                                                   ""),
                                       xAxis=markLine[i,6],
                                       yAxis=markLine[i,7]))
+                    }else if (type[1]=='map'){ 
+                        geoFrom <- unlist(strsplit(as.character(markLine[i,2]),"[/|]",perl=T))[1]
+                        geoTo <- unlist(strsplit(as.character(markLine[i,2]),"[/|]",perl=T))[2]
+                        lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]] <- list(
+                            list(name=geoFrom),
+                            list(name=geoTo)
+                        )
+                        if (!is.na(markLine[i,3])){
+                            lstSeries[[serIdx]][['markLine']][['data']][[nLines+1]][[2]][['value']]<-
+                                markLine[i,3]
+                        }
+                        lstSeries[[serIdx]][['geoCoord']][[geoFrom]] <-
+                            c(markLine[i,5],markLine[i,4])
+                        lstSeries[[serIdx]][['geoCoord']][[geoTo]]<-
+                            c(markLine[i,7],markLine[i,6])
+                    }else{
+                        
                     }
                 }
                 if (markLine[i,8]==T) { # effect
-                    lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
+                    lstSeries[[serIdx]][['markLine']][['effect']] <- 
+                        list(show=T, shadowBlur=10)
                 }
             }else if (ncol(markLine) %in% c(5)){  # short form
                 serIdx <- markLine[i,5]
@@ -889,36 +1213,29 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     }
                 }
             }
-            if (is.na(sermarkPoint[i,2])){
+            if (is.na(sermarkPoint[i,2])){ #new markPoint series
                 sermarkPoint[i,2] <- length(lstSeries)+1
                 lstSeries[[sermarkPoint[i,2]]] <- list(
-                    name=markPoint[i,1],
+                    name=as.character(sermarkPoint[i,1]),
                     type="scatter", 
                     data=vector(mode="numeric")
                 )
-                if (type[1]=='map'){
-                    lstSeries[[sermarkPoint[i,2]]][['type']] <- "map"
-                    lstSeries[[sermarkPoint[i,2]]][['mapType']] <- type[2]
-                    lstSeries[[sermarkPoint[i,2]]][['markPoint']] <- list(
-                        symbolSize=JS('function(v){
-                                      return 10+(v-',min(markPoint[,3]),')*',
-                                      10/diff(range(markPoint[,3])),'}'),
-                        itemStyle=list(
-                            symbol='emptyCircle',
-                            data=list()
-                        )
-                    )
             }
-                lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
+            if (type[1]=='map'){
+                lstSeries[[sermarkPoint[i,2]]][['type']] <- "map"
+                lstSeries[[sermarkPoint[i,2]]][['mapType']] <- type[2]
+                lstSeries[[sermarkPoint[i,2]]][['markPoint']] <- list(
+                    symbol='emptyCircle',
+                    itemStyle=list(normal=list(label=list(show=F))),
+                    data=list()
+                )
             }
+            lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
         }
         markPoint <- plyr::join(markPoint,sermarkPoint,by=names(markPoint)[1])
         
         for (i in 1:nrow(markPoint)){  # loop over markPoint
             if (ncol(markPoint) %in% c(7)){ # full form
-                if (any(is.na(as.numeric(markPoint[i,3:5])))){
-                    stop(paste("The",i,"th row of markPoint is not of correct format."))
-                }
                 serIdx <- markPoint[i,7]
                 if (serIdx==1 | serIdx<=length(lstSeries)){
                     nPoints <- length(lstSeries[[serIdx]][['markPoint']][['data']])
@@ -944,14 +1261,15 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                             list(name=markPoint[i,2],
                                  value=round(as.numeric(markPoint[i,3]),2))
                         if (!any(is.na(markPoint[i,4:5]))){
-                            lstSeries[[serIdx]][['geoCoord']][[markPoint[i,2]]] <-
+                            lstSeries[[1]][['geoCoord']][[markPoint[i,2]]] <-
                                 c(markPoint[i,5],markPoint[i,4])
-                        }
+                        }  # all geoCoords append to series 1
                     }
                 }
+
                 if (markPoint[i,6]==T) { # effect
-                    lstSeries[[serIdx]][['markPoint']][['effect']] <- list(show=T,
-                                                                           shadowBlur=0)
+                    lstSeries[[serIdx]][['markPoint']][['effect']] <- 
+                        list(show=T, shadowBlur=0)
                 }
                 
             }else if (ncol(markPoint) %in% c(5)){  # short form
@@ -972,13 +1290,45 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     }
                 }
             }
-            lstSeries[[serIdx]][['markPoint']][['symbolSize']] <- 9
-            #lstSeries[[serIdx]][['markPoint']][['itemStyle']] <- 
-            #    list(normal=list(label=list(show=F)))
             if (length(markPoint)>1000) {
                 lstSeries[[serIdx]][['markPoint']][['large']] <- T
             }
         }
+        if (ncol(markPoint)==7) { #JS func symbolSize, max 20, min 10
+            sizeFold <- 10/(1+diff(range(markPoint[,3])))
+            for (i in 1:nrow(sermarkPoint)){
+                lstSeries[[sermarkPoint[i,2]]][['markPoint']][['symbolSize']] <-
+                    JS('function (value) {
+                       return 10+(value-',min(markPoint[,3]),')*',
+                       sizeFold,'}')
+            }
+        }
+    }
+    
+    #----------Legend 2--------
+    if (length(legend)==2){
+        if (legend[[1]]=='single' & length(legend[[2]])==1){
+            lstLegend[['selectedMode']]<-'single'
+        }
+        if (!is.null(lvlseries) & !is.null(legend[[2]])){
+            legendShow <- vector()
+            for (i in 1:length(legend[[2]])){
+                if (is.numeric(legend[[2]][i])){
+                    legendShow <- c(legendShow,legend[[2]][i])
+                }else{
+                    legendShow <- c(legendShow,which(lstLegend[['data']]==legend[[2]][i]))
+                }
+            }
+            if (length(lstLegend[['data']][-legendShow]) >0){
+                lstLegend[['selected']] <- list()
+                for (legName in lstLegend[['data']][-legendShow]){
+                    lstLegend[['selected']][[legName]] <- F
+                }
+            }
+        }
+        #}else if (length(lvlseries) ==1){ 
+        #    lstLegend= list(show=TRUE, data=levels(as.factor(x)))
+        #}
     }
     
     #-------SymbolList----------
@@ -989,8 +1339,52 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                                 length(lvlseries)-length(symbolList)))
         }
     }
-    
     lstSymbol <- symbolList
+    
+    #----------Theme--------------
+    lstbackgroundColor <- NULL
+    if (!is.null(theme[['backgroundColor']]) & 
+        !is(try(col2rgb(theme[['backgroundColor']])),"try-error")){
+        lstbackgroundColor <- theme[['backgroundColor']]
+        vecColor <- c(255,255,255)-as.vector(col2rgb(theme[['backgroundColor']]))
+        backColor <- rgb(col2rgb(theme[['backgroundColor']])[1],
+                         col2rgb(theme[['backgroundColor']])[2],
+                         col2rgb(theme[['backgroundColor']])[3],max=255)
+        textColor <- rgb(vecColor[1],vecColor[2],vecColor[3],max=255)
+        if (!is.null(lstTitle)) lstTitle[['textStyle']][['color']] <- textColor
+        if (!is.null(lstLegend)) lstLegend[['textStyle']][['color']] <- textColor
+        if (!is.null(lstdataRange)) lstdataRange[['textStyle']][['color']] <- textColor
+        for (ser in 1:length(lstSeries)){
+            if (length(lstSeries[[ser]][['data']])==0){
+                if (is.null(lstSeries[[ser]][['itemStyle']][['normal']][['areaStyle']])){
+                    if (is.null(lstSeries[[ser]][['itemStyle']][['normal']])){
+                        lstSeries[[ser]][['itemStyle']][['normal']] <- list()
+                    }else{
+                        lstSeries[[ser]][['itemStyle']][['normal']][['areaStyle']] <- list()
+                    }
+                }
+                lstSeries[[ser]][['itemStyle']][['normal']][['areaStyle']][['color']]<-
+                    backColor
+            }
+        }
+    }
+    if (!is.null(theme[['borderColor']]) & 
+        !is(try(col2rgb(theme[['borderColor']])),"try-error")){
+        borderColor <- rgb(col2rgb(theme[['borderColor']])[1],
+                           col2rgb(theme[['borderColor']])[2],
+                           col2rgb(theme[['borderColor']])[3],max=255)
+        for (ser in 1:length(lstSeries)){
+            if (length(lstSeries[[ser]][['data']])==0){
+                if (is.null(lstSeries[[ser]][['itemStyle']][['normal']])) {
+                    lstSeries[[ser]][['itemStyle']][['normal']] <- 
+                        list(borderColor=borderColor)
+                }else{
+                    lstSeries[[ser]][['itemStyle']][['normal']][['borderColor']] <-
+                        borderColor
+                }
+            }
+        }
+    }
     
     #-------Make plot-------------
     chartobj <- list(
@@ -999,7 +1393,9 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         calculable=calculable,
         series=lstSeries
     )
+
     if (!is.null(asImage)) chartobj[['renderAsImage']] <- asImage
+    if (!is.null(lstbackgroundColor)) chartobj[['backgroundColor']] <- lstbackgroundColor
     if (!is.null(lstColor)) chartobj[['color']] <- lstColor
     if (try(exists("lstGrid"),T)) chartobj[['grid']] <- lstGrid
     if (!is.null(lstSymbol)) chartobj[['symbolList']] <- lstSymbol
@@ -1023,179 +1419,4 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         chartobj[['polar']] <- lstPolar
     }
     echart(chartobj)
-    }
-
-#-----Aetna palettes---------
-aetnaPal <- function(palname,n=6){
-    brewer <- c('BrBG','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu',
-                'RdYlGn','Spectral','Accent','Dark2','Paired','Pastel1',
-                'Pastel2','Set1','Set2','Set3','Blues','BuGn','BuPu',
-                'GnBu','Greens','Greys','Oranges','OrRd','PuBu','PuBuGn',
-                'PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr',
-                'YlOrRd')
-    tableau <- data.frame(
-        nick=c('tableau20','tableau10medium','tableaugray', 'tableauprgy',
-               'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
-               'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
-               'tableaucolorblind','trafficlight'),
-        pal=c('tableau20','tableau10medium','gray5', 'purplegray6',
-              'bluered6','greenorange6','cyclic','tableau10light', 
-              'bluered12','purplegray12','greenorange12','tableau10',
-              'colorblind10','trafficlight'))
-    if (!is.null(palname)) palname <- tolower(palname)
-    if (is.null(palname)){
-        return(c( '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed', 
-                  '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0', 
-                  '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700', 
-                  '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' ))
-    }else if (palname %in% paste0("aetna",
-                                  c('green','blue','teal','cranberry','orange','violet'))){
-        switch(palname,
-               aetnagreen=c("#7AC143","#7D3F98","#F47721","#D20962","#00A78E",
-                            "#00BCE4","#B8D936","#EE3D94","#FDB933","#F58F9F",
-                            "#60C3AE","#5F78BB","#5E9732","#CEA979","#EF4135",
-                            "#7090A5"),
-               aetnablue=c("#00BCE4","#D20962","#7AC143","#F47721","#7D3F98",
-                           "#00A78E","#F58F9F","#B8D936","#60C3AE","#FDB933",
-                           "#EE3D94","#5E9732","#5F78BB","#CEA979","#EF4135",
-                           "#7090A5"),
-               aetnateal=c("#00A78E","#F47721","#7AC143","#00BCE4","#D20962",
-                           "#7D3F98","#60C3AE","#FDB933","#B8D936","#5F78BB",
-                           "#F58F9F","#EE3D94","#5E9732","#CEA979","#EF4135",
-                           "#7090A5"),
-               aetnacranberry=c("#D20962","#00BCE4","#7D3F98","#7AC143","#F47721",
-                                "#00A78E","#F58F9F","#60C3AE","#EE3D94","#B8D936",
-                                "#FDB933","#5E9732","#5F78BB","#CEA979","#EF4135",
-                                "#7090A5"),
-               aetnaorange=c("#F47721","#7AC143","#00A78E","#D20962","#00BCE4",
-                             "#7D3F98","#FDB933","#B8D936","#60C3AE","#F58F9F",
-                             "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
-                             "#7090A5"),
-               aetnaviolet=c("#7D3F98","#7AC143","#F47721","#00A78E","#00BCE4",
-                             "#D20962","#F58F9F","#B8D936","#FDB933","#60C3AE",
-                             "#5F78BB","#EE3D94","#5E9732","#CEA979","#EF4135",
-                             "#7090A5")
-        )
-    }else if (palname %in% tolower(brewer)){
-        Palname <- brewer[which(tolower(brewer)==palname)]
-        loadpkg("RColorBrewer")
-        maxcolors <- brewer.pal.info[row.names(brewer.pal.info)==Palname,
-                                     "maxcolors"]
-        return(brewer.pal(maxcolors,Palname))
-    }else{
-        if (palname %in% c('rainbow','terrain','topo','heat','cm')){
-            switch(palname,
-                   rainbow=substr(rainbow(n),1,7),
-                   terrain=substr(terrain.colors(n),1,7),
-                   heat=substr(heat.colors(n),1,7),
-                   topo=substr(topo.colors(n),1,7),
-                   cm=substr(cm.colors(n),1,7)
-            )
-        }else{
-            loadpkg("ggthemes")
-            loadpkg("scales")
-            if (palname %in% c('pander')){
-                colObj <- palette_pander(100)
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% c('excel',"excel_fill","excel_old","excel_new")){
-                palname <- unlist(strsplit(palname,"excel_"))
-                colObj <- eval(parse(text=paste0("excel_pal('",
-                                                 ifelse(is.na(palname[2]),"line",palname[2]),
-                                                 "')(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% c('economist','economist_white','economist_stata')){
-                palname <- unlist(strsplit(palname,"economist_"))
-                colObj <- eval(parse(text=paste0("economist_pal(stata=",
-                                                 ifelse(palname[2]=='stata',T,F),
-                                                 ",fill=",ifelse(palname[2]=='white',F,T),
-                                                 ")(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% c('darkunica')){
-                colObj <- eval(parse(text=paste0("hc_pal('",palname,"')(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% c('wsj','wsj_rgby','wsj_red_green','wsj_black_green',
-                                     'wsj_dem_rep')){
-                palname <- unlist(strsplit(palname,"wsj_"))
-                colObj <- eval(parse(text=paste0("wsj_pal('",
-                                                 ifelse(is.na(palname[2]),'colors6',
-                                                        palname[2]),"')(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% c('stata','stata1','stata1r','statamono')){
-                palname <- switch(palname, stata='s2color', stata1='s1color',
-                                  stata1r='s1rcolor',statamono='mono')
-                colObj <- eval(parse(text=paste0("stata_pal('",palname,"')(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% 
-                      c('calc', 'few','fivethirtyeight','gdocs',
-                        'stata','hc','colorblind')){
-                colObj <- eval(parse(text=paste0(palname,"_pal()(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% 
-                      c('tableau20','tableau10medium','tableaugray', 'tableauprgy',
-                        'tableaublrd','tableaugnor','tableaucyclic','tableau10light', 
-                        'tableaublrd12','tableauprgy12','tableaugnor12','tableau',
-                        'tableaucolorblind','trafficlight')){
-                palname <- tableau[tableau$nick==palname,"pal"]
-                colObj <- eval(parse(text=paste0("tableau_color_pal(palette='",
-                                                 palname,"')(100)")))
-                return(colObj[!is.na(colObj)])
-            }else if (palname %in% 
-                      c('solarized','solarized_red','solarized_yellow',
-                        'solarized_orange','solarized_magenta','solarized_violet',
-                        'solarized_blue','solarized_cyan','solarized_green')){
-                palname <- unlist(strsplit(palname,"solarized_"))
-                colObj <- eval(parse(text=paste0("solarized_pal('",
-                                                 ifelse(is.null(palname[2]),'blue',palname[2]),
-                                                 "')(100)")))
-                return(colObj[!is.na(colObj)])
-            }
-        }
-    }
-}
-funcPal <- function(palette){ # build a function to extract palette info
-    if (length(palette)==1) {
-        palettes <- unlist(strsplit(palette,"[\\(\\)]",perl=T))
-        if (length(palettes)==1){
-            return(aetnaPal(palettes[1]))
-        }else{
-            aetPal <- aetnaPal(palettes[1],as.numeric(palettes[2]))
-            if (as.numeric(palettes[2])<length(aetPal)){
-                #set.seed(61936962L)
-                return(sample(aetPal,as.numeric(palettes[2])))
-            }else{
-                return(aetPal)
-            }
-        }
-    }else if(length(palette)>1){
-        aetPal <- vector()
-        for (i in 1:length(palette)){
-            if (!is(try(col2rgb(palette[i]),T),"try-error")){
-                aetPal <- c(aetPal,rgb(col2rgb(palette[i])[[1]],
-                                       col2rgb(palette[i])[[2]],
-                                       col2rgb(palette[i])[[3]],
-                                       maxColorValue = 255)
-                )
-            }
-        }
-        return(aetPal)
-    }else{
-        return(aetnaPal(NULL))
-    }
-}
-vecPos <- function(pos){
-    TblPos=as.data.frame(rbind(c("right","top","horizontal"),
-                               c("right","top","vertical"),
-                               c("right","center","vertical"),
-                               c("right","bottom","vertical"),
-                               c("right","bottom","horizontal"),
-                               c("center","bottom","horizontal"),
-                               c("left","bottom","horizontal"),
-                               c("left","bottom","vertical"),
-                               c("left","center","vertical"),
-                               c("left","top","vertical"),
-                               c("left","top","horizontal"),
-                               c("center","top","horizontal")),
-                         stringsAsFactors=F)
-    names(TblPos) <- c("x","y","z")
-    return(as.vector(unlist(TblPos[pos,])))
 }

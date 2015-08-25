@@ -420,16 +420,16 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             lstTooltip[['formatter']] <- "{a} <br/>{b} : {c} ({d}%)"
         }else if (type[1] %in% c('chord','force')){
             lstTooltip[['formatter']] <- JS('function (params) {
-                if (params.indicator2) {    // is edge
+                                            if (params.indicator2) {    // is edge
                                             return params.indicator2 + " " + 
                                             params.name + " " + params.indicator;
-                } else {    // is node
+                                            } else {    // is node
                                             return params.name
-                }}')
+                                            }}')
         }
 }else{
     lstTooltip = list(show=FALSE)
-}
+    }
     
     #-------------Toolbox----------------
     if (toolbox){
@@ -437,17 +437,17 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
-                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
-                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
+                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
+                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
+                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
-                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
+                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
+                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="æ•°æ®è§†å›¾ Data view"),
+                                title="Êý¾ÝÊÓÍ¼ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
-                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
+                restore = list(show= TRUE,title="»¹Ô­ Restore"),
+                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
             )
         )
         
@@ -468,16 +468,17 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             lstToolbox[['feature']][['magicType']] <- 
                 list(show=TRUE, type= c('force','chord'))
             lstToolbox[['feature']][['dataView']]<-list(show=F)
+            lstToolbox[['feature']][['dataZoom']]<-list(show=F)
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
-                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
-                stack="å †ç§¯ Stack", 
-                tiled="å¹³é“º Tile",
-                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
-                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
-                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
+                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
+                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
+                stack="¶Ñ»ý Stack", 
+                tiled="Æ½ÆÌ Tile",
+                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
+                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
+                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
             )
         }
     }else{
@@ -961,7 +962,10 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                             )
                         }
                     }
-                    lstLegend <- list(show=T,data=lvlseries)
+                    lstLegend <- list(show=T,data=lvlseries,
+                                      x=vecPos(pos[['legend']])[1],
+                                      y=vecPos(pos[['legend']])[2],
+                                      orient=vecPos(pos[['legend']])[3])
                     if (length(levels(as.factor(data[,yvar])))>nrow(data)/2){
                         lstSeries[[1]][['showScale']]<-T
                         lstSeries[[1]][['showScaleText']]<-T
@@ -971,7 +975,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 }else{    # complex chord
                     
                 }
-
+                
                 
             }else{              # the rest charts
                 if (is.null(series)){
@@ -1063,7 +1067,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     data=list(),
                     itemStyle=list(normal=list(borderWidth=1,
                                                lineStyle=list(type='solid',shadowBlur=10))
-                        )
+                    )
                 )
             }
             if (!is.null(markLinesmooth)){
@@ -1266,7 +1270,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         }  # all geoCoords append to series 1
                     }
                 }
-
+                
                 if (markPoint[i,6]==T) { # effect
                     lstSeries[[serIdx]][['markPoint']][['effect']] <- 
                         list(show=T, shadowBlur=0)
@@ -1302,8 +1306,8 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                        return 10+(value-',min(markPoint[,3]),')*',
                        sizeFold,'}')
             }
-        }
     }
+        }
     
     #----------Legend 2--------
     if (length(legend)==2){
@@ -1342,6 +1346,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     lstSymbol <- symbolList
     
     #----------Theme--------------
+    theme <- mergeList(list(backgroundColor=NULL, borderColor=NULL),theme)
     lstbackgroundColor <- NULL
     if (!is.null(theme[['backgroundColor']]) & 
         !is(try(col2rgb(theme[['backgroundColor']])),"try-error")){
@@ -1393,7 +1398,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         calculable=calculable,
         series=lstSeries
     )
-
+    
     if (!is.null(asImage)) chartobj[['renderAsImage']] <- asImage
     if (!is.null(lstbackgroundColor)) chartobj[['backgroundColor']] <- lstbackgroundColor
     if (!is.null(lstColor)) chartobj[['color']] <- lstColor

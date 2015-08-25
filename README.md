@@ -70,7 +70,7 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
 - weight: 权重变量，可用于直方图、气泡图等 weight variable, used in histogram, bubble, etc
 - xcoord: 纬度坐标变量，仅用于点/线标注的map。Lattitude variable, only for point/line-marking map.
 - ycoord: 经度坐标变量，仅用于点/线标注的map。Longitude variable, only for point/line-marking map.
-- x1: 备用自变量，仅用于线标注的地图。Backup x variable, only for line-marking map.
+- x1: 备用自变量，仅用于线标注的地图、力导向图和和弦图。Backup x variable, only for line-marking map, force andchord chart.
 - xcoord1: 备用纬度坐标变量，仅用于线标注的map。Backup lattitude variable, only for line-marking map.
 - ycoord1: 备用经度坐标变量，仅用于线标注的map。Backup Longitude variable, only for line-marking map.
 - type: 默认 default `scatter`，可选 options 'scatter', 'bubble', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie', 'ring', 'rose','area', 'areasmooth', 'chord', 'force', 'tree', 'treemap', 'wordcloud', 'heatmap', 'histogram', 'funnel', 'pyramid', 'radar', 'radarfill'

@@ -1,3 +1,33 @@
+#--------Checkup Database Key-------------
+ACCDBkey <- function(){
+    require(tcltk)
+    require(digest)
+    tt<-tktoplevel()
+    Name <- tclVar("Enter ACC Db Key")
+    entry.Name <-tkentry(tt,width="20",textvariable=Name)
+    tkgrid(tklabel(tt,text="Please enter the key:"))
+    tkgrid(entry.Name)
+    OnOK <- function(){
+        key <- tclvalue(Name)
+        tkdestroy(tt)
+        if (nchar(key)!=16){
+            stop("The key is not 16-byte in length!")
+            tkmessageBox(message=msg)
+        }
+        key
+    }
+    OK.but <-tkbutton(tt,text="   OK   ",command=OnOK)
+    tkbind(entry.Name, "<Return>",OnOK)
+    tkgrid(OK.but)
+    tkfocus(tt)
+    tkwait.window(tt)
+    aes <- AES(charToRaw(OnOK()),mode="ECB")
+    cipher <- as.raw(c("0xa2","0x02","0x9e","0x3f","0x49","0x0f","0xe5",
+                       "0x7d","0x63","0x40","0x0c","0x99","0x15","0x06","0x3e",
+                       "0x1e"))
+    return(list(aes,cipher))
+}
+#------------Require packages, if not installed, install it--------------
 loadpkg <- function(pkg, url=NULL){
     if (! pkg %in% rownames(installed.packages())){
         if (is.null(url)){
@@ -230,8 +260,12 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                   title=NULL, subtitle=NULL, title_url=NULL, subtitle_url=NULL,
                   symbolList=NULL, dataZoom=NULL, 
                   dataRange=NULL, splitNumber=NULL, dataRangePalette=NULL,
-                  xAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F), xlab=NULL,
-                  yAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F), ylab=NULL,
+                  xAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0), xlab=NULL,
+                  yAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0), ylab=NULL,
+                  xAxis1=list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,
+                              banded=F,rotate=0), xlab1=NULL, 
+                  yAxis1=list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,
+                              banded=F,rotate=0), ylab1=NULL,
                   xyflip=FALSE, AxisAtZero=TRUE, scale=TRUE,
                   palette='aetnagreen', tooltip=TRUE, legend=TRUE, toolbox=TRUE, 
                   pos=list(title=6, legend=11, toolbox=1, dataZoom=6, 
@@ -241,8 +275,8 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                   theme=list(backgroundColor=NULL, borderColor=NULL), ...){
     type <- tolower(type)
     supportedTypes <- c('scatter', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie',
-                        'ring', 'rose', 'chord', 'area', 'areasmooth', 'force',
-                        'bubble', 'funnel', 'pyramid', 'tree','treemap',
+                        'ring', 'rose', 'chordribbon', 'chord', 'area', 'areasmooth', 
+                        'force', 'bubble', 'funnel', 'pyramid', 'tree','treemap',
                         'wordcloud', 'heatmap', 'histogram', 'radar', 'radarfill',
                         'gauge'
     )
@@ -255,60 +289,122 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     loadpkg("plyr")
     loadpkg("reshape2")
     loadpkg("recharts","yihui/recharts")
-    if (!all(as.numeric(pos) %in% 1:12)) stop("list pos must be all integers 1-12")
-    pos <- mergeList(list(title=6, legend=11, toolbox=1, dataZoom=6, dataRange=8, 
-                          roam=2),pos)
-    
-    #-------pre-process of data-----------
-    for (var in names(data)){  # transform factors to char
-        if (is.factor(data[,var])) data[,var]<-as.character(data[,var])
+
+    #-------if there is timeline, loop over z---------
+    Data <- data
+    if (!is.null(z)) {
+        zvar <- substr(deparse(z),2,nchar(deparse(z)))
+        z <- evalFormula(z,data)
+        timeslice <- unique(z)
     }
-    if (!is.null(y)) {      # y is mandatory
-        yvar <- substr(deparse(y),2,nchar(deparse(y)))
-        y <- evalFormula(y,data)
-    }
-    if (!is.null(x)) {
-        xvar <- substr(deparse(x),2,nchar(deparse(x)))
-        x <- evalFormula(x,data)
-    }
+    #----data preProcess-----------
+    if (!is.null(y)) yvar <- substr(deparse(y),2,nchar(deparse(y)))
+    if (!is.null(x)) xvar <- substr(deparse(x),2,nchar(deparse(x)))
     if (!is.null(series)) {
         svar <- substr(deparse(series),2,nchar(deparse(series)))
-        series <- evalFormula(series,data)
-        lvlseries <- levels(as.factor(series))
+        if (is.factor(data[,svar])){
+            lvlseries <- levels(data[,svar])
+        }else{
+            lvlseries <- unique(data[,svar])
+        }
     }else{
         lvlseries <- NULL
     }
-    if (!is.null(weight)) {
-        wvar <- substr(deparse(weight),2,nchar(deparse(weight)))
-        weight <- evalFormula(weight,data)
+    for (var in names(Data)){  # transform all factors to char
+        if (is.factor(Data[,var])) Data[,var]<-as.character(Data[,var])
     }
-    if (!is.null(xcoord)) {
-        xcoordvar <- substr(deparse(xcoord),2,nchar(deparse(xcoord)))
-        xcoord <- evalFormula(xcoord,data)
+    if (!is.null(weight)) wvar <- substr(deparse(weight),2,nchar(deparse(weight)))
+    if (!is.null(xcoord)) xcoordvar <- substr(deparse(xcoord),2,nchar(deparse(xcoord)))
+    if (!is.null(x1)) xvar1 <- substr(deparse(x1),2,nchar(deparse(x1)))
+    if (!is.null(xcoord1)) xcoordvar1 <- substr(deparse(xcoord1),2,nchar(deparse(xcoord1)))
+    if (!is.null(ycoord)) ycoordvar <- substr(deparse(ycoord),2,nchar(deparse(ycoord)))
+    if (!is.null(ycoord1)) ycoordvar1 <- substr(deparse(ycoord1),2,nchar(deparse(ycoord1)))
+    if (!is.null(markLinesmooth)) markLine <- markLinesmooth
+    
+    if (type[1] %in% c('line','linesmooth','scatter','bubble','area','areasmooth',
+                       'bar')){       # only these charts can use double axes
+        xAxis1 <- mergeList(list(lab=NULL,series=NULL,reverse=F,color=NULL,
+                                 splitLine=T,banded=F,rotate=0), xAxis1) 
+        yAxis1 <- mergeList(list(lab=NULL,series=NULL,reverse=F,color=NULL,
+                                 splitLine=T,banded=F,rotate=0), yAxis1) 
+        
+        for (lstName in c("xAxis1","yAxis1")){
+            objAxis <- eval(parse(text=lstName))
+            if (!is.null(lvlseries)){
+                if (is.null(objAxis[['series']])){
+                    objAxis <- NULL
+                }else{
+                    for (i in 1:length(objAxis[['series']])){
+                        if (!is.na(as.numeric(objAxis[['series']][i]))){ # numeric
+                            if (as.numeric(objAxis[['series']][i])>length(lvlseries)){
+                                objAxis[['series']][i]<-NA
+                            }else{
+                                objAxis[['series']][i]<-
+                                    lvlseries[as.numeric(objAxis[['series']][i])]
+                            }
+                        }else{
+                            if ((!objAxis[['series']][i] %in% lvlseries)){ # char
+                                objAxis[['series']][i]<-NA
+                            }
+                        }
+                    }
+                    objAxis[['series']] <- objAxis[['series']][!is.na(objAxis[['series']])]
+                }
+            }else{
+                objAxis <- NULL
+            }
+            if (lstName=='xAxis1') {
+                xAxis1 <- objAxis
+                if (is.null(objAxis[['series']]) | 
+                    length(objAxis[['series']])==0) xAxis1 <- NULL
+            }
+            if (lstName=='yAxis1') {
+                yAxis1 <- objAxis
+                if (is.null(objAxis[['series']]) | 
+                    length(objAxis[['series']])==0) yAxis1 <- NULL
+            }
+        }
+    }else{
+        xAxis1 <- NULL
+        yAxis1 <- NULL
     }
-    if (!is.null(x1)) {
-        xvar1 <- substr(deparse(x1),2,nchar(deparse(x1)))
-        x1 <- evalFormula(x1,data)
+    if (!is.null(xAxis1)) {
+        if (xAxis1[['reverse']]){
+            if (is.numeric(data[,xvar])) {
+                data[data[,svar] %in% xAxis1[['series']],xvar] <- 
+                    -data[data[,svar] %in% xAxis1[['series']],xvar]
+            }
+        }
     }
-    if (!is.null(xcoord1)) {
-        xcoordvar1 <- substr(deparse(xcoord1),2,nchar(deparse(xcoord1)))
-        xcoord1 <- evalFormula(xcoord1,data)
+    if (!is.null(yAxis1)){
+        if (yAxis1[['reverse']]){
+            if (is.numeric(data[,yvar])) {
+                data[data[,svar] %in% yAxis1[['series']],yvar] <- 
+                    -data[data[,svar] %in% yAxis1[['series']],yvar]
+            }
+        }
     }
-    if (!is.null(ycoord)) {
-        ycoordvar <- substr(deparse(ycoord),2,nchar(deparse(ycoord)))
-        ycoord <- evalFormula(ycoord,data)
-    }
-    if (!is.null(ycoord1)) {
-        ycoordvar1 <- substr(deparse(ycoord1),2,nchar(deparse(ycoord1)))
-        ycoord1 <- evalFormula(ycoord1,data)
-    }
-    if (!is.null(markLinesmooth)) {
-        markLine <- markLinesmooth
-    }
+#---------------------------------------------------------#
+#--                     Loop over Z                     --|
+#---------------------------------------------------------#
+for (t in 1:ifelse(is.null(z),1,length(timeslice)))  { 
+    
+    #-------pre-process of data-----------
+    if (!is.null(z)) data <- Data[Data[,zvar]==timeslice[t],]
+    if (!is.null(y)) y <- data[,yvar]
+    if (!is.null(x)) x <- data[,xvar]
+    if (!is.null(series)) series <- data[,svar]
+    if (!is.null(weight)) weight <- data[,wvar]
+    if (!is.null(xcoord)) xcoord <- data[,xcoordvar]
+    if (!is.null(x1)) x1 <- data[,xvar1]
+    if (!is.null(xcoord1)) xcoord1 <- data[,xcoordvar1]
+    if (!is.null(ycoord)) ycoord <- data[,ycoordvar]
+    if (!is.null(ycoord1)) ycoord1 <- data[,ycoordvar1]
     if (type[1] %in% c('bubble') & is.null(weight)){
         wvar <- yvar
         weight <- y
     }
+
     if (type[1] %in% c('pie','ring','rose','funnel','pyramid')){
         if (is.null(series) & !is.null(x)){
             svar <- xvar
@@ -343,9 +439,23 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         y <- data[,'Freq']
         xvar <- yvar
         yvar <- "Freq"
-    }else if (type[1] %in% c('line')){
+    }else if (type[1] %in% c('line','linesmooth')){
         if (is.numeric(x)) {
             data[,xvar] <- x <- as.character(x)
+        }
+    }
+    #-------check invalid input---------
+    if (!all(as.numeric(pos) %in% 1:12)) stop("list pos must be all integers 1-12")
+    pos <- mergeList(list(title=6, legend=11, toolbox=1, dataZoom=6, dataRange=8, 
+                          roam=2),pos)
+    
+    #---------timeline--------------
+    if (!is.null(z)){
+        lstTimeline <- list(data=timeslice,autoPlay=T,playInterval=2000)
+        if (!is.null(title) & pos[['title']] %in% 5:7) lstTimeline[['y2']] <- 50
+        if (!is.null(dataZoom) & pos[['dataZoom']] %in% 5:7) {
+            lstTimeline[['y2']] <- ifelse(is.null(lstTimeline[['y2']]),0,
+                                                  lstTimeline[['y2']])+ 30
         }
     }
     
@@ -361,6 +471,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     }
     
     #--------Title and subtitle--------
+    lstTitle=list()
     lstTitle <- list(text=ifelse(is.null(title),"",title),
                      subtext=ifelse(is.null(subtitle),"",subtitle))
     lstTitle[['x']] <- vecPos(pos[['title']])[1]
@@ -368,13 +479,15 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     lstTitle[['orient']] <- vecPos(pos[['title']])[3]
     if (!is.null(title_url)) lstTitle[['link']] <- title_url
     if (!is.null(subtitle_url)) lstTitle[['sublink']] <- subtitle_url
+    if (!is.null(z)) lstTitle[['text']] <- 
+        paste0(lstTitle[['text']], " (",zvar," = ",timeslice[t],")")
     
     #-------Tooltip--------------
     if (tooltip){
         lstTooltip <- list(
             trigger=ifelse(type[1] %in% c('pie','ring','funnel','pyramid','map',
                                           'rose','wordcloud','radar','radarfill',
-                                          'chord','force'),
+                                          'chord','chordribbon','force'),
                            'item','axis'),
             axisPointer = list(
                 show= T,lineStyle= list(type= 'dashed',width= 1)
@@ -418,14 +531,25 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             )
         }else if (type[1] %in% c('ring','pie')){
             lstTooltip[['formatter']] <- "{a} <br/>{b} : {c} ({d}%)"
-        }else if (type[1] %in% c('chord','force')){
-            lstTooltip[['formatter']] <- JS('function (params) {
-                                            if (params.indicator2) {    // is edge
-                                            return params.indicator2 + " " + 
-                                            params.name + " " + params.indicator;
-                                            } else {    // is node
-                                            return params.name
+        }else if (type[1] %in% c('chord','chordribbon','force')){
+            if (!is.null(series)){
+                lstTooltip[['formatter']] <- JS('function (params) {
+                                            if (params.name && params.name.indexOf("-") != -1) {
+                                                return params.name.replace("-", " " + params.seriesName + " ")
+                                            }
+                                            else {
+                                                return params.name ? params.name : params.data.id
                                             }}')
+            }else{
+                lstTooltip[['formatter']] <- JS('function (params) {
+                                            if (params.indicator2) {    // is edge
+                                                return params.indicator2 + " " + 
+                                                params.name + " " + params.indicator + " : " +
+                                                params.value.weight;
+                                            } else {    // is node
+                                                return params.name
+                                            }}')
+            }
         }
 }else{
     lstTooltip = list(show=FALSE)
@@ -437,17 +561,17 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             show = TRUE,
             feature = list(
                 mark =list(show= TRUE,
-                           title=list(mark="¸¨ÖúÏß¿ª¹Ø Auxiliary conductor switch",
-                                      markUndo="É¾³ý¸¨ÖúÏß Undo auxiliary conductor",
-                                      markClear="Çå¿Õ¸¨ÖúÏß Clear auxiliary conductor")),
+                           title=list(mark="è¾…åŠ©çº¿å¼€å…³ Auxiliary conductor switch",
+                                      markUndo="åˆ é™¤è¾…åŠ©çº¿ Undo auxiliary conductor",
+                                      markClear="æ¸…ç©ºè¾…åŠ©çº¿ Clear auxiliary conductor")),
                 dataZoom = list(show=TRUE, title=
-                                    list(dataZoom="ÇøÓòËõ·Å Data zoom",
-                                         dataZoomReset="ÇøÓòËõ·ÅºóÍË Data zoom reset")),
+                                    list(dataZoom="åŒºåŸŸç¼©æ”¾ Data zoom",
+                                         dataZoomReset="åŒºåŸŸç¼©æ”¾åŽé€€ Data zoom reset")),
                 dataView = list(show= TRUE, readOnly= FALSE,
-                                title="Êý¾ÝÊÓÍ¼ Data view"),
+                                title="æ•°æ®è§†å›¾ Data view"),
                 magicType = list(show=FALSE),
-                restore = list(show= TRUE,title="»¹Ô­ Restore"),
-                saveAsImage = list(show= TRUE,title="±£´æÎªÍ¼Æ¬ Save as image")
+                restore = list(show= TRUE,title="è¿˜åŽŸ Restore"),
+                saveAsImage = list(show= TRUE,title="ä¿å­˜ä¸ºå›¾ç‰‡ Save as image")
             )
         )
         
@@ -464,7 +588,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 list(show=TRUE, type= c('pie','funnel'),
                      option=list(funnel=list(x='25%',width='80%',
                                              funnelAlign='center')))
-        }else if (type[1] %in% c('force','chord')){
+        }else if (type[1] %in% c('force','chord','chordribbon')){
             lstToolbox[['feature']][['magicType']] <- 
                 list(show=TRUE, type= c('force','chord'))
             lstToolbox[['feature']][['dataView']]<-list(show=F)
@@ -472,13 +596,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         }
         if (lstToolbox[['feature']][['magicType']][['show']]){
             lstToolbox[['feature']][['magicType']][['title']] <- list(
-                line="ÕÛÏßÍ¼ÇÐ»» Switch to line chart",
-                bar="ÖùÐÎÍ¼ÇÐ»» Switch to bar chart",
-                stack="¶Ñ»ý Stack", 
-                tiled="Æ½ÆÌ Tile",
-                force="Á¦µ¼Ïò²¼¾ÖÍ¼ÇÐ»» Switch to force chart",
-                pie="±ýÍ¼ÇÐ»» Switch to pie chart",
-                funnel="Â©¶·Í¼ÇÐ»» Switch to funnel chart"
+                line="æŠ˜çº¿å›¾åˆ‡æ¢ Switch to line chart",
+                bar="æŸ±å½¢å›¾åˆ‡æ¢ Switch to bar chart",
+                stack="å †ç§¯ Stack", 
+                tiled="å¹³é“º Tile",
+                force="åŠ›å¯¼å‘å¸ƒå±€å›¾åˆ‡æ¢ Switch to force chart",
+                pie="é¥¼å›¾åˆ‡æ¢ Switch to pie chart",
+                funnel="æ¼æ–—å›¾åˆ‡æ¢ Switch to funnel chart"
             )
         }
     }else{
@@ -499,8 +623,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     lstLegend[['x']] <- vecPos(pos[['legend']])[1]
     lstLegend[['y']] <- vecPos(pos[['legend']])[2]
     lstLegend[['orient']] <- vecPos(pos[['legend']])[3]
-    
-    
+
     #----------dataZoom----------
     lstdataZoom <- NULL
     
@@ -517,6 +640,10 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
             lstdataZoom[['y']] <- 60
         }else if (pos[['dataZoom']] %in% c(11:12,1)){
             lstdataZoom[['y']] <- 30
+        }else if (pos[['dataZoom']] %in% 5:7){
+            if (!is.null(title) & pos[['title']] %in% 5:7){
+                lstdataZoom[['y']] <- dev.size('px')[2]-40
+            }
         }
         lstdataZoom[['orient']] <- vecPos(pos[['dataZoom']])[3]
         if (all(is.numeric(dataZoom))){
@@ -572,77 +699,177 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     
     #---------Grid------------------
     lstGrid <- NULL
-    if (pos[['title']] %in% 5:7 && !is.null(subtitle)){
-        lstGrid <- list(y2=80)
-        if (type[1] %in% c('pie','ring','rose','funnel','pyramid','map',
-                           'radar','radarfill','wordcloud')){
-            lstGrid <- NULL
-        }
+    bottomSpace <- 20
+    if (pos[['title']] %in% 5:7) {
+        bottomSpace <- 60
+        if (!is.null(subtitle)) bottomSpace <- bottomSpace+20
     }
-    
+    if (!is.null(z)) bottomSpace <- bottomSpace + 50
+    if (!is.null(dataZoom) && pos[['dataZoom']] %in% 5:7){
+        bottomSpace <- bottomSpace + 30
+    }
+    lstGrid <- list(y2=ifelse(bottomSpace<60,60,bottomSpace))
+    if (type[1] %in% c('pie','ring','rose','funnel','pyramid','map','chord',
+                       'chordribbon','radar','radarfill','wordcloud')){
+        lstGrid <- NULL
+    }
+
     #------------Axis-------------
-    xAxis <- mergeList(list(lab=NULL,color=NULL,splitLine=T,banded=F),
+    xAxis <- mergeList(list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0),
                        xAxis)
-    yAxis <- mergeList(list(lab=NULL,color=NULL,splitLine=T,banded=F),
+    yAxis <- mergeList(list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0),
                        yAxis)
     if (!is.null(xlab)) xAxis[['lab']]<-xlab
     if (!is.null(ylab)) yAxis[['lab']]<-ylab
-    lstXAxis = list(
-        name = ifelse(is.null(xAxis[['lab']]),xvar,xAxis[['lab']]),
-        type = ifelse(inherits(x,c('POSIXct','POSIXlt','Date')),'time',
-                      ifelse(!is.numeric(x),'category','value')),
-        scale = scale)
-    if (lstXAxis[['type']]=='category'){
-        lstXAxis[['data']] <- unique(as.character(x))
-    }
-    if (type[1] %in% c('line','linesmooth','area','areasmooth')){
-        lstXAxis[['boundaryGap']] <- F
-    }
-    lstYAxis = list(
-        name = ifelse(is.null(yAxis[['lab']]),yvar,yAxis[['lab']]),
-        type = 'value',
-        scale = scale
-    )
-    if (is.null(xAxis[['color']])) xAxis[['color']] <- '#4488bb'
-    if (xAxis[['color']]=='none'){
-        lstXAxis[['axisLine']] <- list(show=F)
-        lstYAxis[['splitLine']]<-list(show=F)
-        if (!is.null(lstGrid)) lstGrid[['borderWidth']] <- 0
-    }else if (!is(try(col2rgb(xAxis[['color']])),'try-error')){
-        lstXAxis[['axisLine']] <- list(
-            show=T, onZero=AxisAtZero, lineStyle=list(color=xAxis[['color']]))
-        lstYAxis[['splitLine']]<-list(show=ifelse(xAxis[['splitLine']],T,F))
-    }
-    lstXAxis[['splitArea']]<-list(show=ifelse(xAxis[['banded']],T,F))
+    if (!is.null(xlab1) & !is.null(xAxis1)) xAxis1[['lab']]<-xlab1
+    if (!is.null(ylab1) & !is.null(yAxis1)) yAxis1[['lab']]<-ylab1
     
-    if (is.null(yAxis[['color']])) yAxis[['color']] <- '#4488bb'
-    if (yAxis[['color']]=='none'){
-        lstYAxis[['axisLine']] <- list(show=F)
-        lstXAxis[['splitLine']]<-list(show=F)
-        if (!is.null(lstGrid)) lstGrid[['borderWidth']] <- 0
-    }else if (!is(try(col2rgb(yAxis[['color']])),'try-error')){
-        lstYAxis[['axisLine']] <- list(
-            show=T, onZero=AxisAtZero, lineStyle=list(color=yAxis[['color']]))
-        lstXAxis[['splitLine']]<-list(show=ifelse(yAxis[['splitLine']],T,F))
+    for (i in 1:ifelse(is.null(xAxis1),1,2)){  # xAxises
+        if (i==1) {
+            varXAxis <- xAxis
+        }else if (i==2){
+            varXAxis <- xAxis1
+        }
+        tmpXAxis = list(
+            name = ifelse(is.null(varXAxis[['lab']]),xvar,varXAxis[['lab']]),
+            type = ifelse(inherits(x,c('POSIXct','POSIXlt','Date')),'time',
+                          ifelse(!is.numeric(x),'category','value')),
+            scale = scale)
+        if (tmpXAxis[['type']]=='category'){
+            tmpXAxis[['data']] <- unique(as.character(x))
+        }
+        if (type[1] %in% c('line','linesmooth','area','areasmooth')){
+            tmpXAxis[['boundaryGap']] <- F
+        }
+        if (!is.null(varXAxis[['reverse']])){
+            if (varXAxis[['reverse']]) {
+                if (is.null(tmpXAxis[['axisLabel']])) tmpXAxis[['axisLabel']]<-list()
+                tmpXAxis[['axisLabel']][['formatter']] <- JS('function(v){return -v;}')
+            }
+        }
+        if (is.null(varXAxis[['color']])) {
+            varXAxis[['color']] <- '#4488bb'
+            tmpXAxis[['axisLine']] <- list(
+                show=T, onZero=AxisAtZero, lineStyle=list(color=varXAxis[['color']]))
+        }else {
+            if (varXAxis[['color']]=='none'){
+                tmpXAxis[['axisLine']] <- list(show=F)
+                if (!is.null(lstGrid)) lstGrid[['borderWidth']] <- 0
+            }else if (!is(try(col2rgb(varXAxis[['color']])),'try-error')){
+                tmpXAxis[['axisLine']] <- list(
+                    show=T, onZero=AxisAtZero, lineStyle=list(color=varXAxis[['color']]))
+            }
+        }
+        tmpXAxis[['splitArea']]<-list(show=ifelse(varXAxis[['banded']],T,F))
+        if (abs(as.numeric(varXAxis[['rotate']]))<=90){
+            if (is.null(tmpXAxis[['axisLabel']])) tmpXAxis[['axisLabel']]<-list()
+            tmpXAxis[['axisLabel']][['rotate']] <- varXAxis[['rotate']]
+        }
+        if (is.null(xAxis1)) {
+            lstXAxis <- tmpXAxis
+        }else{
+            if (i==1) lstXAxis <- list(list())
+            lstXAxis[[i]] <- tmpXAxis
+        }
     }
-    lstYAxis[['splitArea']]<-list(show=ifelse(yAxis[['banded']],T,F))
+
+    for (i in 1:ifelse(is.null(yAxis1),1,2)){ # yAxises
+        if (i==1) {
+            varYAxis <- yAxis
+        }else if (i==2){
+            varYAxis <- yAxis1
+        }
+        tmpYAxis = list(
+            name = ifelse(is.null(varYAxis[['lab']]),yvar,varYAxis[['lab']]),
+            type = 'value',
+            scale = scale
+        )
+        if (!is.null(varYAxis[['reverse']])){
+            if (varYAxis[['reverse']]) {
+                if (is.null(tmpYAxis[['axisLabel']])) tmpYAxis[['axisLabel']] <- list()
+                tmpYAxis[['axisLabel']][['formatter']] <- JS('function(v){return -v;}')
+            }
+        }
+        if (is.null(varYAxis[['color']])) {
+            varYAxis[['color']] <- '#4488bb'
+            tmpYAxis[['axisLine']] <- list(
+                show=T, onZero=AxisAtZero, lineStyle=list(color=varYAxis[['color']]))
+        }else {
+            if (varYAxis[['color']]=='none'){
+                tmpYAxis[['axisLine']] <- list(show=F)
+                if (is.null(xAxis1)) {
+                    lstXAxis[['splitLine']]<-list(show=F)
+                }else{
+                    lstXAxis[[i]][['splitLine']]<-list(show=F)
+                }
+                if (!is.null(lstGrid)) lstGrid[['borderWidth']] <- 0
+            }else if (!is(try(col2rgb(varYAxis[['color']])),'try-error')){
+                tmpYAxis[['axisLine']] <- list(
+                    show=T, onZero=AxisAtZero, lineStyle=list(color=varYAxis[['color']]))
+                if (is.null(xAxis1)) {
+                    lstXAxis[['splitLine']]<-list(show=ifelse(varYAxis[['splitLine']],T,F))
+                }else{
+                    lstXAxis[[i]][['splitLine']]<-list(show=ifelse(varYAxis[['splitLine']],T,F))
+                }
+            }
+        }
+        tmpYAxis[['splitArea']]<-list(show=ifelse(varYAxis[['banded']],T,F))
+
+        if (abs(as.numeric(varYAxis[['rotate']]))<=90){
+            if (is.null(tmpYAxis[['axisLabel']])) tmpYAxis[['axisLabel']]<-list()
+            tmpYAxis[['axisLabel']][['rotate']] <- varYAxis[['rotate']]
+        }
+        if (is.null(yAxis1)) {
+            lstYAxis <- tmpYAxis
+        }else{
+            if (i==1) lstYAxis <- list(list())
+            lstYAxis[[i]] <- tmpYAxis
+        }
+    }
+    
+    for (i in 1:ifelse(is.null(xAxis1),1,2)){  # Continue to revise yAxis
+        if (i==1) {
+            varXAxis <- xAxis
+        }else if (i==2){
+            varXAxis <- xAxis1
+        }
+        if (!is.null(varXAxis[['color']])){
+            if (varXAxis[['color']]=='none'){
+                if (is.null(yAxis1)) {
+                    lstYAxis[['splitLine']]<-list(show=F)
+                }else{
+                    lstYAxis[[i]][['splitLine']]<-list(show=F)
+                }
+            }else if (!is(try(col2rgb(varXAxis[['color']])),'try-error')){
+                if (is.null(yAxis1)) {
+                    if (is.null(lstYAxis)) lstYAxis <- list()
+                    lstYAxis[['splitLine']]<-list(show=ifelse(varXAxis[['splitLine']],T,F))
+                }else{
+                    if (is.null(lstYAxis)) lstYAxis <- list(list(),list())
+                    lstYAxis[[i]][['splitLine']]<-list(show=ifelse(varXAxis[['splitLine']],T,F))
+                }
+            }
+        }
+    }
+    if (!is.null(xAxis1)) lstYAxis[['axisLine']][['onZero']] <- F
+    if (!is.null(yAxis1)) lstXAxis[['axisLine']][['onZero']] <- F
     
     if (xyflip){ #exchange settings of xAxis and yAxis
         tmp <- lstYAxis
         lstYAxis <- lstXAxis
         lstXAxis <- tmp
+        rm(tmp)
     }
     
-    if (lstXAxis[['type']]=='time' | lstYAxis[['type']]=='time'){
-        lstToolbox[['feature']][['magicType']] <- list(show=F)
-        #lstXAxis[['name']] <- lstYAxis[['name']] <- NULL
-        if (lstXAxis[['type']]=='time') {
-            lstXAxis[['boundaryGap']] <- NULL
-        }
-        if (lstYAxis[['type']]=='time') {
-            lstYAxis[['boundaryGap']] <- NULL
-        }
-    }
+    #if (lstXAxis[['type']]=='time' | lstYAxis[['type']]=='time'){
+    #    lstToolbox[['feature']][['magicType']] <- list(show=F)
+    #    if (lstXAxis[['type']]=='time') {
+    #        lstXAxis[['boundaryGap']] <- NULL
+    #    }
+    #    if (lstYAxis[['type']]=='time') {
+    #        lstYAxis[['boundaryGap']] <- NULL
+    #    }
+    #}
     
     #----------polar---------------
     if (type[1] %in% c('radar','radarfill')){
@@ -695,8 +922,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         large=ifelse(nrow(data)>2000,TRUE,FALSE)
                     )
                     if (length(lvlseries)>1){
-                        lstSeries[[i]][['name']] <-
-                            as.vector(lvlseries[i])
+                        lstSeries[[i]][['name']] <- as.vector(lvlseries[i])
+                        if (lvlseries[i] %in% xAxis1[['series']]){
+                            lstSeries[[i]][['xAxisIndex']] <-1
+                        }
+                        if (lvlseries[i] %in% yAxis1[['series']]){
+                            lstSeries[[i]][['yAxisIndex']] <-1
+                        }
                     }
                     if (type[1]=='bubble'){
                         lstSeries[[i]][['data']] <-
@@ -737,7 +969,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     value=data[i,yvar],name=as.character(data[i,svar])
                 )
             }
-            }else if (type[1] %in% c('funnel','pyramid')){
+        }else if (type[1] %in% c('funnel','pyramid')){
                 lstSeries[[1]] <- list(
                     name=svar,
                     type='funnel',
@@ -754,7 +986,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         value=data[i,yvar],name=as.character(data[i,svar])
                     )
                 }
-            }else if (type[1] %in% c('wordcloud')){
+        }else if (type[1] %in% c('wordcloud')){
                 lstSeries[[1]] <- list(
                     name=yvar,
                     type='wordCloud',
@@ -770,11 +1002,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         itemStyle=list(normal=list(color=sample(unlist(lstColor),1)))
                     )
                 }
-            }else if (type[1] %in% c('line','area','linesmooth','areasmooth')){
+        }else if (type[1] %in% c('line','area','linesmooth','areasmooth')){
                 #---------reformat missing value----------
                 y[is.na(y)] <- data[is.na(data[,yvar]),yvar] <- '-'  
-                
-                if (is.null(series)){
+                #print(yvar)
+                #print(t)
+                #print(data[,yvar])
+                if (is.null(series)){ # single serie
                     lstSeries[[1]] <- list(
                         type='line',
                         data=data[,yvar]
@@ -786,12 +1020,12 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     if (type[1] %in% c('linesmooth','areasmooth')){
                         lstSeries[[1]][['smooth']] <- TRUE
                     }
-                    if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
-                        lstSeries[[1]][['name']] <- yvar
-                        #lstSeries[[1]][['showAllSymbol']] <- T
-                        lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
-                    }
-                }else{
+                    #if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
+                    #    lstSeries[[1]][['name']] <- yvar
+                    #    #lstSeries[[1]][['showAllSymbol']] <- T
+                    #    lstSeries[[1]][['data']] <- as.matrix(data[,c(xvar,yvar)])
+                    #}
+                }else{  # multiple series
                     for (i in 1:ifelse(is.null(series),1,length(lvlseries))){
                         lstSeries[[i]] <- list(
                             name=as.vector(lvlseries[i]),
@@ -799,6 +1033,12 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                             data=data[data[,svar]==lvlseries[i],
                                       yvar]
                         )
+                        if (lvlseries[i] %in% xAxis1[['series']]){
+                            lstSeries[[i]][['xAxisIndex']] <-1
+                        }
+                        if (lvlseries[i] %in% yAxis1[['series']]){
+                            lstSeries[[i]][['yAxisIndex']] <-1
+                        }
                         if (stack) lstSeries[[i]][['stack']] <- 'Stack'
                         if (type[1] %in% c("area",'areasmooth')){
                             lstSeries[[i]][['itemStyle']] <-
@@ -807,13 +1047,13 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         if (type[1] %in% c('linesmooth','areasmooth')) {
                             lstSeries[[i]][['smooth']] <- TRUE
                         }
-                        if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
-                            lstSeries[[i]][['name']] <- lvlseries[i]
-                            #lstSeries[[i]][['showAllSymbol']] <- T
-                            lstSeries[[i]][['data']] <- as.matrix(
-                                data[data[,svar]==lvlseries[i],
-                                     c(xvar,yvar)])
-                        }
+                        #if (lstXAxis[['type']]=='time' || lstYAxis[['type']]=='time'){
+                        #    lstSeries[[i]][['name']] <- lvlseries[i]
+                        #    #lstSeries[[i]][['showAllSymbol']] <- T
+                        #    lstSeries[[i]][['data']] <- as.matrix(
+                        #        data[data[,svar]==lvlseries[i],
+                        #             c(xvar,yvar)])
+                        #}
                     }
                 }
             }else if (type[1] %in% c('radar','radarfill')){
@@ -929,54 +1169,101 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         }
                     }
                 }
-            }else if (type[1]=='chord'){
-                if (is.null(series)){  # simple chord
-                    data <- data[order(data[,xvar1]),]
-                    lvlseries <- levels(as.factor(x1))
-                    lstSeries[[1]] <- list(
-                        type=type[1],sort='ascending',sortSub='descending',
-                        itemStyle=list(normal=list(label=list(rotate=T))),
-                        nodes=list(),links=list()
+            }else if (type[1] %in% c('chord','chordribbon')){
+                
+                # data must be ordered
+                data[,xvar1] <- factor(data[,xvar1],levels=unique(data[,xvar1]))
+                data <- data[order(data[,xvar1]),]
+                data[,xvar1] <-as.character(data[,xvar1])
+                
+                for (i in 1:ifelse(is.null(series),1,length(lvlseries))){
+                    lstSeries[[i]] <- list(
+                        type='chord',sort='ascending',sortSub='descending',
+                        itemStyle=list(normal=list(label=list(
+                            rotate=ifelse(xAxis[['rotate']]!=0,T,F))))
                     )
-                    if (identical(levels(as.factor(x)),levels(as.factor(x1)))){ # matrix
-                        for (j in 1:length(unique(x))){
-                            lstSeries[[1]][['data']][[j]] <- list(
-                                name=unique(x)[j])
+                    if (!is.null(series)){ 
+                        lstSeries[[i]][['name']] <- lvlseries[i]
+                    }
+                    if (i>1){
+                        lstSeries[[i]][['insertToSerie']] <- lstSeries[[1]][['name']]
+                    }
+                    if (type[1]=='chord'){ # no ribbons
+                        lstSeries[[i]][['ribbonType']] <- F
+                        lstSeries[[i]][['radius']] <- '60%'
+                    }
+                    # matrix || node/link mode
+                    if (identical(levels(as.factor(data[,xvar])),
+                                  levels(as.factor(data[,xvar1])))){ # is a squared matrix
+                        for (j in 1:length(unique(data[,xvar1]))){
+                            lstSeries[[i]][['data']][[j]] <- list(
+                                name=unique(data[,xvar1])[j])
                         }
-                        tmpD <- data[order(data[,xvar],data[,xvar1]),]
-                        lstSeries[[1]][['matrix']] <-matrix(tmpD[,yvar],nrow=sqrt(nrow(tmpD)))
+                        tmpD <- data
+                        #tmpD <- tmpD[order(tmpD[,xvar],tmpD[,xvar1]),]
+                        #tmpD[is.na(tmpD[,yvar]),yvar] <- 0
+                        if (!is.null(series)){
+                            tmpD[is.na(tmpD[,svar]) | tmpD[,svar]!=lvlseries[i],yvar] <- 0
+                        }
+                        
+                        tmpD[,xvar] <- factor(tmpD[,xvar],levels=unique(data[,xvar1]))
+                        tmpD[,xvar1] <- factor(tmpD[,xvar1],levels=unique(data[,xvar1]))
+                        tmpM <- dcast(tmpD,eval(parse(text=paste(xvar,'~',xvar1))),
+                                      value.var=yvar,sum)
+                        row.names(tmpM) <- tmpM[,1]
+                        tmpM <- tmpM[,2:ncol(tmpM)]
+                        tmpM <- tmpM[unique(x1),unique(x1)]
+                        tmpM <- as.matrix(tmpM)
+                        #dimnames(tmpM) <- list(unique(x1),unique(x1))
+                        #print(lvlseries[i])
+                        #print(tmpD)
+                        #print(matrix(tmpD[,yvar],nrow=sqrt(nrow(tmpD))))
+                        #lstSeries[[i]][['matrix']] <-matrix(tmpD[,yvar],
+                        #                                   nrow=sqrt(nrow(tmpD)))
+                        lstSeries[[i]][['matrix']] <- tmpM
                     }else{ # nodes and links
-                        for (j in 1:length(c(unique(x),unique(x1)))){
-                            lstSeries[[1]][['nodes']][[j]] <- list(
-                                name=c(unique(x),unique(x1))[j])
+                        for (j in 1:length(c(unique(data[,xvar]),
+                                             unique(data[,xvar1])))){
+                            lstSeries[[i]][['nodes']][[j]] <- list(
+                                name=c(unique(data[,xvar]),unique(data[,xvar1]))[j])
                         }
-                        for (j in 1:nrow(data)){
-                            lstSeries[[1]][['links']][[j]] <- list(
-                                source=data[j,xvar1],target=data[j,xvar],
-                                weight=data[j,yvar]*0.9, name=xvar1
+                        dset <- data
+                        if (!is.null(series)){
+                            dset[is.na(dset[,svar]) | dset[,svar]!=lvlseries[i],yvar] <- 0
+                        }
+                        for (j in 1:nrow(dset)){
+                            lstSeries[[i]][['links']][[j]] <- list(
+                                source=dset[j,xvar1],target=dset[j,xvar],
+                                weight=dset[j,yvar], 
+                                name=ifelse(is.null(series),xvar1,lvlseries[i])
                             )
                         }
-                        for (j in 1:nrow(data)){ #must be mutual links
-                            lstSeries[[1]][['links']][[nrow(data)+j]] <- list(
-                                target=data[j,xvar1],source=data[j,xvar],weight=data[j,yvar]
-                            )
+                        if (type[1]=='chordribbon'){#chordribbon: must be mutual links
+                            for (j in 1:nrow(dset)){ 
+                                lstSeries[[i]][['links']][[nrow(dset)+j]] <- list(
+                                    target=dset[j,xvar1],source=dset[j,xvar],
+                                    weight=dset[j,yvar]
+                                )
+                            }
                         }
                     }
-                    lstLegend <- list(show=T,data=lvlseries,
-                                      x=vecPos(pos[['legend']])[1],
-                                      y=vecPos(pos[['legend']])[2],
-                                      orient=vecPos(pos[['legend']])[3])
                     if (length(levels(as.factor(data[,yvar])))>nrow(data)/2){
-                        lstSeries[[1]][['showScale']]<-T
-                        lstSeries[[1]][['showScaleText']]<-T
+                        lstSeries[[i]][['showScale']]<-T
+                        lstSeries[[i]][['showScaleText']]<-T
                     }else{
-                        lstSeries[[1]][['showScale']]<-F
+                        lstSeries[[i]][['showScale']]<-F
                     }
-                }else{    # complex chord
-                    
+                } 
+                lstLegend <- list(show=T,
+                                  x=vecPos(pos[['legend']])[1],
+                                  y=vecPos(pos[['legend']])[2],
+                                  orient=vecPos(pos[['legend']])[3])
+                if (is.null(series)){
+                    lvlseries <- as.vector(unique(x1))
+                    lstLegend[['data']] <- as.vector(unique(x1))
+                }else{
+                    lstLegend[['data']] <- c(as.vector(unique(x1)),'',lvlseries)
                 }
-                
-                
             }else{              # the rest charts
                 if (is.null(series)){
                     lstSeries[[1]] <- list(
@@ -1129,7 +1416,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                 }
                 if (markLine[i,8]==T) { # effect
                     lstSeries[[serIdx]][['markLine']][['effect']] <- 
-                        list(show=T, shadowBlur=10)
+                        list(show=T, period=30, shadowBlur=10)
                 }
             }else if (ncol(markLine) %in% c(5)){  # short form
                 serIdx <- markLine[i,5]
@@ -1175,7 +1462,8 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                                       yAxis=yhat[[2]]))
                     }
                     if (markLine[i,4]==T) { # effect
-                        lstSeries[[serIdx]][['markLine']][['effect']] <- list(show=T)
+                        lstSeries[[serIdx]][['markLine']][['effect']] <- 
+                            list(show=T, period=30)
                     }
                 }
             }
@@ -1224,6 +1512,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     type="scatter", 
                     data=vector(mode="numeric")
                 )
+                lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
             }
             if (type[1]=='map'){
                 lstSeries[[sermarkPoint[i,2]]][['type']] <- "map"
@@ -1234,7 +1523,6 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                     data=list()
                 )
             }
-            lstLegend[['data']][[sermarkPoint[i,2]]] <- markPoint[i,1]
         }
         markPoint <- plyr::join(markPoint,sermarkPoint,by=names(markPoint)[1])
         
@@ -1392,36 +1680,82 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
     }
     
     #-------Make plot-------------
-    chartobj <- list(
-        title=lstTitle,  tooltip=lstTooltip,
-        toolbox=lstToolbox,
-        calculable=calculable,
-        series=lstSeries
-    )
-    
-    if (!is.null(asImage)) chartobj[['renderAsImage']] <- asImage
-    if (!is.null(lstbackgroundColor)) chartobj[['backgroundColor']] <- lstbackgroundColor
-    if (!is.null(lstColor)) chartobj[['color']] <- lstColor
-    if (try(exists("lstGrid"),T)) chartobj[['grid']] <- lstGrid
-    if (!is.null(lstSymbol)) chartobj[['symbolList']] <- lstSymbol
-    if (!is.null(lstdataZoom)) chartobj[['dataZoom']] <- lstdataZoom
-    if (!is.null(lstdataRange)) chartobj[['dataRange']] <- lstdataRange
-    #if (!is.null(lstSeries[[1]][['name']]))   chartobj[['legend']] <- lstLegend
-    if (!is.null(lvlseries))   chartobj[['legend']] <- lstLegend
-    if (type[1] %in% c('scatter','bubble','line','bar','linesmooth','histogram',
-                       'area','areasmooth')){
-        chartobj[['xAxis']] <- lstXAxis
-        chartobj[['yAxis']] <- lstYAxis
-    }else if(type[1] %in% c('map')){
-        chartobj[['roamController']] <- list(show=T,
-                                             mapTypeControl=list(),
-                                             width=60, height=90,
-                                             x=vecPos(pos[['roam']])[1],
-                                             y=vecPos(pos[['roam']])[2]
+    if (is.null(z)){
+        chartobj <- list(
+            title=lstTitle,  tooltip=lstTooltip,
+            toolbox=lstToolbox,
+            calculable=calculable,
+            series=lstSeries
         )
-        chartobj[['roamController']][['mapTypeControl']][[mapType]] <- T
-    }else if (type[1] %in% c('radar','radarfill')){
-        chartobj[['polar']] <- lstPolar
+        
+        if (!is.null(asImage)) chartobj[['renderAsImage']] <- asImage
+        if (!is.null(lstbackgroundColor)) chartobj[['backgroundColor']] <- lstbackgroundColor
+        if (!is.null(lstColor)) chartobj[['color']] <- lstColor
+        if (try(exists("lstGrid"),T)) chartobj[['grid']] <- lstGrid
+        if (!is.null(lstSymbol)) chartobj[['symbolList']] <- lstSymbol
+        if (!is.null(lstdataZoom)) chartobj[['dataZoom']] <- lstdataZoom
+        if (!is.null(lstdataRange)) chartobj[['dataRange']] <- lstdataRange
+        #if (!is.null(lstSeries[[1]][['name']]))   chartobj[['legend']] <- lstLegend
+        if (!is.null(lvlseries))   chartobj[['legend']] <- lstLegend
+        if (type[1] %in% c('scatter','bubble','line','bar','linesmooth','histogram',
+                           'area','areasmooth')){
+            chartobj[['xAxis']] <- lstXAxis
+            chartobj[['yAxis']] <- lstYAxis
+        }else if(type[1] %in% c('map')){
+            chartobj[['roamController']] <- list(show=T,
+                                                 mapTypeControl=list(),
+                                                 width=60, height=90,
+                                                             x=vecPos(pos[['roam']])[1],
+                                                 y=vecPos(pos[['roam']])[2]
+            )
+            chartobj[['roamController']][['mapTypeControl']][[mapType]] <- T
+        }else if (type[1] %in% c('radar','radarfill')){
+            chartobj[['polar']] <- lstPolar
+        }           
+    }else{
+        if (t==1){ # the 1st timeslice
+            chartobj <- list(list(
+                title=lstTitle,  tooltip=lstTooltip,
+                toolbox=lstToolbox,
+                calculable=calculable,
+                series=lstSeries
+            ))
+            
+            if (!is.null(asImage)) chartobj[[t]][['renderAsImage']] <- asImage
+            if (!is.null(lstbackgroundColor)) chartobj[[t]][['backgroundColor']] <- 
+                    lstbackgroundColor
+            if (!is.null(lstColor)) chartobj[[t]][['color']] <- lstColor
+            if (try(exists("lstGrid"),T)) chartobj[[t]][['grid']] <- lstGrid
+            if (!is.null(lstSymbol)) chartobj[[t]][['symbolList']] <- lstSymbol
+            if (!is.null(lstdataZoom)) chartobj[[t]][['dataZoom']] <- lstdataZoom
+            if (!is.null(lstdataRange)) chartobj[[t]][['dataRange']] <- lstdataRange
+            #if (!is.null(lstSeries[[1]][['name']]))   chartobj[['legend']] <- lstLegend
+            if (!is.null(lvlseries))  chartobj[[t]][['legend']] <- lstLegend
+            if (type[1] %in% c('scatter','bubble','line','bar','linesmooth','histogram',
+                               'area','areasmooth')){
+                chartobj[[t]][['xAxis']] <- lstXAxis
+                chartobj[[t]][['yAxis']] <- lstYAxis
+            }else if(type[1] %in% c('map')){
+                chartobj[[t]][['roamController']] <- list(show=T,
+                                                     mapTypeControl=list(),
+                                                     width=60, height=90,
+                                                     x=vecPos(pos[['roam']])[1],
+                                                     y=vecPos(pos[['roam']])[2]
+                )
+                chartobj[[t]][['roamController']][['mapTypeControl']][[mapType]] <- T
+            }else if (type[1] %in% c('radar','radarfill')){
+                chartobj[[t]][['polar']] <- lstPolar
+            }
+        }else if (t>1){
+            chartobj[[t]] <- list(title=lstTitle,series=lstSeries)
+        }
     }
-    echart(chartobj)
-}
+    }# loop end over z
+    #----------Finally plot it---------
+    if (!is.null(z)) {
+        chartObj <- list(timeline=lstTimeline,options=chartobj)
+    }else{
+        chartObj <- chartobj
+    }
+    echart(chartObj)
+}   

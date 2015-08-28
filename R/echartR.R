@@ -1,32 +1,3 @@
-#--------Checkup Database Key-------------
-ACCDBkey <- function(){
-    require(tcltk)
-    require(digest)
-    tt<-tktoplevel()
-    Name <- tclVar("Enter ACC Db Key")
-    entry.Name <-tkentry(tt,width="20",textvariable=Name)
-    tkgrid(tklabel(tt,text="Please enter the key:"))
-    tkgrid(entry.Name)
-    OnOK <- function(){
-        key <- tclvalue(Name)
-        tkdestroy(tt)
-        if (nchar(key)!=16){
-            stop("The key is not 16-byte in length!")
-            tkmessageBox(message=msg)
-        }
-        key
-    }
-    OK.but <-tkbutton(tt,text="   OK   ",command=OnOK)
-    tkbind(entry.Name, "<Return>",OnOK)
-    tkgrid(OK.but)
-    tkfocus(tt)
-    tkwait.window(tt)
-    aes <- AES(charToRaw(OnOK()),mode="ECB")
-    cipher <- as.raw(c("0xa2","0x02","0x9e","0x3f","0x49","0x0f","0xe5",
-                       "0x7d","0x63","0x40","0x0c","0x99","0x15","0x06","0x3e",
-                       "0x1e"))
-    return(list(aes,cipher))
-}
 #------------Require packages, if not installed, install it--------------
 loadpkg <- function(pkg, url=NULL){
     if (! pkg %in% rownames(installed.packages())){

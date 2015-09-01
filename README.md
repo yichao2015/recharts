@@ -2,6 +2,16 @@
 Author: `r Sys.info()[['user']]`  
 Edited: `r format(Sys.time(),'%x %X')`  
 
+```r
+#Global settings
+Sys.setlocale("LC_CTYPE","Chs")
+source("~/Github/recharts/R/echartR.R")
+#source("C:/HMSProjects/Data Analytics/R_scripts/CommonFunctions.R")
+knitr::opts_chunk$set(message=FALSE,warning=FALSE,results='asis')
+```
+
+# Intro 前言
+
 本工具来源于百度开发的国内顶尖水平的开源`d3-js`可视项目[Echarts](http://echarts.baidu.com/)([Github Repo](https://github.com/ecomfe/echarts))。Yang Zhou和Taiyun Wei基于该工具开发了[recharts](https://github.com/taiyun/recharts)包，经Yihui Xie[修改](https://github.com/yihui/recharts)后，可通过`htmlwidgets`传递js参数，大大简化了开发难度。但此包开发仍未完成。为了赶紧上手用，基于该包做了一个函数`echartR`，用于制作基础Echart交互图。需要R版本>=3.2.0.
 
 This tool originates from a top-tier `d3-js` visualization project of China: [Baidu Echarts](http://echarts.baidu.com/)([Github Repo](https://github.com/ecomfe/echarts)). Yang Zhou and Taiyun Wei developed an experimental R package [recharts](https://github.com/taiyun/recharts) based on it, which then evoluted into [yihui/recharts](https://github.com/yihui/recharts) by Yihui Xie to pass js parameters through `htmlwidgets`. The package is sill uder development. I developed a function `echartR` based on this package to make basic Echarts interation charts. This function requires R>=3.2.0.
@@ -9,6 +19,7 @@ This tool originates from a top-tier `d3-js` visualization project of China: [Ba
 `echartR`的主要工作是将Echarts参数封装成list，Yihui Xie的原型函数`echart`被用来处理这个list。`echart`函数的[基本用法](http://yihui.name/recharts)如下，除了数据本身，并没有提供其他参数的设置方法。
 
 `echartR` majorly packs Echarts parameters into a list while `echart`, the prototype function developed by Yihui Xie, is used to parse the list. The [basic examples](http://yihui.name/recharts) of `echart` is as follows, which does not provide parameters entries other than dataset itself.
+
 ```r
 if (! 'recharts' %in% installed.packages()[,1]){
     install.packages('recharts',
@@ -51,8 +62,12 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
         title=NULL, subtitle=NULL, title_url=NULL, subtitle_url=NULL,
         symbolList=NULL, dataZoom=NULL, 
         dataRange=NULL, splitNumber=NULL, dataRangePalette=NULL,
-        xAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F), xlab=NULL,
-        yAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F), ylab=NULL,
+        xAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0), xlab=NULL,
+        yAxis=list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0), ylab=NULL,
+        xAxis1=list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,
+                              banded=F,rotate=0), xlab1=NULL, 
+                  yAxis1=list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,
+                              banded=F,rotate=0), ylab1=NULL,
         xyflip=FALSE, AxisAtZero=TRUE, scale=TRUE,
         palette='aetnagreen', tooltip=TRUE, legend=TRUE, toolbox=TRUE, 
         pos=list(title=6, legend=11, toolbox=1, dataZoom=6, dataRange=8, roam=2),
@@ -73,7 +88,7 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
 - x1: 备用自变量，仅用于线标注的地图、力导向图和和弦图。Backup x variable, only for line-marking map, force andchord chart.
 - xcoord1: 备用纬度坐标变量，仅用于线标注的map。Backup lattitude variable, only for line-marking map.
 - ycoord1: 备用经度坐标变量，仅用于线标注的map。Backup Longitude variable, only for line-marking map.
-- type: 默认 default `scatter`，可选 options 'scatter', 'bubble', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie', 'ring', 'rose','area', 'areasmooth', 'chord', 'force', 'tree', 'treemap', 'wordcloud', 'heatmap', 'histogram', 'funnel', 'pyramid', 'radar', 'radarfill'
+- type: 默认 default `scatter`，可选 options 'scatter', 'bubble', 'bar', 'line', 'linesmooth', 'map', 'k', 'pie', 'ring', 'rose','area', 'areasmooth', 'chordribbon', 'chord', 'force', 'tree', 'treemap', 'wordcloud', 'heatmap', 'histogram', 'funnel', 'pyramid', 'radar', 'radarfill'
     - 如选择map，则控制项必须写作一个长度为3的向量：c('map',`mapType`,`markType`)。mapType可选'world'、'china'，或简体中文表示的具体中国地名。`markType`为area时，用区块颜色表示效应大小；为point时，用点在地图上做标注；为line时，用线条在地图上做标注。默认为c('map','china','area')。If `map` was chosen, the control option should be a vector of length 3: c('map',`mapType`,`markType`). `mapType` could be either 'world' or 'china', of which simplified Chinese names are required for 'china'. When `markType` equals to 'area', the function colors polygons to show the effects; while equals to 'point', it ticks pins on the map; while equals to 'line', it ticks lines on the map.
 - stack: 默认FALSE，是否堆积。用于制作堆积条图、柱图、线图和面积图等直角坐标系图形。Default to FALSE (do not stack). Used in stacked column, bar, line and area chart, etc.
 - title: 标题 title of the figure
@@ -86,10 +101,14 @@ echartR(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
 - dataRange: 数据范围漫游范围，默认不打开。如要打开，设置dataRange=c(`高值标签`,`低值标签`) The range to zoom the data. Default to FALSE. Set dataRange=c(`High value label`,`Low value label`) to enable dataRange.
 - splitNumber: 如打开数据漫游，可指定数据范围切分段数，默认为连续漫游轴(0)。在直方图里，如设定splitNumber，则将数据切分成splitNumber个块。When dataRange is on, assign splitNumber to cut the range into discrete sections. Default to 0 (continuous range). In histogram, if splitNumber is set, the y variable will be cut into splitNumber groups.
 - dataRangePalette: 如打开数据漫游，可单独指定漫游色板(同palette功能)，否则采用Echarts默认值。You can independently assign palettes to dataRange (similar to overall palette). Default to NULL (applies echarts defaults).
-- xAxis: x轴参数，写作列表，默认为`list(lab=NULL,color=NULL,splitLine=T,banded=F)`,lab为标题，color为颜色，splitLine为分割线，banded为间隔区块。x Axis parameters in a list, default to `list(lab=NULL,color=NULL,splitLine=T,banded=F)`.  
+- xAxis: x轴参数，写作一个列表，默认为`list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0)`,lab为标题，color为颜色，splitLine为分割线，banded为间隔区块，rotate为轴标签旋转(-90 ~ 90)。x Axis parameters in a list, default to `list(lab=NULL,color=NULL,splitLine=T,banded=F,rotate=0)`.  
 - yAxis: y轴参数，参考xAxis。parameters of y Axis. Refer to xAxis.
 - xlab: 也可忽略xAxis项，单独通过xlab指定x轴标题。如`xAxis[['lab']]`和`xlab`冲突，取xlab。You can also omit xAxis, directly assign xAxis title. xlab has a higher priority than `xAxis[['lab']]`.
 - ylab: 也可忽略yAxis项，单独通过ylab指定y轴标题。如`yAxis[['lab']]`和`ylab`冲突，取ylab。You can also omit yAxis, directly assign yAxis title. ylab has a higher priority than `yAxis[['lab']]`.
+- xAxis1: 次级x轴参数，多系列数据时有效。写作一个列表，默认为`list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,banded=F,rotate=0)`。其中，series指定放于次坐标轴的数据系列，可写系列名或序号，如c(1,2)或c('male','female')；reverse设为TRUE时将数据颠倒显示。Secondary x axis, effecitve only if there are multiple series. Written in a list, default to `list(lab=NULL,series=NULL,reverse=F,color=NULL,splitLine=T,banded=F,rotate=0)`. `series` set which series to put on secondary x-axis, which can be either a name vector or an index vector, e.g., c(1,2) or c('male','female'). The data is fliped up when `reverse` is set TRUE.
+- yAxis1：级次y轴参数，参考xAxis1。
+- xlab1：次级x轴标题，优先级高于xAxis1列表中的lab项。Title of secondary x-axis, with higher priority than `lab` in xAxis1 list,
+- ylab1：次级y轴标题，优先级高于yAxis1列表中的lab项。Title of secondary y-axis, with higher priority than `lab` in yAxis1 list,
 - xyflip: 默认FALSE，是否翻转坐标轴。Flip x,y-axies. Default to FALSE.
 - AxisAtZero: 默认FALSE，坐标轴是否交叉于零点。Axes cross at zero. Default to FALSE.
 - scale: 默认TRUE，是否基于最大、最小值调整坐标尺度。Rescale the axes based on min and max values. Default to TRUE.
@@ -456,38 +475,55 @@ echartR(dtcars, x = ~cylinder,  y = ~car, type='rose',
 
 ### Unstacked Line 平铺线图
 
-打开数据缩放，设置初始显示30-70%(`dataZoom=c(30,70)`)。
+打开时间轴(`z=~Month`)，按月动画显示每日风力数据。
 
 
 ```r
-airquality$Date <- strptime(paste(2015,airquality$Month,airquality$Day,sep="-"),
-                            format="%F", tz="Asia/Taipei")
+#airquality$Date <- strptime(paste(2015,airquality$Month,airquality$Day,sep="-"),
+#                            format="%F", tz="Asia/Taipei")
 airquality$strDate <- with(airquality,paste(2015,Month,Day,sep="-"))
 airquality$TempG <- cut(airquality$Temp,breaks=c(0,60,70,80,100))
-
-echartR(airquality, x = ~Day, y= ~Wind, series=~Month, type='line', 
-        dataZoom=c(30,70), symbolList='none', 
+airquality <- rbind(airquality,c(rep(NA,4),6,31),c(rep(NA,4),9,31))  
+# Jun, Sep has no 31th, suppl with NAs
+echartR(airquality, x = ~Day, y= ~Wind, z=~Month, type='line', 
+        symbolList='none', 
         palette='tableauBlRd', xlab = 'Days', ylab = 'Wind',
-        title='Day-specific Wind by month (airquality)')
+        title='Day-specific Wind by month (airquality)',
+        pos=list(title=12,toolbox=3))
 ```
 
 ![](files/figure-html/line1.png)
 
-线段平滑(`type='linesmooth'`)，不显示标志图形(`symbolList='none'`)。Echarts对缺失值默认不填补，因此有很多断线。需要在数据前处理时自行作插值运算。
+线段平滑(`type='linesmooth'`)，不显示标志图形(`symbolList='none'`)。此外开启双坐标轴(`yAxis1`)，将系列1、2(Ozone、Solar.R)显示于次y轴。Echarts对缺失值默认不填补，因此有很多断线。需要在数据前处理时自行作插值运算。打开数据缩放，设置初始显示30-70%(`dataZoom=c(20,50)`)。
 
 
 ```r
 airq <- melt(airquality[,c("Ozone","Solar.R","Wind","Temp","strDate")],
              id=c("strDate"))
-airQ <- melt(airquality[,c("Wind","Temp","Date")],
-             id=c("Date"))
+#airQ <- melt(airquality[,c("Wind","Temp","Date")],
+#             id=c("Date"))
 echartR(airq, x = ~strDate, y= ~value, series= ~variable, type='linesmooth',
         symbolList='none', dataZoom=c(20,50),
-        palette='tableauPrGy', xlab = 'Date', ylab = 'Measure',
-        title='Climate measures by day', subtitle = '(source: airquality)')
+        palette='tableauPrGy', ylab = 'Wind, Temp',xlab="Day",
+        title='Climate measures by day', subtitle = '(source: airquality)',
+        yAxis1=list(lab="Ozone, SolorR",series=c(1,2)))
 ```
 
 ![](files/figure-html/line2.png)
+
+
+打开时间轴(`z=~Month`)，按月显示每日天气数据。
+
+```r
+airq <- melt(airquality[c("Ozone","Solar.R","Wind","Temp","Month","Day")],
+             id=c("Month","Day"))
+echartR(airq, x= ~Day, y= ~value, series= ~variable, z= ~Month, type='linesmooth',
+        symbolList='none', pos=list(toolbox=3),
+        palette='tableauPrGy', xlab = 'Day', ylab = 'Measure',
+        title='Climate measures by day', subtitle = '(source: airquality)')
+```
+
+![](files/figure-html/line3.png)
 
 ### Stacked Line 堆积线图
 设置xAxis和yAxis，关闭所有纵线(`color='none'`)，并显示横向间条(`banded=T`)。
@@ -500,7 +536,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='line',stack=T,
         title='Parameter measures', subtitle = '(source: iris)')
 ```
 
-![](files/figure-html/line3.png)
+![](files/figure-html/line4.png)
 
 线段平滑，不显示标志图形
 
@@ -511,7 +547,7 @@ echartR(dfiris, x = ~id, y= ~Value, series= ~Param, type='linesmooth',stack=T,
         title='Parameter measures', subtitle = '(source: iris)')
 ```
 
-![](files/figure-html/line4.png)
+![](files/figure-html/line5.png)
 
 ## Area 面积图
 Echarts中，面积图本质上被定义为线图，只需通过`itemStyle`参数渲染颜色。
@@ -981,21 +1017,21 @@ migrate$series <- "全国"
 migrateEm <- as.data.frame(matrix(unlist(strsplit(readLines("CZflight.txt")[5],",")),
                                 byrow=T,ncol=3),stringsAsFactors=F)
 migrateEm[,3] <- as.numeric(migrateEm[,3])
-names(migrateEm) <- c("From","To","Val")
+names(migrateEm) <- c("From","To","NFlights")
 #migrate <- merge(migrate,migrateEm,by=c("From","To"),all.x=T)
 #migrate$Val[is.na(migrate$Val)] <- "-"
-migrate$Val <- NA
+migrate$NFlights <- NA
 migrateEm <- merge(migrateEm, migrateCoord, by.x="From",by.y="City",all.x=T)
 migrateEm <- merge(migrateEm, migrateCoord, by.x="To",by.y="City",all.x=T)
 # markLine dataset (8 col)
 markline <- migrateEm[,c(2,1,3,5,4,7,6)]
 markline$To <- paste(markline$From,markline$To,sep="/")
-markline$effect <- F
+markline$effect <- T
 # markPoint dataset (6 col)
 markpoint <- migrateEm[,c(2,1,3,7,6)]
 markpoint$effect <- T
 # plot
-echartR(migrate, x=~From, x1=~To, y=~Val, series=~series, xcoord=~Xcoord.x,
+echartR(migrate, x=~From, x1=~To, y=~NFlights, series=~series, xcoord=~Xcoord.x,
           ycoord=~Ycoord.x, xcoord1=~Xcoord.y, ycoord1=~Ycoord.y,
         type=c('map','china','line'), palette=c("Gray","Orange","Green","Purple"),
         pos=list(toolbox=3), title="百度迁徙（模拟数据）", dataRange=c("High","Low"),
@@ -1008,8 +1044,7 @@ echartR(migrate, x=~From, x1=~To, y=~Val, series=~series, xcoord=~Xcoord.x,
 ![](files/figure-html/map5.png)
 
 ## Wordcloud 词云
-直接knitr时readLines读取网页会报错，此例将网页 'http://top.baidu.com/buzz?b=1' 的源代码保存为本地txt后再读取。
-
+直接knitr时readLines读取网页会报错，此例将[百度热词榜网页](http://top.baidu.com/buzz?b=1) 的源代码保存为本地txt后再读取。
 
 ```r
 #baiduhot <- paste0(readLines("http://top.baidu.com/buzz?b=1"),collapse="")
@@ -1248,36 +1283,53 @@ echartR(hotword[1:30,], x=~Keyword, y=~Freq, type="wordcloud",
 ![](files/figure-html/wordcloud.png)
 
 ## Chord 和弦图
+全部借用Echarts的例图数据，略有改动。
+
 ### Simple chord 简单和弦图
 和弦图需要用到x,x1和y变量。其中x和x1是连接关系，y为权重。
+
+#### Chord without ribbons 无缎带和弦图
+本例用`xAxis=list(rotate=90)`将标签转向。
 
 
 ```r
 deutsch <- data.frame(player=c('Kruse','Kramer','Neuer','Boateng','Lahm','Kroos',
                                'Muller','Gotze','Badstuber','Hummels','Weidenfeller',
                                'Reus','Gundogan'),
-                      club=c(rep('Monchengladbach',2),rep('Bayern',7),
+                      hire=c(rep('Monchengladbach',2),rep('Bayern',7),
                              rep('Dortmund',4)),
-                      weight=rep(1,13), stringsAsFactors=F)
-echartR(deutsch,x=~player, y=~weight, x1=~club, type='chord', 
-          title='Deutsch Soccer Team - Clubs',pos=list(legend=10))
+                      weight=rep(1,13), 
+                      role=c('Fw','Mf','Gk','Df','Df','Mf','Mf','Fw','Df','Df','Gk','Df','Md'),
+                      stringsAsFactors=F)
+echartR(deutsch,x=~player, y=~weight, x1=~hire, type='chord', xAxis=list(rotate=90),
+          title='Deutsch Soccer Team - Clubs',pos=list(legend=10,title=5))
 ```
+
 
 ![](files/figure-html/chord1.png)
 
+#### Chord with ribbons 缎带和弦图
 
-也可以对矩阵作图。
+
+```r
+echartR(deutsch,x=~player, y=~weight, x1=~hire, type='chordribbon', 
+          title='Deutsch Soccer Team - Clubs',pos=list(legend=10,title=5))
+```
+
+![](files/figure-html/chord2.png)
+
+也可以对矩阵作图。矩阵数据$x_{i,j}$表示i到j的关系数据。
 
 ```r
 grpmtx <- matrix(c(11975, 5871, 8916, 2868, 1951, 10048, 2060, 6171, 8010, 16145,
                    8090, 8045, 1013, 990, 940, 6907),byrow=T,nrow=4)
 dimnames(grpmtx) <- list(LETTERS[1:4],LETTERS[1:4])
 knitr::kable(as.data.frame(grpmtx),format='html',
-             caption="Table: Group A-D Mutual Transition")
+             caption="Table: Group A-D Mutual Links")
 ```
 
 <table>
-<caption>Table: Group A-D Mutual Transition</caption>
+<caption>Table: Group A-D Mutual Links</caption>
  <thead>
   <tr>
    <th style="text-align:left;">   </th>
@@ -1321,27 +1373,146 @@ knitr::kable(as.data.frame(grpmtx),format='html',
 
 ```r
 grpmtx <- melt(grpmtx)
-echartR(grpmtx,x=~Var1, y=~value, x1=~Var2, type='chord', 
-          title='Group A-D mutual transition',pos=list(legend=10))
+echartR(grpmtx,x=~Var1, y=~value, x1=~Var2, type='chordribbon', 
+          title='Group A-D mutual links',pos=list(legend=10,title=5))
 ```
 
-![](files/figure-html/chord2.png)
+![](files/figure-html/chord3.png)
 
+### Multi-series chord 多系列和弦图
+下载[中东格局数据集](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/MidEast.csv)到本地，`read.csv`读入。
+多系列和弦图必须用于两两之间关系。德国国家足球队的例子不适用。
+
+
+```r
+mideast <- read.csv("MidEast.csv",header=T,stringsAsFactors=F)
+names(mideast[,2:16]) <- mideast$X
+mideast <- melt(mideast,id="X")
+mideast$attd <- gsub("(.+)/\\d+","\\1",mideast$value)
+mideast$attd[mideast$attd==''] <- NA
+mideast$attd <- factor(mideast$attd,levels=unique(mideast$attd))
+mideast$wt <- gsub(".+/(\\d+)","\\1",mideast$value)
+mideast$wt <- as.numeric(mideast$wt)
+echartR(mideast,x=~X, y=~wt, x1=~variable, series=~attd, type='chordribbon', 
+        title='Relationship in Mid-east', subtitle='(source: Caixin)', 
+        palette=c('#FBB367','#80B1D2','#FB8070','#CC99FF','#B0D961','#99CCCC','#BEBBD8',
+                  '#FFCC99','#8DD3C8','#FF9999','#CCEAC4','#BB81BC','#FBCCEC','#CCFF66',
+                  '#99CC66','#66CC66','#FF6666','#FFED6F','#ff7f50','#87cefa'), 
+        pos=list(legend=10,title=5,toolbox=2),
+        subtitle_url='http://international.caixin.com/2013-09-06/100579154.html')
+```
+![](files/figure-html/chord4.png)
 
 ## Force 力导向布局图
 
+下载[Network.txt](https://raw.githubusercontent.com/madlogos/Shared_Doc/master/Shared_Documents/Network.txt)到本地，`readLines`读入。
+将x整理成`关系起点/关系终点/关系名称`格式，x1整理成`关系起点赋值/关系终点赋值`格式，series整理成`起点节点类型/终点节点类型`格式。
+
+
+```r
+netNode <- as.data.frame(matrix(unlist(strsplit(readLines('Network.txt')[1],",")),
+                     byrow=T,ncol=3),stringsAsFactors=F)
+names(netNode) <- c("name","category","value")
+netLink <- as.data.frame(matrix(unlist(strsplit(readLines('Network.txt')[2],",")),
+                     byrow=T,ncol=4),stringsAsFactors=F)
+names(netLink) <- c("from","to","relation","weight")
+netLink$weight <- as.numeric(netLink$weight)
+netLink <- merge(netLink,netNode,by.x="from",by.y="name",all.x=T)
+netLink <- merge(netLink,netNode,by.x="to",by.y="name",all.x=T)
+rm(netNode)
+netLink$category.x <- factor(netLink$category.x,
+                             levels=c("Root","Node 1","Node 2","Node 3","Leaf"))  
+    # Order the categories
+netLink <- netLink[order(netLink$category.x),]
+netLink$Link <- with(netLink,paste(from,to,relation,sep="/"))
+netLink$NodeVal <- with(netLink,paste(value.x,value.y,sep="/"))
+netLink$Series <- with(netLink,paste(category.x,category.y,sep="/"))
+```
+
+按此格式读入数据集作图。
+
+```r
+echartR(netLink,x=~Link,y=~weight,x1=~NodeVal,series=~Series,type='force',
+        title='绍兴俞氏社会网络',pos=list(title=5,legend=10),
+        palette=c('brown','green4','green3','lawngreen','olivedrab1'))
+```
+
+![](files/figure-html/force.png)
+
 
 ## Candlestick K线图
+K线图必须将日期整理在x，开盘、收盘、最低、最高标签整理在x1（且按该顺序排序），价格整理在y。
 
 
-## Tree 树状图
+```r
+stockidx <- data.frame(
+    date=c('1/24','1/25','1/28','1/29','1/30','1/31','2/1','2/4','2/5','2/6','2/7',
+           '2/8','2/18','2/19','2/20','2/21','2/22','2/25','2/26','2/27','2/28','3/1',
+           '3/4','3/5','3/6','3/7','3/8','3/11','3/12','3/13','3/14','3/15','3/18',
+           '3/19','3/20','3/21','3/22','3/25','3/26','3/27','3/28','3/29','4/1','4/2',
+           '4/3','4/8','4/9','4/10','4/11','4/12','4/15','4/16','4/17','4/18','4/19',
+           '4/22','4/23','4/24','4/25','4/26','5/2','5/3','5/6','5/7','5/8','5/9',
+           '5/10','5/13','5/14','5/15','5/16','5/17','5/20','5/21','5/22','5/23',
+           '5/24','5/27','5/28','5/29','5/30','5/31','6/3','6/4','6/5','6/6','6/7',
+           '6/13'),
+    open=c(2320.26,2300,2295.35,2347.22,2360.75,2383.43,2377.41,2425.92,2411,2432.68,
+           2430.69,2416.62,2441.91,2420.26,2383.49,2378.82,2322.94,2320.62,2313.74,
+           2297.77,2322.32,2364.54,2332.08,2274.81,2333.61,2340.44,2326.42,2314.68,
+           2309.16,2282.17,2255.77,2269.31,2267.29,2244.26,2257.74,2318.21,2321.4,
+           2334.74,2318.58,2299.38,2273.55,2238.49,2229.46,2234.9,2232.69,2196.24,
+           2215.47,2224.93,2236.98,2218.09,2199.91,2169.63,2195.03,2181.82,2201.12,
+           2236.4,2242.62,2187.35,2213.19,2203.89,2170.78,2179.05,2212.5,2227.86,
+           2242.39,2246.96,2228.82,2247.68,2238.9,2217.09,2221.34,2249.81,2286.33,
+           2297.11,2303.75,2293.81,2281.45,2286.66,2293.4,2323.54,2316.25,2320.74,
+           2300.21,2297.1,2270.71,2264.43,2242.26,2190.1),
+    close=c(2302.6,2291.3,2346.5,2358.98,2382.48,2385.42,2419.02,2428.15,2433.13,
+            2434.48,2418.53,2432.4,2421.56,2382.91,2397.18,2325.95,2314.16,2325.82,
+            2293.34,2313.22,2365.59,2359.51,2273.4,2326.31,2347.18,2324.29,2318.61,
+            2310.59,2286.6,2263.97,2270.28,2278.4,2240.02,2257.43,2317.37,2324.24,
+            2328.28,2326.72,2297.67,2301.26,2236.3,2236.62,2234.4,2227.74,2225.29,
+            2211.59,2225.77,2226.13,2219.55,2206.78,2181.94,2194.85,2193.8,2197.6,
+            2244.64,2242.17,2184.54,2218.32,2199.31,2177.91,2174.12,2205.5,2231.17,
+            2235.57,2246.3,2232.97,2246.83,2241.92,2217.01,2224.8,2251.81,2282.87,
+            2299.99,2305.11,2302.4,2275.67,2288.53,2293.08,2321.32,2324.02,2317.75,
+            2300.59,2299.25,2272.42,2270.93,2242.11,2210.9,2148.35),
+    low=c(2287.3,2288.26,2295.35,2337.35,2347.89,2371.23,2369.57,2417.58,2403.3,2427.7,
+          2394.22,2414.4,2415.43,2373.53,2370.61,2309.17,2308.76,2315.01,2289.89,
+          2292.03,2308.92,2330.86,2259.25,2270.1,2321.6,2304.27,2314.59,2296.58,
+          2264.83,2253.25,2253.31,2250,2239.21,2232.02,2257.42,2311.6,2314.97,2319.91,
+          2281.12,2289,2232.91,2228.81,2227.31,2220.44,2217.25,2180.67,2215.47,2212.56,
+          2217.26,2204.44,2177.39,2165.78,2178.47,2175.44,2200.58,2232.26,2182.81,
+          2184.11,2191.85,2173.86,2161.14,2179.05,2212.5,2219.44,2235.42,2221.38,
+          2225.81,2231.36,2205.87,2213.58,2210.77,2248.41,2281.9,2290.12,2292.43,
+          2274.1,2270.25,2283.94,2281.47,2321.17,2310.49,2299.37,2294.11,2264.76,
+          2260.87,2240.07,2205.07,2126.22),
+    high=c(2362.94,2308.38,2346.92,2363.8,2383.76,2391.82,2421.15,2440.38,2437.42,
+           2441.73,2433.89,2443.03,2444.8,2427.07,2397.94,2378.82,2330.88,2338.78,
+           2340.71,2324.63,2366.16,2369.65,2333.54,2328.14,2351.44,2352.02,2333.67,
+           2320.96,2333.29,2286.33,2276.22,2312.08,2276.05,2261.31,2317.86,2330.81,
+           2332,2344.89,2319.99,2323.48,2273.55,2246.87,2243.95,2253.42,2241.34,
+           2212.59,2234.73,2233.04,2242.48,2226.26,2204.99,2196.43,2197.51,2206.03,
+           2250.11,2245.12,2242.62,2226.12,2224.63,2210.58,2179.65,2222.81,2236.07,
+           2240.26,2255.21,2247.86,2247.67,2250.85,2239.93,2225.19,2252.87,2288.09,
+           2309.39,2305.3,2314.18,2304.95,2292.59,2301.7,2322.1,2334.33,2325.72,
+           2325.53,2313.43,2297.1,2276.86,2266.69,2250.63,2190.1))
+stockidx <- melt(stockidx,id="date")
+stockidx <- stockidx[order(stockidx$variable),]
+echartR(stockidx,x=~date,x1=~variable,y=~value,type='k',title='2013年上半年上证指数',
+        dataZoom=c(0,50))
+```
 
-
-## Heatmap 热力图
-
+![](files/figure-html/k.png)
 
 ## Gauge 仪表盘
+仪表盘的数据集比较简单，标签列在x，数值在y，单位在x1。如果要自定义表盘颜色，可以在x列标记'axisStyle'，则x1列为颜色（Hex值或颜色名），y为切断点。此外可单独通过`splitNumber`制定刻度数量。
 
+
+```r
+gauge <- data.frame(x=c("完成率",rep("axisStyle",3)),
+                    unit=c("%","forestgreen","orange","red2"),KPI=c(74,0.5,0.8,1))
+echartR(gauge,x=~x,y=~KPI,x1=~unit,type='gauge')
+```
+![](files/figure-html/gauge.png)
 
 # Recognized Issues 已知的问题
 
@@ -1349,10 +1520,10 @@ echartR(grpmtx,x=~Var1, y=~value, x1=~Var2, type='chord',
 1. 函数本身写得比较笨重，技术还不行；
 1. 当没有数据系列的时候，如显示图例，会被拆成一串单字节字符；
 1. 未实现的功能：
-    1. Force，candlestick(k)还没有开发；
+    1. candlestick(k)还没有开发；Tree不打算开发了；
     1. 仍然不支持时间格式的坐标轴（series中数据结构有问题）；
-    1. 仍然不支持动态时间轴；
     1. tooltip不够智能；
-    1. 进阶功能（包括多图联动、双坐标轴等）仍未开发；
+    1. 进阶功能（包括多图联动等）仍未开发；
+    1. 不支持多类型混搭；
 1. **注意**：如要改进，千万不要在函数代码中`set.seed()`，这会全局锁定种子数，导致knitr时每做一图都按该种子随机化`htmlwidget id`。最终的文档中，某些图可能会无法按指定代码出图，而是重复其他的图（串id）。
 

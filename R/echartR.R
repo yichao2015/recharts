@@ -1069,7 +1069,7 @@ for (t in 1:ifelse(is.null(z),1,length(timeslice)))  {
                     dset <- dcast(dset,eval(parse(text=paste(xvar,"~",xvar1))),
                                   value.var=yvar,sum)
                     dset[,xvar] <- factor(as.character(dset[,xvar]),levels=lvlx)
-                    dset <- data[order(dset[,xvar]),]
+                    dset <- dset[order(dset[,xvar]),]
                     lstSeries[[i]] <- 
                         list(type='k',name=ifelse(is.null(series),yvar,lvlseries[i]),
                                                   data=as.matrix(dset[,2:5]))

@@ -1059,6 +1059,7 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                             #}
                         }
                     }
+<<<<<<< HEAD
                 }else if (type[1] =='k'){
                     for (i in 1:ifelse(is.null(series),1,length(lvlseries))){
                         if (is.null(series)){
@@ -1073,6 +1074,43 @@ echartR<-function(data, x=NULL, y, z=NULL, series=NULL, weight=NULL,
                         lstSeries[[i]] <- 
                             list(type='k',name=ifelse(is.null(series),yvar,lvlseries[i]),
                                  data=as.matrix(dset[,2:5]))
+=======
+                }
+            }else if (type[1] =='k'){
+                for (i in 1:ifelse(is.null(series),1,length(lvlseries))){
+                    if (is.null(series)){
+                        dset <- data
+                    }else{
+                        dset <- data[data[,svar]==lvlseries[i],]
+                    }
+                    dset <- dcast(dset,eval(parse(text=paste(xvar,"~",xvar1))),
+                                  value.var=yvar,sum)
+                    dset[,xvar] <- factor(as.character(dset[,xvar]),levels=lvlx)
+                    dset <- dset[order(dset[,xvar]),]
+                    lstSeries[[i]] <- 
+                        list(type='k',name=ifelse(is.null(series),yvar,lvlseries[i]),
+                                                  data=as.matrix(dset[,2:5]))
+                }
+            }else if (type[1] =='gauge'){
+                for (i in 1:ifelse(is.null(series),1,length(lvlseries))){
+                    if (is.null(series)){
+                        dset <- data[data[,xvar]!='axisStyle',]
+                    }else{
+                        dset <- data[data[,svar]==lvlseries[i] & data[,xvar]!='axisStyle',]
+                    }
+                    axisStyle <- data[data[,xvar]=='axisStyle',]
+                    lstSeries[[i]] <- 
+                        list(type='gauge',name=ifelse(is.null(series),yvar,lvlseries[i]),
+                             title=list(show=T,offsetCenter=c(0,'-40%'),
+                                        textStyle=list(fontWeight='bolder')),
+                             pointer=list(width=5),axisLine=list(lineStyle=list(width=8)),
+                             detail=list(textStyle=list(fontWeight='bolder'),color='auto'),
+                             axisTick=list(length=12,lineStyle=list(color='auto')),
+                             splitLine=list(show=T,length=30,lineStyle=list(color='auto')))
+                    if (!is.null(splitNumber)) {
+                        lstSeries[[i]][['splitNumber']] <- splitNumber
+                        lstSeries[[i]][['axisTick']][['splitNumber']] <- splitNumber
+>>>>>>> origin/master
                     }
                 }else if (type[1] =='gauge'){
                     for (i in 1:ifelse(is.null(series),1,length(lvlseries))){

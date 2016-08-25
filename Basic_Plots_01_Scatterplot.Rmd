@@ -1,0 +1,96 @@
+---
+title: "Basic Plots 01 - Scatterplot"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+```
+
+First, you should load `recharts`:
+```{r}
+library(recharts)
+```
+
+# Introduction
+
+Scatter plot includes:
+- simple scatter/point
+- bubble
+
+For scatter plots, `x` and `y` must both be numeric.
+
+# Simple Scatter Plot
+
+## Single Series
+
+```{r}
+echartr(iris, Sepal.Width, Petal.Width)
+```
+
+It is equivalent to
+
+```r
+echartr(iris, x=Sepal.Width, y=Petal.Width, type='scatter')
+echartr(iris, Sepal.Width, Petal.Width, type='point')
+echartr(iris, Sepal.Width, Petal.Width, type='bubble')
+```
+
+## Multiple Series
+
+```{r}
+echartr(iris, Sepal.Width, Petal.Width, Species)
+```
+
+# Bubble Chart
+
+The key is to pass `weight` variable. If `weight` is accepted, no matter the `type` variable is 'scatter', 'point' or 'bubble', a bubble chart will display.
+
+```{r}
+echartr(iris, Sepal.Width, Petal.Width, weight=Petal.Length)
+```
+
+# Scatter Plot with Timeline
+
+Timeline calls for numeric or time variable. When a character variable is passed in, `echarts` coerces it to numeric.
+
+```{r}
+echartr(iris, Sepal.Width, Petal.Width, z=Species)
+```
+
+# Aesthetics
+
+Of course you can apply `setTheme` or `setSymbols` to modify the charts
+
+```{r}
+g <- echartr(iris, Sepal.Width, Petal.Width, Species)
+```
+
+- Apply 'vintage' theme and set the width 500 px, height 350 px.
+
+```{r}
+g %>% setTheme('vintage', width=500, height=350)
+```
+
+
+- Apply non-standard symbols c('star6', 'emptyCircle', 'heart') to `symbolList`.
+
+```{r}
+g = g %>% setTheme('macarons') %>% setSymbols(c('star6', 'emptyCircle', 'heart')) 
+g
+```
+
+
+- Move `legend` to 12 o'clock position, `toolbox` to 9 o'clock position. 
+- Set `title` = 'Iris Flowers' at the 6 o'clock position.
+
+```{r}
+g = g %>% relocLegend(pos=12) %>% relocToolbox(pos=9) %>% 
+  setTitle("Iris Flowers", pos=6) %>% setTheme('helianthus')
+g
+```
+
+You can refer to related functions to play around on your own.

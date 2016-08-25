@@ -79,7 +79,9 @@ g %>% setTheme('vintage', width=500, height=350)
 - Apply non-standard symbols c('star6', 'emptyCircle', 'heart') to `symbolList`.
 
 ```{r}
-g = g %>% setTheme('macarons') %>% setSymbols(c('star6', 'emptyCircle', 'heart')) 
+rm(g)
+g = echartr(iris, Sepal.Width, Petal.Width, Species) %>% 
+  setTheme('macarons') %>% setSymbols(c('star6', 'emptyCircle', 'heart')) 
 g
 ```
 
@@ -88,7 +90,9 @@ g
 - Set `title` = 'Iris Flowers' at the 6 o'clock position.
 
 ```{r}
-g = g %>% relocLegend(pos=12) %>% relocToolbox(pos=9) %>% 
+rm(g)
+g = echartr(iris, Sepal.Width, Petal.Width, Species) %>% 
+  setLegend(pos=12) %>% setToolbox(pos=9) %>% 
   setTitle("Iris Flowers", pos=6) %>% setTheme('helianthus')
 g
 ```

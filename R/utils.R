@@ -200,8 +200,8 @@ reElementId <- function(chart, seed=NULL){
     elementId = paste0('echarts-', sha1(
         paste0(convTimestamp(Sys.time()), Sys.info()[['nodename']],
                sample(10000000000, 1))))
-    txt <- paste(deparse(chart), collapse="")
-    txt <- gsub("(document\\.getElementById\\()(.+?)\\)",
+    txt <- paste(deparse(chart, backtick=TRUE, control='all'), collapse='')
+    txt <- gsub("(document\\.getElementById\\()([^\\)]+?)\\)",
                 paste0("\\1'", elementId, "'\\)"), txt)
     chart <- eval(parse(text=txt))
     chart$elementId <- elementId

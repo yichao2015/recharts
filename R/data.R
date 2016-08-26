@@ -1,3 +1,423 @@
+#' @importFrom data.table melt
+series_scatter <- function(lst, type, return=NULL, ...){
+    # g = echartr(mtcars, wt, mpg, am)
+    lst <- mergeList(list(weight=NULL, series=NULL), lst)
+    if (!is.numeric(lst$x[,1])) stop('x and y must be numeric')
+    data <- cbind(lst$y[,1], lst$x[,1])
+
+    if (!is.null(lst$weight)){  # weight as symbolSize
+        data <- cbind(data, lst$weight[,1])
+        minWeight <- min(abs(lst$weight[,1]), na.rm=TRUE)
+        maxWeight <- max(abs(lst$weight[,1]), na.rm=TRUE)
+        range <- maxWeight - minWeight
+        folds <- maxWeight / minWeight
+        if (abs(folds) < 50){  # max/min < 50, linear
+            jsSymbolSize <- JS(paste0('function (value){
+                return ', switch(ceiling(abs(folds)/10), 6,5,4,3,2),
+                '*Math.round(Math.abs(value[2]/', minWeight,'));
+                }'))
+        }else{  # max/min >= 50, normalize
+            jsSymbolSize <- JS(paste0('function (value){
+                return Math.round(1+29*(Math.abs(value[2])-', minWeight,')/', range, ');
+            }'))
+        }
+    }
+    obj <- list()
+    if (is.null(lst$series)) {  # no series
+        if (is.null(lst$weight))
+            obj <- list(list(type=type$type[1], data=asEchartData(data[,2:1])))
+        else
+            obj <- list(list(type=type$type[1], data=asEchartData(data[,c(2:1,3)]),
+                             symbolSize=jsSymbolSize))
+    }else{  # series-specific
+        data <- cbind(data, lst$series[,1])
+        data <- split(as.data.frame(data), lst$series[,1])
+        if (is.null(lst$weight)){
+            obj <- lapply(seq_along(data), function(i){
+                list(name = names(data)[i], type = type$type[i],
+                     data = asEchartData(data[[i]][,2:1]))
+            })  ## only fetch col 1-2 of data, col 3 is series
+        }else{
+            obj <- lapply(seq_along(data), function(i){
+                list(name = names(data)[i], type = type$type[i],
+                     data = asEchartData(data[[i]][,c(2:1, 3)]),
+                     symbolSize=jsSymbolSize)
+            })  ## fetch col 1-2 and 3 (x, y, weight)
+        }
+    }
+
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+}
+
+series_bar <- function(lst, type, return=NULL, ...){
+    # example:
+    # echartr(mtcars, row.names(mtcars), mpg,
+    #     series=factor(am,labels=c('Manual','Automatic')),
+    #     type=c('hbar','scatter'))
+    lst <- mergeList(list(series=NULL), lst)
+    data <- cbind(lst$y[,1], lst$x[,1])
+
+    if (!'y' %in% names(lst)) {  # y is null, then...
+        if (grepl('hist', type$misc)){  # histogram
+            hist <- hist(data[,1], plot=FALSE)
+            if (grepl('density', type$misc)){
+                data <- as.matrix(cbind(hist$density, hist$mids))  # y, x
+            }else{
+                data <- as.matrix(cbind(hist$counts, hist$mids))  # y, x
+            }
+        }else{ # simply run freq of x
+            if (is.numeric(data[,1])){
+                data <- as.matrix(as.data.frame(table(data[,1])))
+            }else{
+                data <- as.matrix(table(data[,1]))
+            }
+        }
+    }
+
+    obj <- list()
+    if (is.null(lst$series)) {  # no series
+        if (is.numeric(lst$x[,1])){
+            obj <- list(list(type=type$type[1], data=asEchartData(data[,2:1])))
+            if (any(grepl("flip", type$misc))) obj[[1]]$barHeight=10
+            if (grepl('hist',type$misc)) {
+                obj[[1]]$barGap = '1%'
+                obj[[1]]$barWidth = JS(paste0(
+                    "(document.getElementById('temp').offsetWidth-200)/",
+                    length(hist$breaks)))
+                obj[[1]]$barMaxWidth = floor(820 / length(hist$breaks))
+            }
+        }else{
+            obj <- list(list(type=type$type[1], data=asEchartData(data[,1])))
+        }
+    }else{  # series-specific
+        dataCross <- tapply(data[,1], list(data[,2], lst$series[,1]), function(x) {
+            if (length(x) == 1) return(x)
+            stop('y must only have one value corresponding to each combination of x and series')
+        })
+        idx <- match(unique(data[,2]),rownames(dataCross))
+        dataCross <- dataCross[idx,]
+        #rownames(dataCross) <- data[,2]
+        data <- dataCross
+
+        obj <- lapply(seq_len(ncol(data)), function(i){
+            if (is.numeric(lst$x[,1])){
+                o = list(name = colnames(data)[i], type = type$type[i],
+                         data = asEchartData(cbind(as.numeric(rownames(data)),
+                                                        data[,i])))
+                if (any(grepl("flip", type$misc)))
+                    o <- mergeList(o, list(barHeight=10))
+            }else{
+                o = list(name = colnames(data)[i], type = type$type[i],
+                         data = asEchartData(data[,i]))
+            }
+            if (type$stack[i]) o[['stack']] = 'Group'
+            return(o)
+        })
+    }
+
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+}
+
+series_line = function(lst, type, return=NULL, ...) {
+    # Example:
+    # g=echartr(airquality, as.character(Day), Temp,z=Month, type='curve')
+    # g=echartr(airquality, as.character(Day), Temp,z=Month, type='area_smooth')
+    lst <- mergeList(list(series=NULL), lst)
+    data <- cbind(lst$y[,1], lst$x[,1])
+
+    if (is.null(lst$x[,1]) && is.ts(lst$y[,1])) {
+        lst$x[,1] = as.numeric(time(lst$y[,1]))
+        lst$y[,1] = as.numeric(lst$y[,1])
+    }
+    obj <- list()
+
+    if (is.numeric(lst$x[,1])) {
+        obj = series_scatter(lst, type = type)
+    }else{
+        if (is.null(lst$series[,1])) {
+            obj = list(list(type = 'line', data = asEchartData(lst$y[,1])))
+        }
+    }
+    if (length(obj) == 0) obj = series_bar(lst, type = type)
+
+    # area / stack / smooth
+    areaIdx <- which(grepl("fill", type$misc))
+    stackIdx <- which(type$stack)
+    smoothIdx <- which(type$smooth)
+    if (length(areaIdx) > 0){
+        for (i in areaIdx)  obj[[i]][['itemStyle']] <-
+                list(normal=list(areaStyle=list(
+                    type='default')))
+    }
+    if (length(stackIdx) > 0) {
+        for (i in stackIdx) obj[[i]][['stack']] <- 'Group'
+    }
+    if (length(smoothIdx) > 0) {
+        for (i in smoothIdx) obj[[i]][['smooth']] <- TRUE
+    }
+
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+
+}
+
+series_k <- function(lst, type, return=NULL, ...){
+    # Example:
+    # g=echartr(stock, date, c(open, close, low, high), type='k')
+
+    data <- cbind(lst$y[,1], lst$x[,1])
+    obj <- list(list(name='Stock', type=type$type[1], data=asEchartData(lst$y[,1:4])))
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+}
+
+series_pie <- function(lst, type, return=NULL, ...){
+    # Example:
+    # g=echartr(iris, Species, Sepal.Width, type='pie')
+    # g=echartr(mtcars, am, mpg, gear, type='pie')
+    # g=echartr(mtcars, y=mpg, series=gear,type='ring')
+    ## ring_info
+    # ds=data.frame(q=c('68% feel good', '29% feel bad', '3% have no feelings'),
+    #               a=c(68, 29, 3))
+    # g=echartr(ds, q, a, type='ring_info')
+    # dev.width=paste0("document.getElementById('", g$elementId,"').offsetWidth")
+    # dev.height=paste0("document.getElementById('", g$elementId,"').offsetHeight")
+    # g %>% setLegend(pos=c('center','top','vertical'),
+    #                 itemGap=JS(paste0(dev.height,"*0.4/3"))) %>%
+    #       relocLegend(x=JS(paste0(dev.width,"/2")), y=JS(paste0(dev.height,"/10")))
+
+    if (is.null(lst$y)) stop('pie/funnel charts need y!')
+    if (is.null(lst$x) && is.null(lst$series)) stop('pie/funnel charts need either x or series!')
+    data <- data.frame(lst$y[,1])
+    if (!is.null(lst$x)){
+        data[,2] <- if (any(grepl('infographic', type$misc))) 'TRUE' else lst$x[,1]
+        series <- if (any(grepl('infographic', type$misc))) c('TRUE', 'FALSE')
+                  else as.character(unique(lst$x[,1]))
+    }else{
+        data[,2] <- if (any(grepl('infographic', type$misc))) lst$series[,1] else 'TRUE'
+        series <- if (any(grepl('infographic', type$misc)))
+            as.character(unique(lst$series[,1])) else c('TRUE','FALSE')
+    }
+    if (!is.null(lst$series)){
+        data[,3] <- lst$series[,1]
+        pies <- as.character(unique(lst$series[,1]))
+    }else{
+        data[,3] <- if (any(grepl('infographic', type$misc)))
+            lst$x[,1] else 'Proportion'
+        pies <- if (any(grepl('infographic', type$misc)))
+            as.character(unique(lst$x[,1])) else 'Proportion'
+        if (any(grepl('infographic', type$misc)))
+            type[2:length(pies),] <- type[1,]
+    }
+    names(data) <- c('y', 'x', 'series')
+    data <- data.table::dcast(data, x~series, sum, value.var='y')
+
+    if (all(data$x == 'TRUE')) {
+        sum.prop <- sum(data[data$x == 'TRUE', 2:ncol(data)], na.rm=TRUE)
+        data[nrow(data)+1, ] <- c('FALSE', sum.prop - data[data$x == 'TRUE', 2:ncol(data)])
+    }
+
+    layouts <- autoMultiPolarChartLayout(length(pies))
+    rows <- layouts$rows
+    cols <- layouts$cols
+    centers <- layouts$centers
+    rownames(centers) <- pies
+    radius <- layouts$radius
+
+    ## place holder styles
+    placeHolderStyle = list(normal = list(
+            color = 'rgba(0,0,0,0)', label = list(show=FALSE), labelLine = list(show=FALSE)
+        ),
+        emphasis = list(color = 'rgba(0,0,0,0)')
+    )
+    grayStyle = list(normal = list(
+        color='#ccc', label=list(show=FALSE, position='center'),
+        labelLine=list(show=FALSE)
+        ),
+        emphasis=list(color='rgba(0,0,0,0)')
+    )
+    normalStyle = list(normal=list(label=list(show=FALSE),
+                                  labelLine=list(show=FALSE)))
+
+    obj <- list()
+    for (pie in pies){
+        iType <- type[which(pies == pie),]
+        o <- list(
+            name=pie, type=iType$type,
+            data=unname(apply(data[,c('x', pie)], 1, function(row) {
+                if (row[1] == 'FALSE')
+                    return(list(name='', value=as.numeric(unname(row[2])),
+                         itemStyle=grayStyle))
+                else
+                    return(list(name=ifelse(as.character(unname(row[1]))=='TRUE',
+                                            pie, as.character(unname(row[1]))),
+                                value=as.numeric(unname(row[2])),
+                                itemStyle=normalStyle))
+                })),
+            center=paste0(unname(centers[pie,]), '%'), width=paste0(radius, '%'),
+            x=paste0(centers[pie, 1]-radius/2, '%'), max=max(unname(data[,pie])),
+            height=ifelse(rows==1, '70%', paste0(radius, '%')),
+            y=ifelse(rows==1, rep('15%', length(pies)), paste0(centers[pie, 2]-radius/2, '%')),
+            selectedMode='multiple'
+        )
+        if (grepl('ring', iType$misc)){
+            o[['radius']] <- paste0(c(radius * 2/3, radius), '%')
+            o[['itemStyle']] <- list(
+                normal=list(label=list(show=TRUE)),
+                emphasis=list(label=list(show=TRUE, position='center', textStyle=list(
+                    fontSize='30',fontWeight='bold'
+                )))
+            )
+            o[['clockWise']] <- FALSE
+        }else if (grepl('radius', iType$misc)){
+            o[['roseType']] <- 'radius'
+            o[['radius']] <- paste0(c(radius/5, radius), '%')
+        }else if (grepl('area', iType$misc)){
+            o[['roseType']] <- 'area'
+            o[['radius']] <- paste0(c(radius/5, radius), '%')
+        }else if (grepl('infographic', iType$misc)){
+            o[['data']][[2]][['itemStyle']] <- placeHolderStyle
+            ringWidth <- 40 / length(pies)
+            o[['radius']] <- paste0(c(80 - ringWidth*(which(pies == pie)-1),
+                                      80 - ringWidth*which(pies == pie)), '%')
+            o[['center']] <- c('50%', '50%')
+            o[['clockWise']] <- FALSE
+        }else{
+            o[['radius']] <- paste0(radius, '%')
+        }
+        ## additional for funnel charts
+        if (iType$type == 'funnel'){
+            if (grepl('ascending', iType$misc)) o[['sort']] <- 'ascending'
+            o[['itemStyle']] <- mergeList(o[['itemStyle']], list(normal=list(
+                labelLine=list(show=TRUE)))
+            )
+        }
+
+        obj[[pie]] <- o
+    }
+    obj <- unname(obj)
+
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+}
+
+series_funnel <- series_pie
+
+series_radar <- function(lst, type, return=NULL, ...){
+    # Example:
+    # cars = mtcars[c('Merc 450SE','Merc 450SL','Merc 450SLC'),
+    #               c('mpg','disp','hp','qsec','wt','drat')]
+    # cars$model <- rownames(cars)
+    # cars <- data.table::melt(cars, id.vars='model')
+    # names(cars) <- c('model', 'indicator', 'Parameter')
+    # echartr(cars, indicator, Parameter, model, type='radar') %>%
+    #        setTitle('Merc 450SE  vs  450SL  vs  450SLC')
+    # echartr(cars, c(indicator, model), Parameter, type='radar_fill')
+    # echartr(cars, c(indicator, model), Parameter, type='target') %>%
+    #         setSymbols('none')
+    #
+    # echartr(cars, indicator, Parameter, z=model, type='radar')
+    # ----------------
+    # carstat = data.table::dcast(data.table::data.table(mtcars),
+    #               am + carb + gear ~., mean,
+    #               value.var=c('mpg','disp','hp','qsec','wt','drat'))
+    # carstat = data.table::melt(carstat, id=c('am', 'carb', 'gear'))
+    # names(carstat) <- c('am', 'carb', 'gear', 'indicator', 'Parameter')
+    # levels(carstat$indicator) <- gsub("_mean_\\.", "",
+    #                                   levels(carstat$indicator))
+    # echartr(as.data.frame(carstat), c(indicator, am),
+    #         Parameter, carb, z=gear, type='radar')
+
+    # x[,1] is x, x[,2] is series; y[,1] is y; series[,1] is polorIndex
+    if (is.null(lst$y) || is.null(lst$x)) stop('radar charts need x and y!')
+    data <- data.frame(lst$y[,1], lst$x[,1:(ifelse(ncol(lst$x) > 1, 2, 1))])
+    if (ncol(lst$x) == 1) data[,ncol(data)+1] <- names(lst$y)[1]
+    if (is.null(lst$series)) data[,ncol(data)+1] <- 0
+    else data[,ncol(data)+1] <- lst$series[,1]
+    names(data) <- c('y', 'x', 'series', 'index')
+
+    data <- data.table::dcast(data, index+x+series~., sum, value.var='y')
+    names(data) <- c('index', 'x', 'series', 'y')
+    index <- 0:(length(unique(data$index))-1)
+    obj <- lapply(index, function(i){
+        dt <- data[data$index==unique(data$index)[i+1],]
+        out <- list(type=type[i + 1, 'type'], name=unname(unique(data$index)[i+1]),
+                    data=lapply(unique(dt$series), function(s){
+                        list(name=as.character(s),
+                             value=lapply(dt[dt$series==s, 'y'], function(x){
+                                 ifna(x, '-')}))
+                    }))
+        if (i>0) out[['polarIndex']] <- i
+        if (grepl('fill', type[i+1, 'misc']))
+            out[['itemStyle']] <- list(normal=list(areaStyle=list(type='default')))
+        return(out)
+    })
+
+    if (is.null(return)){
+        return(obj)
+    }else{
+        return(obj[intersect(names(obj), return)])
+    }
+}
+
+series_force <- function(lst, type, return=NULL, ...){
+
+}
+
+series_chord <- function(lst, type, return=NULL, ...){
+
+}
+
+series_gauge <- function(lst, type, return=NULL, ...){
+
+}
+
+series_map <- function(lst, type, return=NULL, ...){
+
+}
+
+series_wordCloud <- function(lst, type, return=NULL, ...){
+
+}
+
+series_eventRiver <- function(lst, type, return=NULL, ...){
+
+}
+
+series_venn <- function(lst, type, return=NULL, ...){
+
+}
+
+series_tree <- function(lst, type, return=NULL, ...){
+
+}
+
+series_treemap <- function(lst, type, return=NULL, ...){
+
+}
+
+series_heatmap <- function(lst, type, return=NULL, ...){
+
+}
+
+#---------------------------legacy functions-----------------------------------
 # split the data matrix for a scatterplot by series
 data_scatter = function(x, y, series = NULL, type = 'scatter') {
   xy = unname(cbind(x, y))
@@ -40,6 +460,7 @@ data_bar = function(x, y, series = NULL, type = 'bar') {
     if (length(z) == 1) return(z)
     stop('y must only have one value corresponding to each combination of x and series')
   })
+  xy[is.na(xy)] = 0
   nms = colnames(xy)
   obj = list()
   for (i in seq_len(ncol(xy))) {

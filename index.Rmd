@@ -1,6 +1,8 @@
 ---
 title: "recharts: An R Interface to ECharts"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
 ---
 
 ---
@@ -16,17 +18,33 @@ install_github("madlogos/recharts")
 
 </div>
 
-# Contents
+# Knowledge Map of the Guidance
 
 1. Basic Plots
-  1. Cartesian Coordnate System
-    1. [Scatterplot](Basic_Plots_01_Scatterplot.html)
-  1. Non-Cartesian Coordinate System
+  
+    1. Cartesian Coordinate System
+        1. [Scatter/Bubble Plot](Basic_Plots_01_Scatterplot.html)
+        1. [Bar/Column Chart]
+        1. [Line/Area Chart]
+        1. [Candlestick Chart]
+    1. Polar Coordinate System
+        1. [Pie/Ring/Rose Chart]
+        1. [Funnel/Pyramid Chart]
+        1. [Radar Chart]
+    1. Other Plots
+        1. [Map]
+        1. [Force/Chord Chart]
+        1. [Tree/Treemap Chart]
+        1. [Word Cloud]
+        1. [Venn Chart]
+        1. [River Event Chart]
+        1. [Gauge Chart]
+    
 1. Complex Plots
 1. Aesthetic Configuration
 1. Customization
 
-# Examples
+# Hello World
 
 The R package **recharts** provides an interface to the JavaScript library [ECharts2](http://echarts.baidu.com/echarts2) for data visualization. The goal of this package is to make it easy to create charts with only a few lines of R code. R users should be able to get started with ECharts without having to know HTML or JavaScript, although advanced users will benefit from their knowledge of JavaScript. Here is an example of a scatterplot that shows the basic syntax of this package:
 
@@ -35,21 +53,111 @@ library(recharts)
 echartr(iris, ~Sepal.Length, ~Sepal.Width, series = ~Species)
 ```
 
-It is equivalent to 
-
-```r
-echartr(iris, Sepal.Length, Sepal.Width, Species)
-```
-
-or
-
-```r
-echartr(iris, "Sepal.Length", "Sepal.Width", "Species")
-```
-
 The **recharts** package was built on top of [**htmlwidgets**](http://htmlwidgets.org), which can save us a lot of time on managing JavaScript dependencies and dealing with different types of output documents such as R Markdown and Shiny. You just create a chart, and we will take care of the rest of things when the chart is renderd in R Markdown, Shiny, or the R console / RStudio.
 
 The main function in this package is the `echartr()` function (an S3 generic function), and we want to make it smart enough to deal with different types of R data automatically. For example, when a data frame is passed to `echart()`, and the `x`/`y` variables are numeric, it should automatically figure out that you probably need a scatterplot, and the axes will be automatically generated. Of course, you can also override the automatic guess.
+
+# Quick Start
+
+Follow the steps below to make a plot yourself.
+
+## Data
+Always start from data itself. Let's use `mtcars`.
+
+```{r}
+head(mtcars)
+```
+
+We want to know the relationship between `wt` (weight) and `mpg` (miles per gallon), a scatterplot is a good fit. It requires x and y variables of numeric.
+
+## Core Plot
+
+Use `echartr` to build the basic chart.
+
+```{r}
+echartr(mtcars, wt, mpg)
+```
+
+The grammar of `echartr` is 
+
+```{r}
+args(echartr)
+```
+
+You assign `data` and `x`, `y`, then `echartr` automatically processes the data using `recharts:::series_scatter` function.
+
+If `series` is assigned, a series-specfic scatterplot is shown. If `weight` is assigned, a bubble chart is displayed.
+
+```{r}
+echartr(mtcars, wt, mpg, factor(am, labels=c('Automatic', 'Mannual')))
+echartr(mtcars, wt, mpg, am, weight=gear)
+```
+
+The input param list could be
+
+- symbols: wt, mpg or even as complicated as `factor(am, labels=c('Automatic', 'Mannual'))`
+- characters: 'wt', 'mpg'
+- formulas: ~wt, ~mpg
+
+## Modify the Plot
+
+You can save the plot as an object and keep modifying the plot using `%>%`.
+
+### Title
+
+```{r}
+g = echartr(mtcars, wt, mpg, factor(am, labels=c('Automatic', 'Mannual')))
+g %>% setTitle('wt vs mpg', 'Motor Trend', textStyle=list(color='red'))
+```
+
+### Legend
+
+```{r}
+g %>% setLegend(selected='Automatic', textStyle=list(color='green'))
+```
+
+### Toolbox
+
+```{r}
+g %>% setToolbox(lang='en', pos=2)
+```
+
+### DataZoom
+
+```{r}
+g %>% setDataZoom()
+```
+
+### Axis
+
+```{r}
+g %>% setXAxis(min=0) %>% setYAxis(min=0)
+```
+
+## Fortify the Chart
+
+### Theme
+
+```{r}
+g %>% setTheme('shine', calculable=TRUE)
+```
+
+### Symbols
+
+```{r}
+g %>% setSymbols('heart')
+```
+
+## Altogether
+
+You can combine all the steps using a pipe chain. If you are familiar with JS, you can embed JS fragments using `JS()` for better effects.
+
+```{r}
+g %>% setTitle('wt vs mpg', 'Motor Trend', textStyle=list(color='red')) %>%
+    setLegend(selected='Automatic', textStyle=list(color='green')) %>%
+    setToolbox(lang='en', pos=2) %>% setDataZoom() %>% 
+    setTheme('dark', calculable=TRUE) %>% setSymbols('heart')
+```
 
 ## Low-level API
 
@@ -117,5 +225,7 @@ echart(chordEx1)
 ```
 
 Apparently, all we did was to translate the JavaScript object in the [original example](http://echarts.baidu.com/doc/example/chord1.html) into R. Note we translated the function `tooltip.fomatter` using the `JS()` function in **htmlwidgets**. All other objects can be mapped naturally to R.
+
+# Finale
 
 Normally we do not want R users to specify a long list of options like that. As R users, you are more familiar with (and often work with) data structures like data frames, matrices, tables, and so on. Ideally we hope you can just pass a familiar data object, and we configure ECharts automatically for you whenever possible. We are still _far away_ from our goal at this moment, but we will be happy to know your feedback, and you are welcome to contribute code through [Github pull requests](https://github.com/yihui/recharts).

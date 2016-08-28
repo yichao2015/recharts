@@ -58,7 +58,7 @@ The core function is `echartr`, which accepts basic settings of data source, var
 
 Then `echartr` parses the data source and calls series processing functions (`series_scatter`, `series_bar`, `series_line`, ...) to build the `series` part of the `options` object.
 
-Then you can pass other widgets' configuration to the echarts object created by `echartr` to create/modify the widgets. E.g, `setTitle`, `setLegend`, `setToolbox`, `setDataZoom`, `setDataRange`, `setTimeline`, `setRoamController`, and aesthetics such as `setGrid`, `setSymbols`, `setTooltip`, `setTheme`.
+Then you can pass other widgets' configuration to the echarts object created by `echartr` to create/modify the widgets. E.g, `setTitle`, `setLegend`, `setToolbox`, `setDataZoom`, `setDataRange`, `setTimeline`, `setRoamController`, axes such as `setAxis`, `setPolar` and aesthetics such as `setGrid`, `setSymbols`, `setTooltip`, `setTheme`.
 
 You can further tune the series configuration using series tuning functions (under development) with full APIs from Echarts.
 
@@ -70,27 +70,28 @@ Finally, you can use `addMarkLine` or `addMarkPoint` to modify the `series` obje
 
 - Major part of core function `echartr`
 - Major part of widget functions `setTitle`, `setLegend`, `setDataRange`, `setDataZoom`, `setToolbox`, `setTimeline`
-- Major part of aesthetic function `setGrid`, `relocWidget`, `setTheme`, `setSymbols`, `setTooltip`
-- Series processing fuenctions `series_scatter`, `series_bar`, `series_line`, `series_k`, `series_pie`, `series_funnel`
+- Major part of Axis/grid functions `setAxis`, `setPolar`, `setGrid`
+- Major part of aesthetic function `relocWidget`, `setTheme`, `setSymbols`, `setTooltip`
+- Series processing fuenctions `series_scatter`, `series_bar`, `series_line`, `series_k`, `series_pie`, `series_funnel`, `series_radar`
 
 ### Supported chart types
 - Cartesian coordnate system
-    - scatter|point|bubble
-    - bar|hbar
-    - bar_stack|hbar_stack|stacked_bar|stacked_hbar
-    - vbar|column
-    - vbar_stack|column_stack|stacked_column|stacked_vbar
-    - histogram|hist|histogram_count|hist_count|histogram_freq|hist_freq
-    - histogram_density|hist_density
-    - line
-    - line_stack|stacked_line
-    - line_smooth|smooth_line|curve
-    - line_smooth_stack|line_stack_smooth|stacked_smooth_line|curve_stack|stacked_curve
-    - area
-    - area_stack|stacked_area
-    - area_smooth|smooth_area
-    - area_smooth_stack|area_stack_smooth|stacked_smooth_area
-    - k|candlestick
+    - [scatter|point|bubble](http://madlogos.github.io/recharts/Basic_Plots_01_Scatterplot.html)
+    - [bar|hbar](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#horizontal-bar-chart)
+    - [bar_stack|hbar_stack|stacked_bar|stacked_hbar](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#stacked-horizontal-bar-chart)
+    - [vbar|column](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#vertical-bar-column-chart)
+    - [vbar_stack|column_stack|stacked_column|stacked_vbar](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#stacked-vertical-bar-column-chart)
+    - [histogram|hist|histogram_count|hist_count|histogram_freq|hist_freq](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#histogram-chart-stat-by-freq)
+    - [histogram_density|hist_density](http://madlogos.github.io/recharts/Basic_Plots_02_Bar.html#histogram-chart-stat-by-density)
+    - [line](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#line-chart)
+    - [line_stack|stacked_line](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#stacked-line-chart)
+    - [line_smooth|smooth_line|curve](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#smooth-line-chart)
+    - [line_smooth_stack|line_stack_smooth|stacked_smooth_line|curve_stack|stacked_curve](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#stacked-smooth-line-chart)
+    - [area](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#area-chart)
+    - [area_stack|stacked_area](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#stacked-area-chart)
+    - [area_smooth|smooth_area](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#smooth-area-chart)
+    - [area_smooth_stack|area_stack_smooth|stacked_smooth_area](http://madlogos.github.io/recharts/Basic_Plots_03_Line.html#stacked-smooth-area-chart)
+    - [k|candlestick](http://madlogos.github.io/recharts/Basic_Plots_04_K.html)
     - pie
     - ring
     - ring_info

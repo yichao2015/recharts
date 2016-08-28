@@ -13,7 +13,7 @@ series_scatter <- function(lst, type, return=NULL, ...){
         folds <- maxWeight / minWeight
         if (abs(folds) < 50){  # max/min < 50, linear
             jsSymbolSize <- JS(paste0('function (value){
-                return ', switch(ceiling(abs(folds)/10), 6,5,4,3,2),
+                return ', switch(ceiling(abs(folds)/10), 4,3.5,3,2.5,2),
                 '*Math.round(Math.abs(value[2]/', minWeight,'));
                 }'))
         }else{  # max/min >= 50, normalize
@@ -24,11 +24,12 @@ series_scatter <- function(lst, type, return=NULL, ...){
     }
     obj <- list()
     if (is.null(lst$series)) {  # no series
-        if (is.null(lst$weight))
+        if (is.null(lst$weight)){
             obj <- list(list(type=type$type[1], data=asEchartData(data[,2:1])))
-        else
-            obj <- list(list(type=type$type[1], data=asEchartData(data[,c(2:1,3)]),
-                             symbolSize=jsSymbolSize))
+        }else{
+            obj <- list(list(type=type$type[1], data=asEchartData(data[,c(2:1,3)])))
+            if (grepl('bubble', type$misc[1])) obj[[1]]$symbolSize <- jsSymbolSize
+        }
     }else{  # series-specific
         data <- cbind(data, lst$series[,1])
         data <- split(as.data.frame(data), lst$series[,1])
@@ -39,9 +40,10 @@ series_scatter <- function(lst, type, return=NULL, ...){
             })  ## only fetch col 1-2 of data, col 3 is series
         }else{
             obj <- lapply(seq_along(data), function(i){
-                list(name = names(data)[i], type = type$type[i],
-                     data = asEchartData(data[[i]][,c(2:1, 3)]),
-                     symbolSize=jsSymbolSize)
+                out <- list(name = names(data)[i], type = type$type[i],
+                            data = asEchartData(data[[i]][,c(2:1, 3)]))
+                if (grepl('bubble', type$misc[i])) out$symbolSize <- jsSymbolSize
+                return(out)
             })  ## fetch col 1-2 and 3 (x, y, weight)
         }
     }
@@ -335,6 +337,7 @@ series_radar <- function(lst, type, return=NULL, ...){
     #
     # echartr(cars, indicator, Parameter, z=model, type='radar')
     # ----------------
+    #
     # carstat = data.table::dcast(data.table::data.table(mtcars),
     #               am + carb + gear ~., mean,
     #               value.var=c('mpg','disp','hp','qsec','wt','drat'))
@@ -342,7 +345,11 @@ series_radar <- function(lst, type, return=NULL, ...){
     # names(carstat) <- c('am', 'carb', 'gear', 'indicator', 'Parameter')
     # levels(carstat$indicator) <- gsub("_mean_\\.", "",
     #                                   levels(carstat$indicator))
-    # echartr(as.data.frame(carstat), c(indicator, am),
+    # carstat$am <- factor(carstat$am, labels=c('A', 'M'))
+    # fullData <- data.frame(expand.grid(levels(carstat$indicator),
+    #             levels(carstat$am), unique(carstat$carb)))
+    # carstat <- merge(fullData, carstat, all.x=TRUE)
+    # echartr(carstat, c(indicator, am),
     #         Parameter, carb, z=gear, type='radar')
 
     # x[,1] is x, x[,2] is series; y[,1] is y; series[,1] is polorIndex
@@ -355,10 +362,20 @@ series_radar <- function(lst, type, return=NULL, ...){
 
     data <- data.table::dcast(data, index+x+series~., sum, value.var='y')
     names(data) <- c('index', 'x', 'series', 'y')
+    if (is.factor(lst$x[,2])){
+        fullData <- data.frame(expand.grid(
+            levels(lst$series[,1]), unique(data$x), levels(lst$x[,2])))
+    }else{
+        fullData <- data.frame(expand.grid(
+            levels(lst$series[,1]), unique(data$x), unique(data$series)))
+    }
+    names(fullData) <- c('index', 'x', 'series')
+    data <- merge(fullData, data, all.x=TRUE)
     index <- 0:(length(unique(data$index))-1)
     obj <- lapply(index, function(i){
         dt <- data[data$index==unique(data$index)[i+1],]
-        out <- list(type=type[i + 1, 'type'], name=unname(unique(data$index)[i+1]),
+        out <- list(type=type[i+1, 'type'],
+                    name=unname(unique(as.character(data$index))[i+1]),
                     data=lapply(unique(dt$series), function(s){
                         list(name=as.character(s),
                              value=lapply(dt[dt$series==s, 'y'], function(x){

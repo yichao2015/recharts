@@ -114,6 +114,10 @@ echartr = function(
     eval(parse(text=paste0(names(vArgsRaw), " <- evalVarArg(",
                            sapply(vArgsRaw, deparse), ", data)")))
     hasZ <- ! is.null(z)
+    if (!is.null(series))
+        for (i in seq_along(seriesvar))
+            if (!is.factor(data[,seriesvar[i]]))
+                data[,seriesvar[i]] = as.factor(data[,seriesvar[i]])
 
     # ------------------x, y lab(s)----------------------------
     #xlab = ylab = NULL
@@ -128,8 +132,6 @@ echartr = function(
     # -------------split multi-timeline df to lists-----------
 
     .makeMetaDataList <- function(df) {
-        # assignment <- paste0(dataVars, " = ", substitute(df, parent.frame()),
-        #                      "[ ,", paste0(dataVars, "var"), ", drop=FALSE]")
         vars <- sapply(dataVars, function(x) {
             eval(parse(text=paste0(x, 'varRaw')))}, simplify=TRUE)
         assignment <- paste0(dataVars, " = evalVarArg(", vars, ", ",

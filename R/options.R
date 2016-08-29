@@ -1718,6 +1718,12 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
             c('funnel', 'pie', 'radar')){
             if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
             if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
+        }else if (chart$x$options[[1]]$series[[1]]$type %in%
+                  c('force', 'chord')){
+            if (element == 'name')
+                obj <- unlist(chart$x$options[[1]]$series[[1]]$categories)
+            if (elemetn == 'data')
+                obj <- data[names(data) %in% c('nodes', 'links')]
         }
     }else{
         obj <- sapply(chart$x$series, function(lst) lst[[element]])
@@ -1725,6 +1731,9 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
         if (chart$x$series[[1]]$type %in% c('funnel', 'pie', 'radar')){
             if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
             if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
+        }else if (chart$x$series[[1]]$type %in% c('force', 'chord')){
+            if (element == 'name') obj <- unlist(chart$x$series[[1]]$categories)
+            if (element == 'data') obj <- data[names(data) %in% c('nodes', 'links')]
         }
     }
     return(unlist(obj))
@@ -1902,17 +1911,6 @@ autoPolar <- function(chart, type){
     }
 
     return(chart %>% reElementId())
-    # if (type[1] %in% c('radar')){
-    #     x <- factor(x,levels=unique(x))
-    #     indicator <- levels(x)
-    #     lstPolar <- list(list(radius='70%', indicator=list()))
-    #     for (i in 1:length(indicator)){
-    #         lstPolar[[1]][['indicator']][[i]] <- list(
-    #             text = as.character(indicator[i]),
-    #             max = max(data[data[,xvar]==indicator[i],yvar]) * 1.25
-    #         )
-    #     }
-    # }
 }
 
 #' Set \code{polar} of Echarts (For Radar Charts)
@@ -2343,11 +2341,11 @@ determineFormatter <- function(type){
     }else if (type %in% c('ring','pie')){
         formatter <- tooltipJS('pie')
     }else if (type %in% c('chord', 'force')){
-        if (length(getSeriesPart(chart, 'name')) == 1){
-            formatter <- tooltipJS('chord_mono')
-        }else{
+        # if (length(getSeriesPart(chart, 'name')) == 1){
+        #     formatter <- tooltipJS('chord_mono')
+        # }else{
             formatter <- tooltipJS('chord_multi')
-        }
+        # }
     }else if (type == 'k'){
         formatter <- tooltipJS('k')
     }else if (type == 'histogram'){

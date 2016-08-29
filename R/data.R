@@ -364,13 +364,16 @@ series_radar <- function(lst, type, return=NULL, ...){
     names(data) <- c('index', 'x', 'series', 'y')
     if (is.factor(lst$x[,2])){
         fullData <- data.frame(expand.grid(
-            levels(lst$series[,1]), unique(data$x), levels(lst$x[,2])))
+            if (is.null(lst$series)) unique(data$index) else lst$series[,1],
+            unique(data$x), levels(lst$x[,2])))
     }else{
         fullData <- data.frame(expand.grid(
-            levels(lst$series[,1]), unique(data$x), unique(data$series)))
+            if (is.null(lst$series)) unique(data$index) else lst$series[,1],
+            unique(data$x), unique(data$series)))
     }
     names(fullData) <- c('index', 'x', 'series')
     data <- merge(fullData, data, all.x=TRUE)
+    data$x <- as.character(data$x)
     index <- 0:(length(unique(data$index))-1)
     obj <- lapply(index, function(i){
         dt <- data[data$index==unique(data$index)[i+1],]
@@ -395,6 +398,53 @@ series_radar <- function(lst, type, return=NULL, ...){
 }
 
 series_force <- function(lst, type, return=NULL, ...){
+    # x: node/link, x2: link, series: series/relation, y: weight/value
+    # Example
+    # echartr(yu, c(source, target), value, relation, type='force')
+    if (is.null(lst$y) || is.null(lst$x) || is.null(lst$series))
+        stop('radar charts need x, y and series!')
+    if (ncol(lst$x) < 2) stop('x must have at least 2 columns!')
+    data <- data.frame(lst$y[,1], lst$x[,1:2], lst$series[,1])
+    nodes <- data[is.na(data[,3]), c(1,2,4)]
+    names(nodes) <- c("value", "name", "series")
+    links <- data[!is.na(data[,3]),]
+    names(links) <- c("value", "source", "target", "name")
+    categories <- as.character(unique(nodes$series))
+
+    if (any(type$type=='force')){
+        o <- list(list(
+            type='force', name='Connection',
+            categories=lapply(categories, function(catg) list(name=unname(catg))),
+            itemStyle=list(normal=list(
+                label=list(show=TRUE, textStyle=list(color='#333')),
+                nodeStyle=list(brushType='both', borderColor='rgba(255,215,0,0.4)'),
+                linkStyle=list(type=ifelse(grepl('line', type$misc[type$type=='force']),
+                                 'line','curve')[1])
+            ), emphasis=list(
+                label=list(show=FALSE), nodeStyle=list(), lineStyle=list()
+            )),
+            roam='move',
+            linkSymbol=gsub('(arrow|triangle)', '\\1', type$misc[type$type=='force'])[1],
+            nodes=unname(apply(nodes, 1, function(row){
+                list(category=which(categories==row[['series']])-1,
+                     name=row[['name']], value=as.numeric(row[['value']]))
+            })),
+            links=unname(apply(links, 1, function(row){
+                list(source=row[['source']], target=row[['target']],
+                     name=row[['name']], weight=as.numeric(row[['value']]))
+            }))
+        ))
+        if (sum(paste(links$source, links$target) ==
+                   paste(links$target, links$source), na.rm=TRUE) / nrow(links) > 0.5)
+            o[[1]]$ribbonType <- TRUE
+        else o[[1]]$ribbonType <- FALSE
+
+        if (is.null(return)){
+            return(o)
+        }else{
+            return(o[intersect(names(o), return)])
+        }
+    }
 
 }
 

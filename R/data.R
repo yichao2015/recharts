@@ -262,16 +262,18 @@ series_pie <- function(lst, type, return=NULL, ...){
             name=pie, type=iType$type,
             data=unname(apply(data[,c('x', pie)], 1, function(row) {
                 if (row[1] == 'FALSE')
-                    return(list(name='', value=as.numeric(unname(row[2])),
+                    return(list(name='', value= ifna(as.numeric(unname(row[2])), '-'),
                          itemStyle=grayStyle))
                 else
                     return(list(name=ifelse(as.character(unname(row[1]))=='TRUE',
                                             pie, as.character(unname(row[1]))),
-                                value=as.numeric(unname(row[2])),
+                                value=ifna(as.numeric(unname(row[2])), '-'),
                                 itemStyle=normalStyle))
                 })),
             center=paste0(unname(centers[pie,]), '%'), width=paste0(radius, '%'),
-            x=paste0(centers[pie, 1]-radius/2, '%'), max=max(unname(data[,pie])),
+            x=paste0(centers[pie, 1]-radius/2, '%'),
+            max=ifelse(all(is.na(data[,pie])), 0,
+                       max(unname(data[,pie]), na.rm=TRUE)),
             height=ifelse(rows==1, '70%', paste0(radius, '%')),
             y=ifelse(rows==1, rep('15%', length(pies)), paste0(centers[pie, 2]-radius/2, '%')),
             selectedMode='multiple'

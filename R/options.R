@@ -558,7 +558,8 @@ tuneGrid <- function(chart, ...){
 
     sumGrid <- dcast(data.table(dfGrid), orient + pos ~ ., fun=sum,
                      value.var=c("x", "y", "x2", "y2", "height", "width"))
-    uniqueGrid <- dfGrid[!duplicated(dfGrid$pos),]
+    uniqueGrid <- dfGrid[!duplicated(paste(dfGrid$orient, dfGrid$pos)),]
+    uniqueGrid <- uniqueGrid[order(uniqueGrid$orient, uniqueGrid$pos),]
     sumGrid[,c('x_sum_.', 'y_sum_.', 'x2_sum_.', 'y2_sum_.')] <-
         uniqueGrid[, c('x', 'y', 'x2', 'y2')]
     sumGrid$x <- ifblank(

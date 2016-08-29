@@ -344,9 +344,11 @@ invertColor <- function(color, mode=c('bw', 'opposite', 'hue', 'saturation',
 autoMultiPolarChartLayout <- function(n, col.max=5, gap=5){
     layouts <- data.frame(row=ceiling(n/(1:col.max)), col=1:col.max)
     layouts$empty <- abs(layouts$row * layouts$col - n)
+    layouts$diff <- abs(layouts$row - layouts$col)
     layouts <- layouts[layouts$empty == min(layouts$empty),]
-    rows <- layouts[nrow(layouts), 'row']
-    cols <- layouts[nrow(layouts), 'col']
+    layouts <- layouts[order(layouts$diff, layouts$row), ]
+    rows <- layouts[1, 'row']
+    cols <- layouts[1, 'col']
 
     ## calculate the sizing params
     centers <- expand.grid(5 + ((1:cols)*2 - 1) * 45/cols,

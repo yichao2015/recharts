@@ -189,9 +189,10 @@ echartr = function(
 
     ## check types
     if (nlevels(as.factor(dfType$type)) > 1){
-        if (!all(grepl("^(line|bar|scatter|k)", dfType$type)))
-            stop(paste("Only Cartesion Coordinates charts (scatter/point/bubble,",
-                       "line, area, bar, k) support mixed types"))
+        if (!all(grepl("^(line|bar|scatter|k)", dfType$type) ||
+                 grepl("^(funnel|pie)", dfType$type) ||
+                 grepl("^(force|chord)", dfType$type)))
+            stop(paste("recharts does not support such mixed types yet."))
     }
     # if (nlevels(as.factor(dfType$xyflip)) > 1)
     #     warning(paste("xyflip is not consistent across the types given.\n",

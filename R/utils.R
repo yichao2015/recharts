@@ -341,7 +341,8 @@ invertColor <- function(color, mode=c('bw', 'opposite', 'hue', 'saturation',
     }
 }
 
-autoMultiPolarChartLayout <- function(n, col.max=5, gap=5){
+autoMultiPolarChartLayout <- function(n, col.max=5, gap=5, top=5, bottom=5,
+                                      left=5, right=5){
     layouts <- data.frame(row=ceiling(n/(1:col.max)), col=1:col.max)
     layouts$empty <- abs(layouts$row * layouts$col - n)
     layouts$diff <- abs(layouts$row - layouts$col)
@@ -351,10 +352,11 @@ autoMultiPolarChartLayout <- function(n, col.max=5, gap=5){
     cols <- layouts[1, 'col']
 
     ## calculate the sizing params
-    centers <- expand.grid(5 + ((1:cols)*2 - 1) * 45/cols,
-                           5 + ((1:rows)*2 - 1) * 45/rows)
+    centers <- expand.grid(left + ((1:cols)*2 - 1) * ((100-left-right)/2) /cols,
+                           top + ((1:rows)*2 - 1) * ((100-top-bottom)/2) /rows)
     centers <- centers[1:n,]
-    radius <- (80 - gap * (max(rows, cols) -1)) / max(rows, cols)
+    radius <- (min(100-left-right, 100-top-bottom) -
+                   gap * (max(rows, cols) -1)) / max(rows, cols)
     return(list(rows=rows, cols=cols, centers=centers, radius=radius))
 }
 

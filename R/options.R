@@ -1722,7 +1722,7 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
         }else if (chart$x$options[[1]]$series[[1]]$type %in%
                   c('force', 'chord')){
             if (element == 'name')
-                obj <- unlist(chart$x$options[[1]]$series[[1]]$categories)
+                obj <- unlist(chart$x$options[[1]]$series[[1]][c('categories', 'data')])
             if (elemetn == 'data')
                 obj <- data[names(data) %in% c('nodes', 'links')]
         }
@@ -1733,7 +1733,7 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
             if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
             if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
         }else if (chart$x$series[[1]]$type %in% c('force', 'chord')){
-            if (element == 'name') obj <- unlist(chart$x$series[[1]]$categories)
+            if (element == 'name') obj <- unlist(chart$x$series[[1]][c('categories', 'data')])
             if (element == 'data') obj <- data[names(data) %in% c('nodes', 'links')]
         }
     }

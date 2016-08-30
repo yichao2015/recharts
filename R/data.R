@@ -232,8 +232,12 @@ series_pie <- function(lst, type, return=NULL, ...){
         sum.prop <- sum(data[data$x == 'TRUE', 2:ncol(data)], na.rm=TRUE)
         data[nrow(data)+1, ] <- c('FALSE', sum.prop - data[data$x == 'TRUE', 2:ncol(data)])
     }
+    if (is.null(lst$z)){
+        layouts <- autoMultiPolarChartLayout(length(pies))
+    }else{
+        layouts <- autoMultiPolarChartLayout(length(pies), bottom=15)
+    }
 
-    layouts <- autoMultiPolarChartLayout(length(pies))
     rows <- layouts$rows
     cols <- layouts$cols
     centers <- layouts$centers
@@ -401,45 +405,87 @@ series_radar <- function(lst, type, return=NULL, ...){
 
 series_force <- function(lst, type, return=NULL, ...){
     # x: node/link, x2: link, series: series/relation, y: weight/value
+    # or x: name column, y: matrix
     # Example
     # echartr(yu, c(source, target), value, relation, type='force')
-    if (is.null(lst$y) || is.null(lst$x) || is.null(lst$series))
-        stop('radar charts need x, y and series!')
-    if (ncol(lst$x) < 2) stop('x must have at least 2 columns!')
-    data <- data.frame(lst$y[,1], lst$x[,1:2], lst$series[,1])
-    nodes <- data[is.na(data[,3]), c(1,2,4)]
-    names(nodes) <- c("value", "name", "series")
-    links <- data[!is.na(data[,3]),]
-    names(links) <- c("value", "source", "target", "name")
-    categories <- as.character(unique(nodes$series))
+    if (is.null(lst$y) || is.null(lst$x))
+        stop('radar charts need x and y!')
+    if (is.null(lst$series)){
+        if (ncol(lst$y) != nrow(lst$y)) stop('When there is no sereis, y must be a matrix!')
+    }else{
+        if (ncol(lst$x) < 2) stop('x must have at least 2 columns: 1st as source, 2nd as target!')
+    }
 
-    if (any(type$type=='force')){
+    if (is.null(lst$series)){  #matrix mode
+        data <- data.frame(lst$y, lst$x[,1])
+        matrix <- unname(as.matrix(lst$y))
+        categories <- as.character(unique(lst$x[,1]))
+    }else{  # nodes and links mode
+        data <- data.frame(lst$y[,1], lst$x[,1:2], lst$series[,1])
+        nodes <- data[is.na(data[,3]), c(1,2,4)]
+        names(nodes) <- c("value", "name", "series")
+        links <- data[!is.na(data[,3]),]
+        names(links) <- c("value", "source", "target", "name")
+        categories <- as.character(unique(nodes$series))
+    }
+
+    if (any(type$type %in% c('force', 'chord'))){
+        types <- type$type
+        miscs <- type$misc[type$type %in% c('force', 'chord')]
         o <- list(list(
-            type='force', name='Connection',
-            categories=lapply(categories, function(catg) list(name=unname(catg))),
+            type=types[1], name='Connection', roam='move',
             itemStyle=list(normal=list(
                 label=list(show=TRUE, textStyle=list(color='#333')),
-                nodeStyle=list(brushType='both', borderColor='rgba(255,215,0,0.4)'),
-                linkStyle=list(type=ifelse(grepl('line', type$misc[type$type=='force']),
-                                 'line','curve')[1])
+                nodeStyle=list(brushType='both', strokeColor='rgba(255,215,0,0.4)'),
+                linkStyle=list(type=ifelse(grepl('line', miscs[1]), 'line',
+                                           ifelse(is.null(lst$series), 'line', 'curve')))
             ), emphasis=list(
                 label=list(show=FALSE), nodeStyle=list(), lineStyle=list()
-            )),
-            roam='move',
-            linkSymbol=gsub('(arrow|triangle)', '\\1', type$misc[type$type=='force'])[1],
-            nodes=unname(apply(nodes, 1, function(row){
+            ))
+        ))
+        # nodes/links or matrix
+        if (is.null(lst$series)){  # data/matrix
+            o[[1]]$matrix <- asEchartData(matrix)
+            o[[1]]$data <- lapply(categories, function(catg){
+                list(name=unname(catg))})
+        }else{  # categories, nodes/links
+            o[[1]]$categories <- lapply(categories, function(catg){
+                list(name=unname(catg))})
+            o[[1]]$nodes <- unname(apply(nodes, 1, function(row){
                 list(category=which(categories==row[['series']])-1,
                      name=row[['name']], value=as.numeric(row[['value']]))
-            })),
-            links=unname(apply(links, 1, function(row){
+            }))
+            o[[1]]$links <- unname(apply(links, 1, function(row){
                 list(source=row[['source']], target=row[['target']],
                      name=row[['name']], weight=as.numeric(row[['value']]))
             }))
-        ))
-        if (sum(paste(links$source, links$target) ==
-                   paste(links$target, links$source), na.rm=TRUE) / nrow(links) > 0.5)
-            o[[1]]$ribbonType <- TRUE
-        else o[[1]]$ribbonType <- FALSE
+        }
+
+        #other params
+        ## linkSymbol
+        if (grepl('(arrow|triangle)', miscs[1]))
+            o[[1]]$linkSymbol <- gsub('(arrow|triangle)', '\\1', miscs[1])
+
+        ## auto ribbon
+        if (types[1] == 'force'){
+            if (is.null(lst$series)){
+                 o[[1]]$ribbonType <- TRUE
+            }else{
+                if (sum(paste(links$source, links$target) ==
+                        paste(links$target, links$source), na.rm=TRUE) / nrow(links) > 0.5)
+                    o[[1]]$ribbonType <- TRUE
+                else o[[1]]$ribbonType <- FALSE
+            }
+        }else{
+            o[[1]]$ribbonType <- grepl('ribbon', miscs[1])
+        }
+
+        ## sort and sortSub
+        if (grepl('asc', miscs[1])) o[[1]]$sort = o[[1]]$sortSub <- 'ascending'
+        if (grepl('desc', miscs[1])) o[[1]]$sort = o[[1]]$sortSub <- 'descending'
+
+        ## clockWise
+        if (grepl('clock', miscs[1])) o[[1]]$closeWise <- TRUE
 
         if (is.null(return)){
             return(o)
@@ -447,12 +493,9 @@ series_force <- function(lst, type, return=NULL, ...){
             return(o[intersect(names(o), return)])
         }
     }
-
 }
 
-series_chord <- function(lst, type, return=NULL, ...){
-
-}
+series_chord <- series_force
 
 series_gauge <- function(lst, type, return=NULL, ...){
 
@@ -463,7 +506,38 @@ series_map <- function(lst, type, return=NULL, ...){
 }
 
 series_wordCloud <- function(lst, type, return=NULL, ...){
+    if (is.null(lst$y) || is.null(lst$x))
+        stop('radar charts need x and y!')
+    data <- data.frame(lst$y[,1], lst$x[,1])
+    names(data)[1:2] <- c('y', 'x')
+    data <- data.table::dcast(data, x~., sum, value.var='y')
+    names(data)[2] <- 'y'
 
+    colors <- getColFromPal()
+
+    if (is.null(lst$series)){
+        o <- list(list(data=unname(apply(data, 1, function(row){
+            list(name=unname(row['x']), value=unname(as.numeric(row['y'])),
+                 itemStyle=list(normal=list(color=sample(colors,1))))
+            })), textRotation=c(0,-45,45,90), type=type$type[1]))
+
+    }else{
+        data$series <- as.factor(lst$series[,1])
+        if (length(colors) < length(nlevels(data$series)))
+            colors <- rep(colors, ceiling(nlevels(data$series)/length(colors)))
+        data$color <- colors[as.numeric(data$series)]
+
+        o <- list(list(data=unname(apply(data, 1, function(row){
+            list(name=unname(row['x']), value=unname(ifna(as.numeric(row['y']), '-')),
+                 itemStyle=list(normal=list(color=unname(row['color']))))
+        })), textRotation=c(0,-45,45,90), type=type$type[1]))
+    }
+
+    if (is.null(return)){
+        return(o)
+    }else{
+        return(o[intersect(names(o), return)])
+    }
 }
 
 series_eventRiver <- function(lst, type, return=NULL, ...){
@@ -471,7 +545,24 @@ series_eventRiver <- function(lst, type, return=NULL, ...){
 }
 
 series_venn <- function(lst, type, return=NULL, ...){
+    if (is.null(lst$x) || is.null(lst$y)) stop('venn charts need x and y!')
+    if (nrow(lst$y) < 3) stop('y has to have 3 rows with the last row be intersection.')
+    data <- data.frame(y=lst$y[,1], x=lst$x[,1])[1:3,]
+    o <- list(list(type='venn', itemStyle=list(
+        normal=list(label=list(show=TRUE)),
+        emphasis=list(borderWidth=3, borderColor='yellow')
+        ),
+        data=unname(apply(data, 1, function(row){
+            list(value=unname(ifna(as.numeric(row['y']), '-')),
+                 name=unname(row['x']))
+        }))
+    ))
 
+    if (is.null(return)){
+        return(o)
+    }else{
+        return(o[intersect(names(o), return)])
+    }
 }
 
 series_tree <- function(lst, type, return=NULL, ...){

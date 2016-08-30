@@ -105,17 +105,33 @@ The grammar of `echartr` is
 str(args(echartr))
 ```
 
-|   **Arg**        |               **Meaning**               |
-|:----------|:--------------------------------------------------------------|
-| **data** | source data in form of data.frame |
-| **x** | independent variable(s). One or more columns of `data`. Could be time, numeric or characters. |
-| **y** | dependent variable(s). One or more columns of `data`. Always numeric. |
-| **series** | series variable. A column of `data` which is treated as factors. |
-| **weight** | weight variable used in bubble chart. |
-| **z** | time variable. If `z` is assigned, a timeline widget will display. |
-| **lat** | latitude variable for map. |
-| **lng** | longitude variable for map. |
-| **type** | chart type. Default 'auto'. |
++----------+-------------------------------------------------------------------+
+| **Arg**  |               **Interpretation**               |
++==========+===================================================================+
+| **data** | source data in the form of data.frame |
++----------+-------------------------------------------------------------------+
+| **x**    | - independent variable(s). One or more columns of `data`. Could be time, numeric or characters.        |
+|          | - In Cartesian coordinate system charts, `x` is linked with x-axis |
+|          | - In polar coordinate system charts, `x` var1 is linked with polar-axis, and `x` var2 is data series (linked with legends) |
+|          | - In other chart types, refer to the manual for more. |
++----------+-------------------------------------------------------------------+
+| **y**    | dependent variable(s). One or more columns of `data`. Always numeric. |
++--------+---------------------------------------------------------------------+
+|**series**| - series variable. A column of `data` which is treated as factors.   |
+|          | - In Cartesian coordinate system charts, `series` is data series (linked with legends). |
+|          | - In polar coordinate system charts, `series` is linked with polar systems. |
+|          | - In other chart types, refer to the manual for more.       |
++----------+-------------------------------------------------------------------+
+|**weight**| weight variable used in bubble chart. |
++----------+-------------------------------------------------------------------+
+| **z**    | time variable. If `z` is assigned, a timeline widget will display. |
++----------+-------------------------------------------------------------------+
+| **lat**  | latitude variable for map/heatmap. |
++----------+-------------------------------------------------------------------+
+| **lng**  | longitude variable for map/heatmap. |
++----------+-------------------------------------------------------------------+
+| **type** | chart type. Default 'auto'. `type` as a vector is linked with `series`. |
++----------+-------------------------------------------------------------------+
 
 `echartr` now support the following types (the regex patterns in 'name' column, case insensitive):
 ```{r}

@@ -136,6 +136,38 @@ echartr(titanic, Class, Count, Survived) %>%
     setTitle('Titanic: Survival Outcome by Cabin Class')
 ```
 
+### Tornado Chart
+
+Tornado chart is a special case. The keys are:
+
+- An all-positive series and an all-negative series
+- Tiled rather than stacked
+
+```{r}
+titanic_tc <- titanic
+titanic_tc$Count[titanic_tc$Survived=='No'] <- 
+    - titanic_tc$Count[titanic_tc$Survived=='No']
+g <- echartr(titanic_tc, Class, Count, Survived, type='hbar') %>%
+    setTitle("Titanic: Survival Outcome by Cabin Class")
+g
+```
+
+Of course we need to adjust the axis a little bit as well.
+
+```{r}
+g %>% setYAxis(axisLine=list(onZero=TRUE))
+```
+
+### Population Pyramid
+
+So when you apply 'hbar_stack', you yield a 'population pyramid' as usually used in sociology.
+
+```{r}
+echartr(titanic_tc, Class, Count, Survived, type='hbar_stack') %>%
+    setTitle("Titanic: Survival Outcome by Cabin Class") %>%
+    setYAxis(axisLine=list(onZero=TRUE))
+```
+
 ### Bar Chart with Timeline
 
 We need another variable as timeline. Let's say, 'sex'.

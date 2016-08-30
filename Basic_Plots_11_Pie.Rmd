@@ -133,6 +133,15 @@ echartr(titanic, Survived, Count, Class, type='pie') %>%
     setTitle('Titanic: Survival Outcome by Cabin Class')
 ```
 
+### Multiple Series with No X
+
+What if we only provide `series` and `y`? We get several dichotomous pies.
+
+```{r}
+echartr(titanic, y=Count, series=Class, type='pie') %>%
+    setTitle('Titanic: Propotion of Each Cabin Class')
+```
+
 ### With Timeline
 
 We need another variable as timeline. Let's say, 'sex'.
@@ -212,4 +221,5 @@ echartr(titanic_sex, Class, Count, Survived, type='rose_area') %>%
 Then you can configure the widgets, add markLines and/or markPoints, fortify the chart.
 
 You can refer to related functions to play around on your own.
+
 

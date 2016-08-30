@@ -1709,12 +1709,12 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
     element <- match.arg(element)
     hasZ <- 'timeline' %in% names(chart$x)
     if (hasZ){
-        obj <- sapply(seq_len(length(chart$x$options)), function(i) {
+        obj <- try(sapply(seq_len(length(chart$x$options)), function(i) {
             sapply(chart$x$options[[i]]$series, function(lst) lst[[element]])
-        })
-        data <- sapply(seq_len(length(chart$x$options)), function(i) {
+        }), TRUE)
+        data <- try(sapply(seq_len(length(chart$x$options)), function(i) {
             sapply(chart$x$options[[i]]$series, function(lst) lst[['data']])
-        })
+        }), TRUE)
         if (chart$x$options[[1]]$series[[1]]$type %in%
             c('funnel', 'pie', 'radar')){
             if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
@@ -1727,8 +1727,8 @@ getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
                 obj <- data[names(data) %in% c('nodes', 'links')]
         }
     }else{
-        obj <- sapply(chart$x$series, function(lst) lst[[element]])
-        data <- sapply(chart$x$series, function(lst) lst[['data']])
+        obj <- try(sapply(chart$x$series, function(lst) lst[[element]]), TRUE)
+        data <- try(sapply(chart$x$series, function(lst) lst[['data']]), TRUE)
         if (chart$x$series[[1]]$type %in% c('funnel', 'pie', 'radar')){
             if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
             if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']

@@ -405,9 +405,11 @@ series_radar <- function(lst, type, return=NULL, ...){
 
 series_force <- function(lst, type, return=NULL, ...){
     # x: node/link, x2: link, series: series/relation, y: weight/value
+    # df with x2 NA is nodes, !NA is links. If all !NA, no categories are linked
     # or x: name column, y: matrix
     # Example
     # echartr(yu, c(source, target), value, relation, type='force')
+    # echartr(deutsch, c(club, player), weight, role, type='chord')
     if (is.null(lst$y) || is.null(lst$x))
         stop('radar charts need x and y!')
     if (is.null(lst$series)){
@@ -422,11 +424,16 @@ series_force <- function(lst, type, return=NULL, ...){
         categories <- as.character(unique(lst$x[,1]))
     }else{  # nodes and links mode
         data <- data.frame(lst$y[,1], lst$x[,1:2], lst$series[,1])
-        nodes <- data[is.na(data[,3]), c(1,2,4)]
-        names(nodes) <- c("value", "name", "series")
+        if (!any(is.na(data[,3]))){
+            nodes <- unique(c(as.character(data[,2]), as.character(data[,3])))
+            categories <- as.character(data[,4])
+        }else{
+            nodes <- data[is.na(data[,3]), c(1,2,4)]
+            names(nodes) <- c("value", "name", "series")
+            categories <- as.character(unique(nodes$series))
+        }
         links <- data[!is.na(data[,3]),]
         names(links) <- c("value", "source", "target", "name")
-        categories <- as.character(unique(nodes$series))
     }
 
     if (any(type$type %in% c('force', 'chord'))){
@@ -441,7 +448,8 @@ series_force <- function(lst, type, return=NULL, ...){
                                            ifelse(is.null(lst$series), 'line', 'curve')))
             ), emphasis=list(
                 label=list(show=FALSE), nodeStyle=list(), lineStyle=list()
-            ))
+            )),
+            minRadius=8, maxRadius=20
         ))
         # nodes/links or matrix
         if (is.null(lst$series)){  # data/matrix
@@ -449,12 +457,19 @@ series_force <- function(lst, type, return=NULL, ...){
             o[[1]]$data <- lapply(categories, function(catg){
                 list(name=unname(catg))})
         }else{  # categories, nodes/links
-            o[[1]]$categories <- lapply(categories, function(catg){
-                list(name=unname(catg))})
-            o[[1]]$nodes <- unname(apply(nodes, 1, function(row){
-                list(category=which(categories==row[['series']])-1,
-                     name=row[['name']], value=as.numeric(row[['value']]))
-            }))
+            if (is.null(dim(nodes))){
+                o[[1]]$nodes <- lapply(nodes, function(vec){
+                    list(name=vec)
+                })
+            }else{
+                o[[1]]$nodes <- unname(apply(nodes, 1, function(row){
+                    list(category=which(categories==row[['series']])-1,
+                         name=row[['name']], value=as.numeric(row[['value']]))
+                }))
+                o[[1]]$categories <- lapply(categories, function(catg){
+                    list(name=unname(catg))})
+            }
+
             o[[1]]$links <- unname(apply(links, 1, function(row){
                 list(source=row[['source']], target=row[['target']],
                      name=row[['name']], weight=as.numeric(row[['value']]))
@@ -485,7 +500,7 @@ series_force <- function(lst, type, return=NULL, ...){
         if (grepl('desc', miscs[1])) o[[1]]$sort = o[[1]]$sortSub <- 'descending'
 
         ## clockWise
-        if (grepl('clock', miscs[1])) o[[1]]$closeWise <- TRUE
+        if (grepl('[^i]clock', miscs[1])) o[[1]]$closeWise <- TRUE
 
         if (is.null(return)){
             return(o)
@@ -506,6 +521,7 @@ series_map <- function(lst, type, return=NULL, ...){
 }
 
 series_wordCloud <- function(lst, type, return=NULL, ...){
+    # does not accept series
     if (is.null(lst$y) || is.null(lst$x))
         stop('radar charts need x and y!')
     data <- data.frame(lst$y[,1], lst$x[,1])
@@ -573,8 +589,31 @@ series_treemap <- function(lst, type, return=NULL, ...){
 
 }
 
+#' @importFrom data.table between
 series_heatmap <- function(lst, type, return=NULL, ...){
+    # data = rbind(data.frame(lng=100+rnorm(100,0, 1)*600,
+    #        lat=150+rnorm(100,0, 1)*50, y=abs(rnorm(100,0,1))),
+    # data.frame(lng=rnorm(200,0, 1)*1000,
+    #        lat=rnorm(200,0, 1)*800, y=abs(rnorm(200,0,1))),
+    # data.frame(lng=400+rnorm(20,0, 1)*300,
+    #        lat=5+rnorm(20,0, 1)*10, y=abs(rnorm(100,0,1))))
+    # echartr(data,lng=lng,lat=lat,y=y,type='heatmap')
+    if (is.null(lst$lng) || is.null(lst$lat) || is.null(lst$y))
+        stop("heatmap needs lng, lat and y!")
+    if (!all(data.table::between(lst$y[,1], 0, 1)))
+        lst$y[,1] = (max(lst$y[,1], na.rm=TRUE)-lst$y[,1]) /
+            (max(lst$y[,1], na.rm=TRUE)-min(lst$y[,1], na.rm=TRUE))
 
+    data <- data.frame(y=lst$y[,1], lng=lst$lng[,1], lat=lst$lat[,1])
+    o <- list(list(type=type$type[1], minAlpha=0.2, opacity=0.6,
+              gradientColors=c('blue', 'cyan', 'lime', 'yellow', 'red'),
+              data=asEchartData(unname(data[,c('lng', 'lat', 'y')]))
+    ))
+    if (is.null(return)){
+        return(o)
+    }else{
+        return(o[intersect(names(o), return)])
+    }
 }
 
 #---------------------------legacy functions-----------------------------------

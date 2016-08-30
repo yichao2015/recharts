@@ -263,6 +263,8 @@ echartr = function(
             setYAxis(name = ylab[[1]]) %>%
             setTooltip() %>% setToolbox() %>% setLegend() %>%
             flipAxis(flip=any(grepl("flip", dfType$misc)))
+    }else if (any(dfType$type == 'heatmap')){
+        chart
     }else{
         chart %>% setTooltip() %>% setToolbox() %>% setLegend() %>%
             autoPolar(type=dfType)

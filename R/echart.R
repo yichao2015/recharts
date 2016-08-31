@@ -258,9 +258,10 @@ echartr = function(
         chart <- chart %>% setTimeline(show=TRUE, data=uniZ)
     }
 
-    if (any(dfType$type %in% c('line', 'bar', 'scatter', 'k'))){
+    if (any(dfType$type %in% c('line', 'bar', 'scatter', 'k', 'eventRiver'))){
+        if (!any(dfType$type %in% c('eventRiver')))
+            chart %>% setYAxis(name = ylab[[1]])
         chart %>% setXAxis(name = xlab[[1]]) %>%
-            setYAxis(name = ylab[[1]]) %>%
             setTooltip() %>% setToolbox() %>% setLegend() %>%
             flipAxis(flip=any(grepl("flip", dfType$misc)))
     }else if (any(dfType$type == 'heatmap')){

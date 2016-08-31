@@ -360,6 +360,41 @@ autoMultiPolarChartLayout <- function(n, col.max=5, gap=5, top=5, bottom=5,
     return(list(rows=rows, cols=cols, centers=centers, radius=radius))
 }
 
+parseTreeNodes <- function(name, value, parent, itemStyle=NULL){
+    data <- data.frame(cbind(as.character(name), as.numeric(value),
+                             as.character(parent)),
+                       stringsAsFactors = FALSE)
+    names(data) <- c("name", 'value', 'parent')
+    if (!is.null(itemStyle)) data$itemStyle <- as.character(itemStyle)
+
+    if (sum(is.na(parent)) != 1)
+        stop('Expect to have one NA in parent, which serves as the root node.')
+
+    orderBase <- data[which(data$name == data$parent),]
+
+    .getRecursiveNodes <- function(nodeName){
+        if (is.na(nodeName)) dt <- data[which(is.na(data$parent)),]
+        else dt <- data[which(data$parent %in% nodeName),]
+
+        children <- unique(dt$name)
+
+        out <- unname(apply(dt, 1, function(row){
+            if (nrow(dt) > 0){
+                o <- list(name=unname(row['name']),
+                          value=unname(as.numeric(row['value'])))
+                if ('itemStyle' %in% names(dt))
+                    o$itemStyle <- unname(row['itemStyle'])
+                if (nrow(data[which(data$parent %in% row['name']),]) > 0)
+                    o$children <- .getRecursiveNodes(row['name'])
+                return(o)
+            }
+        }))
+        return(out)
+    }
+
+    return(.getRecursiveNodes(NA))
+}
+
 getJSElementSize <- function(chart, element=c('width', 'height')){
     stopifnot(inherits(chart, 'echarts'))
     element <- match.arg(element)

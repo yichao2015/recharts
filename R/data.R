@@ -557,7 +557,68 @@ series_wordCloud <- function(lst, type, return=NULL, ...){
 }
 
 series_eventRiver <- function(lst, type, return=NULL, ...){
+    # x: slice time, event name, slice title, slice url, slice img;
+    # y: slice value, event weight;  series: series, series weight
+    if (is.null(lst$x) || is.null(lst$y)) stop('eventRiver chart needs x and y!')
+    if (ncol(lst$x) < 2)
+        stop(paste('x should be comprised of 2 compulsory columns:',
+                   'event slice time, events name and 3 optional columns:',
+                   'event slice title, event slice links, event slice images.',
+                   '(the exact order)'))
+    if (!is.numeric(lst$x[,1]))
+        stop('x[,1] should be transformed to time first.')
+    if (any(duplicated(paste(lst$x[,1], lst$x[,2]))))
+        stop(paste('No duplicated combination of x[,1] and x[,2] is allowed!',
+                   'Please check row', which(duplicated(paste(lst$x[,1], lst$x[,2])))), '.')
+    if (ncol(lst$y) < 2) lst$y[,2] <- 1
 
+    data <- cbind(lst$y[,1:2], lst$x[,1:2])
+    names(data) <- c('value', 'weight', 'time', 'event')
+    data$slice <- if (ncol(lst$x) >= 3) lst$x[,3] else NA
+    data$link <- if (ncol(lst$x) >= 4) lst$x[,4] else NA
+    data$image <- if (ncol(lst$x) >= 5) lst$x[,5] else NA
+    if (is.null(lst$series)) {
+        data$series <- ''
+        data$seriesWgt <- 1
+    }else{
+        data$series <- lst$series[,1]
+        data$seriesWgt <- if (ncol(lst$series) > 1) lst$series[,2] else 1
+    }
+
+    series <- unique(as.character(data$series))
+    data$time <- format(convTimestamp(data$time, 'JS', 'R'), "%Y-%m-%d %T")
+
+    out <- lapply(series, function(s){
+        type <- type[which(series == s),]
+        dt <- data[data$series==s,]
+        o <- list(type=type$type, data=lapply(as.character(unique(dt$event)),
+                                              function(event){
+            ds <- dt[dt$event==event,]
+            list(name=event, weight=ifna(as.numeric(ds$weight[1]), '-'),
+                 evolution=unname(apply(ds, 1, function(row){
+                     evo <- list(
+                         time=unname(row['time']),
+                         value=ifna(as.numeric(unname(row['value'])), '-'),
+                         detail=list())
+                     if (!is.na(row['link']))
+                         evo$detail[['link']] = unname(row['link'])
+                     if (!is.na(row['slice']))
+                         evo$detail[['text']] = unname(row['slice'])
+                     if (!is.na(row['image']))
+                         evo$detail[['img']] = unname(row['image'])
+                     return(evo)
+                 })))
+            }), weight=as.numeric(dt$seriesWgt[1])
+            )
+        if (s != '') o$name <- unname(s)
+        return(o)
+    })
+
+    if (is.null(return)){
+        return(out)
+    }else{
+        return(out[intersect(names(out), return)])
+    }
 }
 
 series_venn <- function(lst, type, return=NULL, ...){
@@ -582,6 +643,11 @@ series_venn <- function(lst, type, return=NULL, ...){
 }
 
 series_tree <- function(lst, type, return=NULL, ...){
+    if (is.null(lst$x) || is.nul(is.null(lst$y)))
+        stop("tree charts need x and y!")
+    if (ncol(lst$x) < 2)
+        stop(paste('x must contain 2 columns. x[,1] is node name,',
+                   'x[,2] is parent node name.'))
 
 }
 

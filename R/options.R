@@ -235,7 +235,7 @@ setAxis = function(
         }
     }
 
-    return(chart)
+    return(chart %>% reElementId())
 }
 
 #' @export

@@ -368,14 +368,14 @@ setGrid <- function(chart, x=80, y=60, x2=80, y2=60, width=NULL, height=NULL,
         if (widget == 'timeline'){
             chart$x$timeline <- mergeList(chart$x$timeline, lstGrid)
         }else if((widget == 'grid' &&
-                  all(types %in% c('scatter', 'point', 'bubble', 'line', 'bar'))) ||
+                  all(types %in% c('scatter', 'line', 'bar', 'k', 'eventRiver'))) ||
                   widget %in% names(chart$x$options[[1]])){
             chart$x$options[[1]][[widget]] <-
                 mergeList(chart$x$options[[1]][[widget]], lstGrid)
         }
     }else{
         if ((widget == 'grid' &&
-            all(types %in% c('scatter', 'point', 'bubble', 'line', 'bar'))) ||
+            all(types %in% c('scatter', 'line', 'bar', 'k', 'eventRiver'))) ||
             widget %in% names(chart$x))
                 chart$x[[widget]] <- mergeList(chart$x[[widget]], lstGrid)
     }
@@ -674,7 +674,7 @@ tuneGrid <- function(chart, ...){
 
     ## wrap up
     # collect all grid features
-    if (all(types %in% c('scatter', 'line', 'bar', 'k')))
+    if (all(types %in% c('scatter', 'line', 'bar', 'k', 'eventRiver')))
         if (length(lstGrid) > 0){
             if (hasZ)
                 chart$x$options[[1]][['grid']] <- lstGrid
@@ -1950,6 +1950,7 @@ autoPolar <- function(chart, type){
 #' @return A modified echarts object
 #' @export
 #'
+#' @references \url{http://echarts.baidu.com/echarts2/doc/option.html#title~polar}
 #' @examples
 #' \dontrun{
 #' cars <- mtcars[c('Merc 450SE','Merc 450SL','Merc 450SLC'),
@@ -2272,11 +2273,11 @@ makeTooltip <- function(type, trigger=NULL, formatter=NULL,
     }else{
         if (is.null(trigger)){
             trigger <- ifelse(
-                type %in% c('pie', 'ring', 'funnel', 'pyramid', 'map', 'rose',
-                            'wordcloud', 'radar', 'chord', 'force', 'gauge'),
-                'item', 'axis')
+                type %in% c('pie', 'funnel', 'map', 'wordcloud', 'radar', 'chord',
+                            'force', 'gauge', 'eventRiver', 'tree', 'treemap'),
+                'item', ifelse(type %in% c('bar'), 'shadow', 'axis'))
         }else{
-            trigger <- match.arg(trigger, c('item', 'axis'))
+            trigger <- match.arg(trigger, c('item', 'axis', 'shadow'))
         }
 
         lstTooltip <- list(show = ifnull(show, TRUE), trigger = trigger)
@@ -2284,8 +2285,8 @@ makeTooltip <- function(type, trigger=NULL, formatter=NULL,
         ## fetch default features
         lstTooltip[c('axisPointer', 'textStyle')] <-
             list(list(
-                type=ifelse(type %in% c('bar', 'histogram', 'line'), 'line',
-                            ifelse(type %in% c('scatter', 'point', 'bubble')
+                type=ifelse(type %in% c('bar', 'line'), 'line',
+                            ifelse(type %in% c('scatter')
                                    , 'cross', 'none')),
                 crossStyle=list(type='dashed'), lineStyle='solid'
             ),
@@ -2372,7 +2373,7 @@ determineFormatter <- function(type){
 #' or \code{1:2}
 #' @param timeslots A vector of time slices indices or names, e.g., \code{c(1990, 1992)}
 #'  or \code{c(1,3)}. You can also use \code{z} as a short form of \code{timeslots}.
-#' @param trigger Type of trigger, \code{'item'} or \code{'axis'}.
+#' @param trigger Type of trigger, \code{'item'}, \code{'axis'} or \code{'shadow'}.
 #' @param formatter The format of the tooltip content.
 #' \describe{
 #'  \item{string(template)}{
@@ -2474,8 +2475,6 @@ setTooltip <- function(chart, series=NULL, timeslots=NULL, trigger=NULL,
             }else{
                 vecZ <- which(timeslotsIndex %in% timeslots)
             }
-            # if (identical(sort(vecZ), seq_len(length(chart$x$timelin$data))))
-            #     vecZ <- timeslots <- NULL
         }
     }
     if (length(chartTypes) == 1) {

@@ -360,6 +360,41 @@ autoMultiPolarChartLayout <- function(n, col.max=5, gap=5, top=5, bottom=5,
     return(list(rows=rows, cols=cols, centers=centers, radius=radius))
 }
 
+parseTreeNodes <- function(name, value, parent){
+    data <- data.frame(cbind(name, value, parent), stringsAsFactors = FALSE)
+    names(data) <- c("name", 'value', 'parent')
+    if (!any(is.na(parents))) stop('Cannot detect NA in parent, which is the root node.')
+
+    orderBase <- data[which(data$name %in% data$parent),]
+    orderBase[is.na(orderBase$parent), 'idx'] <- 0
+
+    while (any(is.na(orderBase$idx))){
+        maxLayer <- max(orderBase$idx, na.rm=TRUE)
+        thisLayer <- orderBase$name[which(orderBase$idx==maxLayer)]
+        orderBase[which(orderBase$parent==thisLayer), 'idx'] <- maxLayer + 1
+    }
+    parents <- orderBase$parent[order(orderBase$idx)]
+    data <- merge(data, orderBase[,c('parent', 'idx')], by='parent', all.x=TRUE,
+                  sort=FALSE)
+    data$idx[is.na(data$idx)] <- max(data$idx, na.rm=TRUE) + 1
+
+    .recursiveNodes <- function(node){
+        if (is.na(node)) dt <- data[which(is.na(data$parent)),]
+        else dt <- data[which(data$parent == node),]
+        children <- unique(dt$name)
+
+        out <- unname(apply(dt, 1, function(row){
+            o <- list(name=unname(row['name']), value=unname(row['value']))
+            if (length(children) > 0)
+                o[[1]]$children=lapply(children, .recursiveNodes)
+            return(o)
+        }))
+        return(out)
+    }
+
+    return(.recursiveNodes(0))
+}
+
 getJSElementSize <- function(chart, element=c('width', 'height')){
     stopifnot(inherits(chart, 'echarts'))
     element <- match.arg(element)

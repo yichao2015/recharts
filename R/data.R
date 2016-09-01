@@ -554,28 +554,71 @@ series_gauge <- function(lst, type, subtype, return=NULL, ...){
 
 series_map <- function(lst, type, subtype, return=NULL, ...){
     # x[,1] x; x[,2] series; y[,1] value; y[,2] selected; series[,1] multi-maps
-    data <- data.frame()
-    data$x <- if (is.null(lst$x)) NA else lst$x[,1]
-    data$series <- if (is.null(lst$x)) NA else if (ncol(lst$x) > 1) lst$x[,2] else NA
-    data$y <- if (is.null(lst$y)) NA else lst$y[,1]
-    data$sel <- if (is.null(lst$y)) NA else if (ncol(lst$y) > 1) lst$y[,2] else NA
-    data$idx <- if (is.null(lst$series)) '' else lst$series[,1]
-    nMaps <- length(unique(data$idx))
-    nSeries <- length(unique(data$series))
+    x <- if (is.null(lst$x)) NA else lst$x[,1]
+    series <- if (is.null(lst$x)) '' else if (ncol(lst$x) > 1) lst$x[,2] else ''
+    y <- if (is.null(lst$y)) NA else lst$y[,1]
+    sel <- if (is.null(lst$y)) 0 else if (ncol(lst$y) > 1) lst$y[,2] else 0
+    idx <- if (is.null(lst$series)) '' else lst$series[,1]
+    data <- data.frame(y, x, series, sel, idx, stringsAsFactors=FALSE)
+    mode <- if (is.null(lst$series)) 'series' else 'split'
+    lvlSeries <- if (mode=='series') as.character(unique(data$series)) else
+        as.character(unique(data$idx))
+    nSeries <- length(lvlSeries)
 
-    out <- sapply(unique(data$series), function(series){
-        dt <- data[data$series==series,]
-        idx <- which(unique(data$series)==series)
+    if (nrow(type) < nSeries)
+        type[nrow(type)+1:nSeries,] <- type[nrow(type),]
+    if (length(subtype) < nSeries)
+        subtype[length(subtype)+1:nSeries] <- subtype[length(subtype)]
+
+    #layouts
+    if (mode=='split'){
+        if (is.null(lst$z)){
+            layouts <- autoMultiPolarChartLayout(nSeries, col.max=4)
+        }else{
+            layouts <- autoMultiPolarChartLayout(nSeries, bottom=15,
+                                                 col.max=4)
+        }
+        rows <- layouts$rows
+        cols <- layouts$cols
+        ul.corners <- layouts$centers - layouts$radius/2
+    }
+
+    out <- lapply(lvlSeries, function(series){
+        if (mode=='series'){
+            dt <- data[!is.na(data$x) & !is.na(data$y) & data$series==series,]
+            idx <- which(unique(data$series)==series)
+        }else{
+            dt <- data[!is.na(data$x) & !is.na(data$y) & data$idx==series,]
+            idx <- which(unique(data$idx)==series)
+        }
         iType <- type[idx,]
+        validSubtypes <- eval(parse(text=iType$subtype))
         iSubtype <- subtype[[idx]]
+        if (iSubtype != '')
+            iSubtype <- validSubtypes[which(
+                tolower(validSubtypes)==iSubtype)]
         o <- list(
-            type=iType$type, mapType=if (iSubtype == '') iType$mapType else
-                paste(iType$mapType, iSubtype[1], sep='|'), roam=TRUE,
+            type=iType$type, roam=TRUE,
+            mapType=if (iSubtype == "")  iType$misc else
+                if (mode=='series') iSubtype[1] else
+                    paste(iType$misc, iSubtype[1], sep="|"),
             itemStyle=list(normal=list(show=TRUE), emphasis=list(show=TRUE)),
             data=list()
         )
-
-        return(0)
+        if (mode=='split')
+            o$mapLocation <- list(
+                x=paste0(ul.corners[idx,1], '%'),
+                y=paste0(ul.corners[idx,2], '%'),
+                width=paste0((90-4*cols)/cols, '%'),
+                height=paste0((90-4*rows)/rows, '%'))
+        if (nrow(dt) > 0)
+            o$data <- unname(apply(dt, 1, function(row){
+                list(name=as.character(unname(row['x'])),
+                     value=ifna(as.numeric(unname(row['y'])), '-'),
+                     selected=ifna(as.logical(unname(as.numeric(row['sel']))), FALSE))
+            }))
+        if (mode=='series' && series != "") o$name <- series
+        return(o)
     })
 
     if (is.null(return)){

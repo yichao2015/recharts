@@ -44,12 +44,14 @@ The Echarts object is an S3 list, comprising of the following elements:
         - list 1
         - ...
     - widgets (title, legend, toolbox, dataRange, dataZoom, roamController)
+    - ...
 
 (2) **No timeline contained**
 - series
     - list 1
     - ...
 - widgets (title, legend, toolbox, dataRange, dataZoom, roamController)
+- ...
 
 
 The basic design is to configure an S3 object widget by widget and concatenate them by pipe operator (%>%). It is inspired by `ggplot2`.

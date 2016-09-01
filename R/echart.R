@@ -103,6 +103,7 @@ echartr = function(
         symbols = all.names(v)
         if (any(symbols %in% names(data)))
             return(as.symbol(symbols[symbols %in% names(data)]))
+            # should be sapply(symbols[symbols %in% names(data)], as.symbol)
         v
     })  # get arg names correspond to data vars
 
@@ -132,10 +133,12 @@ echartr = function(
     # -------------split multi-timeline df to lists-----------
 
     .makeMetaDataList <- function(df) {
-        vars <- sapply(dataVars, function(x) {
-            eval(parse(text=paste0(x, 'varRaw')))}, simplify=TRUE)
-        assignment <- paste0(dataVars, " = evalVarArg(", vars, ", ",
-                            substitute(df, parent.frame()), ")")
+        # vars <- sapply(dataVars, function(x) {
+        #     eval(parse(text=paste0(x, 'varRaw')))}, simplify=TRUE)
+        # assignment <- paste0(dataVars, " = evalVarArg(", vars, ", ",
+        #                     substitute(df, parent.frame()), ")")
+        assignment <- paste0(dataVars, " = evalVarArg(", vArgsRaw[dataVars], ", ",
+                             substitute(df, parent.frame()), ")")
         eval(parse(text=paste0("list(", paste(assignment, collapse=", "), ")")))
     }
     if (hasZ){
@@ -181,7 +184,7 @@ echartr = function(
         type <- c(type, rep(type[length(type)], nSeries-length(type)))
     }
     subtype <- tolower(subtype)
-    if (!missing(subtype)) if (!is.null(subtype))
+    if (!missing(subtype)) if (length(subtype) > 0)
         if (length(subtype) < length(type)){
             subtype <- c(subtype, rep(subtype[length(subtype)],
                                       length(type)-length(subtype)))
@@ -200,10 +203,10 @@ echartr = function(
     }
     dfType <- validChartTypes[typeIdx,]
     lstSubtype <- rep('', length(type))
-    if (!missing(subtype)) if (!is.null(subtype))
+    if (!missing(subtype)) if (length(subtype) > 0)
         lstSubtype <- lapply(1:length(subtype), function(i){
             str <- subtype[i]
-            validSubtype <- eval(parse(text=dfType[i, 'subtype']))
+            validSubtype <- eval(parse(text=tolower(dfType[i, 'subtype'])))
             strSubtype <- unlist(strsplit(str, '[_|\\+]'))
             strSubtype <- gsub("^ +| +$", "", strSubtype)
             o <- intersect(validSubtype, strSubtype)

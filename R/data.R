@@ -1,5 +1,5 @@
 #' @importFrom data.table melt
-series_scatter <- function(lst, type, return=NULL, ...){
+series_scatter <- function(lst, type, subtype, return=NULL, ...){
     # g = echartr(mtcars, wt, mpg, am)
     lst <- mergeList(list(weight=NULL, series=NULL), lst)
     if (!is.numeric(lst$x[,1])) stop('x and y must be numeric')
@@ -55,7 +55,7 @@ series_scatter <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_bar <- function(lst, type, return=NULL, ...){
+series_bar <- function(lst, type, subtype, return=NULL, ...){
     # example:
     # echartr(mtcars, row.names(mtcars), mpg,
     #     series=factor(am,labels=c('Manual','Automatic')),
@@ -64,9 +64,9 @@ series_bar <- function(lst, type, return=NULL, ...){
     data <- cbind(lst$y[,1], lst$x[,1])
 
     if (!'y' %in% names(lst)) {  # y is null, then...
-        if (grepl('hist', type$misc)){  # histogram
+        if (any(grepl('hist', type$misc))){  # histogram
             hist <- hist(data[,1], plot=FALSE)
-            if (grepl('density', type$misc)){
+            if ('density' %in% subtype[[1]]){
                 data <- as.matrix(cbind(hist$density, hist$mids))  # y, x
             }else{
                 data <- as.matrix(cbind(hist$counts, hist$mids))  # y, x
@@ -84,8 +84,8 @@ series_bar <- function(lst, type, return=NULL, ...){
     if (is.null(lst$series)) {  # no series
         if (is.numeric(lst$x[,1])){
             obj <- list(list(type=type$type[1], data=asEchartData(data[,2:1])))
-            if (any(grepl("flip", type$misc))) obj[[1]]$barHeight=10
-            if (grepl('hist',type$misc)) {
+            if (any(grepl("flip", type$misc[[1]]))) obj[[1]]$barHeight=10
+            if (grepl('hist',type$misc[[1]])) {
                 obj[[1]]$barGap = '1%'
                 obj[[1]]$barWidth = JS(paste0(
                     "(document.getElementById('temp').offsetWidth-200)/",
@@ -116,7 +116,7 @@ series_bar <- function(lst, type, return=NULL, ...){
                 o = list(name = colnames(data)[i], type = type$type[i],
                          data = asEchartData(data[,i]))
             }
-            if (type$stack[i]) o[['stack']] = 'Group'
+            if ('stack' %in% subtype[[1]]) o[['stack']] = 'Group'
             return(o)
         })
     }
@@ -128,7 +128,7 @@ series_bar <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_line = function(lst, type, return=NULL, ...) {
+series_line = function(lst, type, subtype, return=NULL, ...) {
     # Example:
     # g=echartr(airquality, as.character(Day), Temp,z=Month, type='curve')
     # g=echartr(airquality, as.character(Day), Temp,z=Month, type='area_smooth')
@@ -152,8 +152,8 @@ series_line = function(lst, type, return=NULL, ...) {
 
     # area / stack / smooth
     areaIdx <- which(grepl("fill", type$misc))
-    stackIdx <- which(type$stack)
-    smoothIdx <- which(type$smooth)
+    stackIdx <- which(sapply(subtype, function(x) 'stack' %in% x))
+    smoothIdx <- which(sapply(subtype, function(x) 'smooth' %in% x))
     if (length(areaIdx) > 0){
         for (i in areaIdx)  obj[[i]][['itemStyle']] <-
                 list(normal=list(areaStyle=list(
@@ -174,7 +174,7 @@ series_line = function(lst, type, return=NULL, ...) {
 
 }
 
-series_k <- function(lst, type, return=NULL, ...){
+series_k <- function(lst, type, subtype, return=NULL, ...){
     # Example:
     # g=echartr(stock, date, c(open, close, low, high), type='k')
 
@@ -187,7 +187,7 @@ series_k <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_pie <- function(lst, type, return=NULL, ...){
+series_pie <- function(lst, type, subtype, return=NULL, ...){
     # Example:
     # g=echartr(iris, Species, Sepal.Width, type='pie')
     # g=echartr(mtcars, am, mpg, gear, type='pie')
@@ -206,23 +206,25 @@ series_pie <- function(lst, type, return=NULL, ...){
     if (is.null(lst$x) && is.null(lst$series)) stop('pie/funnel charts need either x or series!')
     data <- data.frame(lst$y[,1])
     if (!is.null(lst$x)){
-        data[,2] <- if (any(grepl('infographic', type$misc))) 'TRUE' else lst$x[,1]
-        series <- if (any(grepl('infographic', type$misc))) c('TRUE', 'FALSE')
-                  else as.character(unique(lst$x[,1]))
+        data[,2] <- if (matchSubtype('info', subtype))
+            'TRUE' else lst$x[,1]
+        series <- if (matchSubtype('info', subtype))
+            c('TRUE', 'FALSE') else as.character(unique(lst$x[,1]))
     }else{
-        data[,2] <- if (any(grepl('infographic', type$misc))) lst$series[,1] else 'TRUE'
-        series <- if (any(grepl('infographic', type$misc)))
+        data[,2] <- if (matchSubtype('info', subtype))
+            lst$series[,1] else 'TRUE'
+        series <- if (matchSubtype('info', subtype))
             as.character(unique(lst$series[,1])) else c('TRUE','FALSE')
     }
     if (!is.null(lst$series)){
         data[,3] <- lst$series[,1]
         pies <- as.character(unique(lst$series[,1]))
     }else{
-        data[,3] <- if (any(grepl('infographic', type$misc)))
+        data[,3] <- if (matchSubtype('info', subtype))
             lst$x[,1] else 'Proportion'
-        pies <- if (any(grepl('infographic', type$misc)))
+        pies <- if (any(sapply(subtype, function(x) 'info' %in% x)))
             as.character(unique(lst$x[,1])) else 'Proportion'
-        if (any(grepl('infographic', type$misc)))
+        if (any(sapply(subtype, function(x) 'info' %in% x)))
             type[2:length(pies),] <- type[1,]
     }
     names(data) <- c('y', 'x', 'series')
@@ -230,7 +232,8 @@ series_pie <- function(lst, type, return=NULL, ...){
 
     if (all(data$x == 'TRUE')) {
         sum.prop <- sum(data[data$x == 'TRUE', 2:ncol(data)], na.rm=TRUE)
-        data[nrow(data)+1, ] <- c('FALSE', sum.prop - data[data$x == 'TRUE', 2:ncol(data)])
+        data[nrow(data)+1, ] <- c('FALSE', sum.prop - data[data$x == 'TRUE',
+                                                           2:ncol(data)])
     }
     if (is.null(lst$z)){
         layouts <- autoMultiPolarChartLayout(length(pies))
@@ -262,6 +265,7 @@ series_pie <- function(lst, type, return=NULL, ...){
     obj <- list()
     for (pie in pies){
         iType <- type[which(pies == pie),]
+        iSubtype <- subtype[[which(pies == pie)]]
         o <- list(
             name=pie, type=iType$type,
             data=unname(apply(data[,c('x', pie)], 1, function(row) {
@@ -291,13 +295,13 @@ series_pie <- function(lst, type, return=NULL, ...){
                 )))
             )
             o[['clockWise']] <- FALSE
-        }else if (grepl('radius', iType$misc)){
+        }else if ('radius' %in% iSubtype){
             o[['roseType']] <- 'radius'
             o[['radius']] <- paste0(c(radius/5, radius), '%')
-        }else if (grepl('area', iType$misc)){
+        }else if ('area' %in% iSubtype){
             o[['roseType']] <- 'area'
             o[['radius']] <- paste0(c(radius/5, radius), '%')
-        }else if (grepl('infographic', iType$misc)){
+        }else if ('info' %in% iSubtype){
             o[['data']][[2]][['itemStyle']] <- placeHolderStyle
             ringWidth <- 40 / length(pies)
             o[['radius']] <- paste0(c(80 - ringWidth*(which(pies == pie)-1),
@@ -328,7 +332,7 @@ series_pie <- function(lst, type, return=NULL, ...){
 
 series_funnel <- series_pie
 
-series_radar <- function(lst, type, return=NULL, ...){
+series_radar <- function(lst, type, subtype, return=NULL, ...){
     # Example:
     # cars = mtcars[c('Merc 450SE','Merc 450SL','Merc 450SLC'),
     #               c('mpg','disp','hp','qsec','wt','drat')]
@@ -391,7 +395,7 @@ series_radar <- function(lst, type, return=NULL, ...){
                                  ifna(x, '-')}))
                     }))
         if (i>0) out[['polarIndex']] <- i
-        if (grepl('fill', type[i+1, 'misc']))
+        if ('fill' %in% subtype[[i+1]])
             out[['itemStyle']] <- list(normal=list(areaStyle=list(type='default')))
         return(out)
     })
@@ -403,7 +407,7 @@ series_radar <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_force <- function(lst, type, return=NULL, ...){
+series_force <- function(lst, type, subtype, return=NULL, ...){
     # x: node/link, x2: link, series: series/relation, y: weight/value
     # df with x2 NA is nodes, !NA is links. If all !NA, no categories are linked
     # or x: name column, y: matrix
@@ -438,13 +442,12 @@ series_force <- function(lst, type, return=NULL, ...){
 
     if (any(type$type %in% c('force', 'chord'))){
         types <- type$type
-        miscs <- type$misc[type$type %in% c('force', 'chord')]
         o <- list(list(
             type=types[1], name='Connection', roam='move',
             itemStyle=list(normal=list(
                 label=list(show=TRUE, textStyle=list(color='#333')),
                 nodeStyle=list(brushType='both', strokeColor='rgba(255,215,0,0.4)'),
-                linkStyle=list(type=ifelse(grepl('line', miscs[1]), 'line',
+                linkStyle=list(type=ifelse(grepl('line', type$misc[1]), 'line',
                                            ifelse(is.null(lst$series), 'line', 'curve')))
             ), emphasis=list(
                 label=list(show=FALSE), nodeStyle=list(), lineStyle=list()
@@ -478,8 +481,8 @@ series_force <- function(lst, type, return=NULL, ...){
 
         #other params
         ## linkSymbol
-        if (grepl('(arrow|triangle)', miscs[1]))
-            o[[1]]$linkSymbol <- gsub('(arrow|triangle)', '\\1', miscs[1])
+        if ('arrow' %in% subtype[[1]]) o[[1]]$linkSymbol <- 'arrow'
+        if ('triangle' %in% subtype[[1]]) o[[1]]$linkSymbol <- 'triangle'
 
         ## auto ribbon
         if (types[1] == 'force'){
@@ -492,15 +495,18 @@ series_force <- function(lst, type, return=NULL, ...){
                 else o[[1]]$ribbonType <- FALSE
             }
         }else{
-            o[[1]]$ribbonType <- grepl('ribbon', miscs[1])
+            o[[1]]$ribbonType <- 'ribbon' %in% subtype[[1]]
         }
 
         ## sort and sortSub
-        if (grepl('asc', miscs[1])) o[[1]]$sort = o[[1]]$sortSub <- 'ascending'
-        if (grepl('desc', miscs[1])) o[[1]]$sort = o[[1]]$sortSub <- 'descending'
+        if ('asc' %in% subtype[[1]]) o[[1]]$sort <- 'ascending'
+        if ('ascsub' %in% subtype[[1]]) o[[1]]$sortSub <- 'ascending'
+        if ('desc' %in% subtype[[1]]) o[[1]]$sort <- 'descending'
+        if ('descsub' %in% subtype[[1]]) o[[1]]$sortSub <- 'descending'
 
         ## clockWise
-        if (grepl('[^i]clock', miscs[1])) o[[1]]$closeWise <- TRUE
+        if ('clock' %in% subtype[[1]] || 'clockwise' %in% subtype[[1]])
+            o[[1]]$closeWise <- TRUE
 
         if (is.null(return)){
             return(o)
@@ -512,15 +518,75 @@ series_force <- function(lst, type, return=NULL, ...){
 
 series_chord <- series_force
 
-series_gauge <- function(lst, type, return=NULL, ...){
+series_gauge <- function(lst, type, subtype, return=NULL, ...){
+    if (is.null(lst$x) || is.null(lst$y))
+        stop('gauge charts need x and y!')
+    data <- data.frame(y=lst$y[,1], x=lst$x[,1])
+    data$series <- if (is.null(lst$series)) '' else lst$series[,1]
+    nSeries <- length(unique(data$series))
+    layouts <- autoMultiPolarChartLayout(nSeries)
+    rows <- layouts$rows
+    cols <- layouts$cols
+    cols <- layouts$cols
+    centers <- layouts$centers
+    radius <- layouts$radius
 
+    out <- lapply(unique(data$series), function(series){
+        dt <- data[data$series==series,]
+        idx <- which(unique(data$series)==series)
+        iType <- type[idx,]
+        o <- list(type=iType$type, center=paste0(centers[idx,], '%'),
+                  radius=paste0(radius[idx], '%'),
+                  max=max(dt$y, na.rm=TRUE), data=unname(apply(dt, 1, function(row){
+                      list(name=unname(as.character(row['x'])),
+                           value=unname(as.numeric(row['y'])))
+                  })))
+        if (series != '') o[['name']] <- series
+        return(o)
+    })
+
+    if (is.null(return)){
+        return(out)
+    }else{
+        return(out[intersect(names(out), return)])
+    }
 }
 
-series_map <- function(lst, type, return=NULL, ...){
+series_map <- function(lst, type, subtype, return=NULL, ...){
+    # x[,1] x; x[,2] series; y[,1] value; y[,2] selected; series[,1] multi-maps
+    data <- data.frame()
+    data$x <- if (is.null(lst$x)) NA else lst$x[,1]
+    data$series <- if (is.null(lst$x)) NA else if (ncol(lst$x) > 1) lst$x[,2] else NA
+    data$y <- if (is.null(lst$y)) NA else lst$y[,1]
+    data$sel <- if (is.null(lst$y)) NA else if (ncol(lst$y) > 1) lst$y[,2] else NA
+    data$idx <- if (is.null(lst$series)) '' else lst$series[,1]
+    nMaps <- length(unique(data$idx))
+    nSeries <- length(unique(data$series))
 
+    out <- sapply(unique(data$series), function(series){
+        dt <- data[data$series==series,]
+        idx <- which(unique(data$series)==series)
+        iType <- type[idx,]
+        iSubtype <- subtype[[idx]]
+        o <- list(
+            type=iType$type, mapType=if (iSubtype == '') iType$mapType else
+                paste(iType$mapType, iSubtype[1], sep='|'), roam=TRUE,
+            itemStyle=list(normal=list(show=TRUE), emphasis=list(show=TRUE)),
+            data=list()
+        )
+
+        return(0)
+    })
+
+    if (is.null(return)){
+        return(out)
+    }else{
+        return(out[intersect(names(out), return)])
+    }
 }
 
-series_wordCloud <- function(lst, type, return=NULL, ...){
+
+series_wordCloud <- function(lst, type, subtype, return=NULL, ...){
     # does not accept series
     if (is.null(lst$y) || is.null(lst$x))
         stop('radar charts need x and y!')
@@ -556,7 +622,7 @@ series_wordCloud <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_eventRiver <- function(lst, type, return=NULL, ...){
+series_eventRiver <- function(lst, type, subtype, return=NULL, ...){
     # x: slice time, event name, slice title, slice url, slice img;
     # y: slice value, event weight;  series: series, series weight
     if (is.null(lst$x) || is.null(lst$y)) stop('eventRiver chart needs x and y!')
@@ -642,47 +708,64 @@ series_venn <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_tree <- function(lst, type, return=NULL, ...){
+series_tree <- function(lst, type, subtype, return=NULL, ...){
     if (is.null(lst$x) || is.null(lst$y))
-        stop("tree charts need x and y!")
-    if (ncol(lst$x) < 2)
-        stop(paste('x must contain 2 columns. x[,1] is node name,',
+        stop("tree/treemap charts need x and y!")
+    if (ncol(lst$x) < 2 && any(type$type == 'tree'))
+        stop(paste('for tree charts, x must contain 2 columns. x[,1] is node name,',
                    'x[,2] is parent node name.'))
-    data <- data.frame(y=lst$y[,1], x=lst$x[,1], parent=lst$x[,2])
+    data <- data.frame(value=lst$y[,1], name=lst$x[,1],
+                       parent=if (ncol(lst$x)<2) NA else lst$x[,2])
+
     data$series <- if (is.null(lst$series)) '' else lst$series[,1]
     nSeries <- length(unique(data$series))
-    if (nSeries > 5) warning('Too many sereis! The layout will be messy!')
+    if (nSeries > 4) warning('Too many sereis! The layout will be messy!')
 
     out <- lapply(unique(data$series), function(series){
         idx <- which(unique(data$series) == series)
-        dt <- data[data$series == series, ]
+        dt <- data[data$series == series, c('name', 'value', 'parent')]
         iType <- type[idx,]
+        iSubtype <- subtype[[idx]]
         orient <- ifelse(grepl('horizontal', iType$misc), 'horizontal', 'vertical')
         inv <- grepl('inv', iType$misc)
-        lineType <- ifelse(grepl('broken', iType$misc), 'broken',
-                           ifelse(grepl('dotted', iType$misc), 'dotted',
-                                  ifelse(grepl('solid', iType$misc), 'solid',
-                                         ifelse(grepl('dashed', iType$misc),
+        center <- list(paste0(10+80/nSeries*(idx-0.5), '%'), '50%')
+        size <- list(paste0((90-nSeries*5)/nSeries, '%'), '80%')
+        lineType <- ifelse('broken' %in% iSubtype, 'broken',
+                           ifelse('dotted' %in% iSubtype, 'dotted',
+                                  ifelse('solid' %in% iSubtype, 'solid',
+                                         ifelse('dashed' %in% iSubtype,
                                                       'dashed', 'curve'))))
-        o <- list(type=iType$type, orient=orient, nodePadding=1,
-                  rootLocation=list(
-                      x=ifelse(orient=='vertical',
-                             paste0(10+80/nSeries*(idx-0.5), '%'),
-                             ifelse(inv, paste0(10+80/nSeries*(idx), '%'),
-                                    paste0(10+80/nSeries*(idx-1), '%'))),
-                      y=ifelse(orient=='vertical', ifelse(inv, '90%', '10%'),
-                             '50%')),
+
+        o <- list(type=iType$type, orient=orient, roam=TRUE,
                   direction=ifelse(inv, 'inverse', ''),
-                  itemStyle=list(normal=list(
-                      label=list(show=FALSE, formatter="{b}"),
-                      lineStyle=list(
-                          color='#48b', shadowColor='#000', shadowBlur=3,
-                          shadowOffsetX=3, shadowOffsetY=5, type=lineType)),
-                      emphasis=list(label=list(show=TRUE))
-                  ),
-                  data=parseTreeNodes(dt$x, dt$y, dt$parent)
+                  data=parseTreeNodes(dt)
         )
-        if (series != '') o[[1]]$name <- series
+        if (series != '') o$name <- series else
+            if (iType$type=='treemap') o$name <- names(lst$x)[1]
+        if (iType$type == 'tree'){
+            o$nodePadding <- 1
+            o$rootLocation <- list(
+                x=ifelse(orient=='vertical',
+                         paste0(10+80/nSeries*(idx-0.5), '%'),
+                         ifelse(inv, paste0(10+80/nSeries*(idx), '%'),
+                                paste0(10+80/nSeries*(idx-1), '%'))),
+                y=ifelse(orient=='vertical', ifelse(inv, '90%', '10%'),
+                         '50%'))
+            o$itemStyle=list(normal=list(
+                label=list(show=FALSE, formatter="{b}"),
+                lineStyle=list(
+                    color='#48b', shadowColor='#000', shadowBlur=3,
+                    shadowOffsetX=2, shadowOffsetY=3, type=lineType)),
+                emphasis=list(label=list(show=TRUE))
+            )
+        }else if (iType$type == 'treemap'){
+            o$center <- center
+            o$size <- size
+            o$itemStyle=list(normal=list(
+                label=list(show=TRUE, formatter="{b}")),
+                emphasis=list(label=list(show=TRUE))
+            )
+        }
         return(o)
     })
 
@@ -693,12 +776,10 @@ series_tree <- function(lst, type, return=NULL, ...){
     }
 }
 
-series_treemap <- function(lst, type, return=NULL, ...){
-
-}
+series_treemap <- series_tree
 
 #' @importFrom data.table between
-series_heatmap <- function(lst, type, return=NULL, ...){
+series_heatmap <- function(lst, type, subtype, return=NULL, ...){
     # data = rbind(data.frame(lng=100+rnorm(100,0, 1)*600,
     #        lat=150+rnorm(100,0, 1)*50, y=abs(rnorm(100,0,1))),
     # data.frame(lng=rnorm(200,0, 1)*1000,

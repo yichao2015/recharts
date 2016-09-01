@@ -360,15 +360,30 @@ autoMultiPolarChartLayout <- function(n, col.max=5, gap=5, top=5, bottom=5,
     return(list(rows=rows, cols=cols, centers=centers, radius=radius))
 }
 
-parseTreeNodes <- function(name, value, parent, itemStyle=NULL){
-    data <- data.frame(cbind(as.character(name), as.numeric(value),
-                             as.character(parent)),
-                       stringsAsFactors = FALSE)
-    names(data) <- c("name", 'value', 'parent')
-    if (!is.null(itemStyle)) data$itemStyle <- as.character(itemStyle)
+parseTreeNodes <- function(data, name='name', parent='parent'){
+    name <- as.character(substitute(name))
+    parent <- as.character(substitute(parent))
+    name <- name[length(name)]
+    parent <- parent[length(parent)]
 
-    if (sum(is.na(parent)) != 1)
-        stop('Expect to have one NA in parent, which serves as the root node.')
+    names(data)[which(names(data) == name)] <- 'name'
+    names(data)[which(names(data) == parent)] <- 'parent'
+    validColNames <- c('name', 'value', 'itemStyle', 'symbol', 'symbolSize')
+    if (!all(names(data) %in% c('parent', validColNames)))
+        stop("treeNode data only accepts column names of ",
+             paste(c('parent', validColNames), ', '),
+             " ('name' and 'parent' could be named differently) .")
+
+    if (!any(is.na(data$parent)))
+        stop('parent columns must contain at least one NA to be the root.')
+
+    colnames <- names(data)
+    data <- data.frame(lapply(names(data), function(col){
+        col = if (grepl('value|Size', col)) as.numeric(data[,col]) else
+            as.character(data[,col])
+        return(col)
+    }), stringsAsFactors=FALSE)
+    names(data) <- colnames
 
     orderBase <- data[which(data$name == data$parent),]
 
@@ -376,16 +391,19 @@ parseTreeNodes <- function(name, value, parent, itemStyle=NULL){
         if (is.na(nodeName)) dt <- data[which(is.na(data$parent)),]
         else dt <- data[which(data$parent %in% nodeName),]
 
-        children <- unique(dt$name)
+        children <- unique(as.character(dt$name))
 
         out <- unname(apply(dt, 1, function(row){
             if (nrow(dt) > 0){
-                o <- list(name=unname(row['name']),
-                          value=unname(as.numeric(row['value'])))
-                if ('itemStyle' %in% names(dt))
-                    o$itemStyle <- unname(row['itemStyle'])
+                o <- lapply(intersect(names(dt), validColNames), function(col){
+                    if (grepl('value|Size', col))
+                        as.numeric(unname(row[col]))
+                    else
+                        as.character(unname(row[col]))
+                })
+                names(o) <- intersect(names(dt), validColNames)
                 if (nrow(data[which(data$parent %in% row['name']),]) > 0)
-                    o$children <- .getRecursiveNodes(row['name'])
+                    o$children <- .getRecursiveNodes(as.character(row['name']))
                 return(o)
             }
         }))
@@ -393,6 +411,20 @@ parseTreeNodes <- function(name, value, parent, itemStyle=NULL){
     }
 
     return(.getRecursiveNodes(NA))
+}
+
+matchSubtype <- function(subtype, lstSubtype, mode=c('any', 'all', 'detail',
+                                                     'which')){
+    stopifnot(length(subtype)==1)
+    if (mode=='any'){
+        any(sapply(lstSubtype, function(x) subtype %in% x))
+    }else if (mode == 'all'){
+        all(sapply(lstSubtype, function(x) subtype %in% x))
+    }else if (mode=='detail'){
+        sapply(lstSubtype, function(x) subtype %in% x)
+    }else if (mode=='which'){
+        which(sapply(lstSubtype, function(x) subtype %in% x))
+    }
 }
 
 getJSElementSize <- function(chart, element=c('width', 'height')){

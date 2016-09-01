@@ -89,7 +89,7 @@ eChart = echart
 #' @export
 echartr = function(
     data, x = NULL, y = NULL, series = NULL, weight = NULL, z = NULL,
-    lat = NULL, lng = NULL, type = 'auto', ...
+    lat = NULL, lng = NULL, type = 'auto', subtype = NULL, ...
 ) {
     # experimental function
     if (inherits(data, 'data.frame')) data <- as.data.frame(data)
@@ -164,7 +164,12 @@ echartr = function(
 
     # -----------------determine types---------------------------
     type <- tolower(type)
-    stopifnot(any(sapply(c('auto', validChartTypes$name), grepl, x=type)))
+    check.types <- unname(sapply(c('auto', validChartTypes$name), grepl, x=type))
+    if (is.null(dim(check.types)))
+        check.types <- matrix(check.types, nrow=1)
+    if (!any(check.types))
+        stop("Invalid chart type!\n", paste(type[which(rowSums(check.types)==0)], ', '),
+             " not matching the valid chart type table.")
     if (!is.null(series)) lvlSeries <- levels(as.factor(series[,1]))
     if (!is.null(series)) nSeries <- length(lvlSeries) else nSeries <- 1
     if (type[1] == 'auto')  type = determineType(x[,1], y[,1])
@@ -175,6 +180,14 @@ echartr = function(
     }else{
         type <- c(type, rep(type[length(type)], nSeries-length(type)))
     }
+    subtype <- tolower(subtype)
+    if (!missing(subtype)) if (!is.null(subtype))
+        if (length(subtype) < length(type)){
+            subtype <- c(subtype, rep(subtype[length(subtype)],
+                                      length(type)-length(subtype)))
+        }else if (length(subtype) > length(type)){
+            subtype <- subtype[1:length(type)]
+        }
 
     ## type is converted to a data.frame, colnames:
     ## [id name type stack smooth mapType mapMode misc]
@@ -186,12 +199,24 @@ echartr = function(
                                  function(i) which(dfType[i,]))))
     }
     dfType <- validChartTypes[typeIdx,]
+    lstSubtype <- rep('', length(type))
+    if (!missing(subtype)) if (!is.null(subtype))
+        lstSubtype <- lapply(1:length(subtype), function(i){
+            str <- subtype[i]
+            validSubtype <- eval(parse(text=dfType[i, 'subtype']))
+            strSubtype <- unlist(strsplit(str, '[_|\\+]'))
+            strSubtype <- gsub("^ +| +$", "", strSubtype)
+            o <- intersect(validSubtype, strSubtype)
+            if (length(o) == 0) o <- ''
+            return(o)
+        })
 
     ## check types
     if (nlevels(as.factor(dfType$type)) > 1){
         if (!all(grepl("^(line|bar|scatter|k)", dfType$type) ||
                  grepl("^(funnel|pie)", dfType$type) ||
-                 grepl("^(force|chord)", dfType$type)))
+                 grepl("^(force|chord)", dfType$type) ||
+                 grepl("^(tree|treemap)", dfType$type)))
             stop(paste("recharts does not support such mixed types yet."))
     }
     # if (nlevels(as.factor(dfType$xyflip)) > 1)
@@ -213,7 +238,7 @@ echartr = function(
                 }))
             })
             out <- structure(list(
-                series = series_fun(time_metaData, type=dfType)
+                series = series_fun(time_metaData, type=dfType, subtype=lstSubtype)
             ), meta = metaData)
         }else{  # with timeline
             time_metaData = lapply(metaData, function(df){
@@ -224,7 +249,8 @@ echartr = function(
                 })
             })
             out <- structure(list(
-                series = series_fun(time_metaData[[z]], type=dfType)
+                series = series_fun(time_metaData[[z]], type=dfType,
+                                    subtype=lstSubtype)
             ), meta = metaData[[z]])
         }
 
@@ -260,7 +286,7 @@ echartr = function(
 
     if (any(dfType$type %in% c('line', 'bar', 'scatter', 'k', 'eventRiver'))){
         if (!any(dfType$type %in% c('eventRiver')))
-            chart %>% setYAxis(name = ylab[[1]])
+            chart <- chart %>% setYAxis(name = ylab[[1]])
         chart %>% setXAxis(name = xlab[[1]]) %>%
             setTooltip() %>% setToolbox() %>% setLegend() %>%
             flipAxis(flip=any(grepl("flip", dfType$misc)))

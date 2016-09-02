@@ -1,6 +1,8 @@
 #' @importFrom data.table melt
 series_scatter <- function(lst, type, subtype, return=NULL, ...){
     # g = echartr(mtcars, wt, mpg, am)
+    if (is.null(lst$x) || is.null(lst$y))
+        stop('scatter charts need x and y!')
     lst <- mergeList(list(weight=NULL, series=NULL), lst)
     if (!is.numeric(lst$x[,1])) stop('x and y must be numeric')
     data <- cbind(lst$y[,1], lst$x[,1])
@@ -153,7 +155,8 @@ series_line = function(lst, type, subtype, return=NULL, ...) {
     # area / stack / smooth
     areaIdx <- which(grepl("fill", type$misc))
     stackIdx <- which(sapply(subtype, function(x) 'stack' %in% x))
-    smoothIdx <- which(sapply(subtype, function(x) 'smooth' %in% x))
+    smoothIdx <- which(sapply(subtype, function(x) 'smooth' %in% x) ||
+                           grepl('smooth', type$misc))
     if (length(areaIdx) > 0){
         for (i in areaIdx)  obj[[i]][['itemStyle']] <-
                 list(normal=list(areaStyle=list(
@@ -284,7 +287,7 @@ series_pie <- function(lst, type, subtype, return=NULL, ...){
                        max(unname(data[,pie]), na.rm=TRUE)),
             height=ifelse(rows==1, '70%', paste0(radius, '%')),
             y=ifelse(rows==1, rep('15%', length(pies)), paste0(centers[pie, 2]-radius/2, '%')),
-            selectedMode='multiple'
+            selectedMode=if (grepl('multi', iType$misc)) 'multiple' else NULL
         )
         if (grepl('ring', iType$misc)){
             o[['radius']] <- paste0(c(radius * 2/3, radius), '%')
@@ -294,8 +297,9 @@ series_pie <- function(lst, type, subtype, return=NULL, ...){
                     fontSize='30',fontWeight='bold'
                 )))
             )
-            o[['clockWise']] <- FALSE
-        }else if ('radius' %in% iSubtype){
+            o[['clockWise']] <- any(c('clock', 'clockwise') %in% iSubtype)
+        }
+        if ('radius' %in% iSubtype){
             o[['roseType']] <- 'radius'
             o[['radius']] <- paste0(c(radius/5, radius), '%')
         }else if ('area' %in% iSubtype){
@@ -307,7 +311,7 @@ series_pie <- function(lst, type, subtype, return=NULL, ...){
             o[['radius']] <- paste0(c(80 - ringWidth*(which(pies == pie)-1),
                                       80 - ringWidth*which(pies == pie)), '%')
             o[['center']] <- c('50%', '50%')
-            o[['clockWise']] <- FALSE
+            o[['clockWise']] <- any(c('clock', 'clockwise') %in% iSubtype)
         }else{
             o[['radius']] <- paste0(radius, '%')
         }
@@ -317,6 +321,11 @@ series_pie <- function(lst, type, subtype, return=NULL, ...){
             o[['itemStyle']] <- mergeList(o[['itemStyle']], list(normal=list(
                 labelLine=list(show=TRUE)))
             )
+            if ('left' %in% iSubtype){
+                o[['funnelAlign']] <- 'left'
+            }else if ('right' %in% iSubtype){
+                o[['funnelAlign']] <- 'right'
+            }
         }
 
         obj[[pie]] <- o
@@ -554,12 +563,18 @@ series_gauge <- function(lst, type, subtype, return=NULL, ...){
 
 series_map <- function(lst, type, subtype, return=NULL, ...){
     # x[,1] x; x[,2] series; y[,1] value; y[,2] selected; series[,1] multi-maps
+
+    # Example:
+    # echartr(NULL, type="map_china")
     x <- if (is.null(lst$x)) NA else lst$x[,1]
     series <- if (is.null(lst$x)) '' else if (ncol(lst$x) > 1) lst$x[,2] else ''
     y <- if (is.null(lst$y)) NA else lst$y[,1]
-    sel <- if (is.null(lst$y)) 0 else if (ncol(lst$y) > 1) lst$y[,2] else 0
+    sel <- if (is.null(lst$y)) FALSE else
+        if (ncol(lst$y) > 1) as.logical(lst$y[,2]) else FALSE
     idx <- if (is.null(lst$series)) '' else lst$series[,1]
     data <- data.frame(y, x, series, sel, idx, stringsAsFactors=FALSE)
+
+    # two modes: series - mono map mulit series; split - multi map mono series
     mode <- if (is.null(lst$series)) 'series' else 'split'
     lvlSeries <- if (mode=='series') as.character(unique(data$series)) else
         as.character(unique(data$idx))
@@ -575,8 +590,7 @@ series_map <- function(lst, type, subtype, return=NULL, ...){
         if (is.null(lst$z)){
             layouts <- autoMultiPolarChartLayout(nSeries, col.max=4)
         }else{
-            layouts <- autoMultiPolarChartLayout(nSeries, bottom=15,
-                                                 col.max=4)
+            layouts <- autoMultiPolarChartLayout(nSeries, bottom=15, col.max=4)
         }
         rows <- layouts$rows
         cols <- layouts$cols
@@ -605,6 +619,8 @@ series_map <- function(lst, type, subtype, return=NULL, ...){
             itemStyle=list(normal=list(show=TRUE), emphasis=list(show=TRUE)),
             data=list()
         )
+        o$name <- if (!is.null(lst$y)) names(lst$y)[1]
+        if (grepl('multi', iType$misc)) o$selectedMode <- 'multiple'
         if (mode=='split')
             o$mapLocation <- list(
                 x=paste0(ul.corners[idx,1], '%'),
@@ -615,9 +631,12 @@ series_map <- function(lst, type, subtype, return=NULL, ...){
             o$data <- unname(apply(dt, 1, function(row){
                 list(name=as.character(unname(row['x'])),
                      value=ifna(as.numeric(unname(row['y'])), '-'),
-                     selected=ifna(as.logical(unname(as.numeric(row['sel']))), FALSE))
+                     selected=ifna(as.logical(unname(row['sel'])), FALSE))
             }))
-        if (mode=='series' && series != "") o$name <- series
+        if (mode=='series') if (series != "") o$name <- series
+        if (mode=='split') if (! (is.na(dt$series) || all(dt$series=='')))
+            o$name <- dt$series[1]
+
         return(o)
     })
 

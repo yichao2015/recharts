@@ -91,54 +91,64 @@ echartr = function(
     data, x = NULL, y = NULL, series = NULL, weight = NULL, z = NULL,
     lat = NULL, lng = NULL, type = 'auto', subtype = NULL, ...
 ) {
-    # experimental function
-    if (inherits(data, 'data.frame')) data <- as.data.frame(data)
+    if (is.null(data)){
+        data <- data.frame(x='', stringsAsFactors=FALSE)
+        dataVars <- list('x')
+        xvarRaw <- 'x'
+        hasZ <- FALSE
+        xlab <- ylab <- ''
+    }else{
+        if (inherits(data, 'data.frame')) data <- as.data.frame(data)
 
-    #------------- get all arguments as a list-----------------
-    vArgs <- as.list(match.call(expand.dots=TRUE))
-    dataVars <- intersect(names(vArgs),
-                          c('x', 'y', 'z', 'series', 'weight', 'lat', 'lng'))
-    vArgsRaw <- vArgs[dataVars]  # original arg names
-    vArgs <- lapply(vArgsRaw, function(v) {
-        symbols = all.names(v)
-        if (any(symbols %in% names(data)))
-            return(as.symbol(symbols[symbols %in% names(data)]))
+        #------------- get all arguments as a list-----------------
+        vArgs <- as.list(match.call(expand.dots=TRUE))
+        dataVars <- intersect(names(vArgs),
+                              c('x', 'y', 'z', 'series', 'weight', 'lat', 'lng'))
+        vArgsRaw <- vArgs[dataVars]  # original arg names
+        vArgs <- lapply(vArgsRaw, function(v) {
+            symbols = all.names(v)
+            if (any(symbols %in% names(data)))
+                return(as.symbol(symbols[symbols %in% names(data)]))
             # should be sapply(symbols[symbols %in% names(data)], as.symbol)
-        v
-    })  # get arg names correspond to data vars
+            v
+        })  # get arg names correspond to data vars
 
-    # ------------extract var names and values-----------------
-    eval(parse(text=paste0(names(vArgs), "var <- evalVarArg(",
-                           sapply(vArgs, deparse), ", data, eval=FALSE)")))
-    eval(parse(text=paste0(names(vArgs), "varRaw <- evalVarArg(",
-                           sapply(vArgsRaw, deparse), ", data, eval=FALSE)")))
-    eval(parse(text=paste0(names(vArgsRaw), " <- evalVarArg(",
-                           sapply(vArgsRaw, deparse), ", data)")))
-    hasZ <- ! is.null(z)
-    if (!is.null(series))
-        for (i in seq_along(seriesvar))
-            if (!is.factor(data[,seriesvar[i]]))
-                data[,seriesvar[i]] = as.factor(data[,seriesvar[i]])
+        # ------------extract var names and values-----------------
+        eval(parse(text=paste0(names(vArgs), "var <- evalVarArg(",
+                               sapply(vArgs, deparse), ", data, eval=FALSE)")))
+        eval(parse(text=paste0(names(vArgs), "varRaw <- evalVarArg(",
+                               sapply(vArgsRaw, deparse), ", data, eval=FALSE)")))
+        eval(parse(text=paste0(names(vArgsRaw), " <- evalVarArg(",
+                               sapply(vArgsRaw, deparse), ", data)")))
+        hasZ <- ! is.null(z)
+        if (!is.null(series))
+            for (i in seq_along(seriesvar))
+                if (!is.factor(data[,seriesvar[i]]))
+                    data[,seriesvar[i]] = as.factor(data[,seriesvar[i]])
 
-    # ------------------x, y lab(s)----------------------------
-    #xlab = ylab = NULL
-    if (!missing(x)) xlab = as.character(vArgsRaw$x) else xlab = "x"
-    if (!missing(y)) ylab = as.character(vArgsRaw$y) else ylab = "Freq"
-    xlab = sapply(xlab, autoArgLabel, auto=deparse(substitute(xvar)))
-    ylab = sapply(ylab, autoArgLabel, auto=deparse(substitute(xvar)))
-    xlab <- gsub("^\"|\"$", "", xlab)
-    ylab <- gsub("^\"|\"$", "", ylab)
-    if (length(ylab) == 0) ylab = "Freq"
+        # ------------------x, y lab(s)----------------------------
+        #xlab = ylab = NULL
+        if (!missing(x)) xlab = as.character(vArgsRaw$x) else xlab = "x"
+        if (!missing(y)) ylab = as.character(vArgsRaw$y) else ylab = "Freq"
+        xlab = sapply(xlab, autoArgLabel, auto=deparse(substitute(xvar)))
+        ylab = sapply(ylab, autoArgLabel, auto=deparse(substitute(xvar)))
+        xlab <- gsub("^\"|\"$", "", xlab)
+        ylab <- gsub("^\"|\"$", "", ylab)
+        if (length(ylab) == 0) ylab = "Freq"
+    }
 
     # -------------split multi-timeline df to lists-----------
 
     .makeMetaDataList <- function(df) {
-        # vars <- sapply(dataVars, function(x) {
-        #     eval(parse(text=paste0(x, 'varRaw')))}, simplify=TRUE)
-        # assignment <- paste0(dataVars, " = evalVarArg(", vars, ", ",
-        #                     substitute(df, parent.frame()), ")")
-        assignment <- paste0(dataVars, " = evalVarArg(", vArgsRaw[dataVars], ", ",
+         vars <- sapply(dataVars, function(x) {
+             eval(parse(text=paste0(x, 'varRaw')))}, simplify=TRUE)
+         if (!is.null(dim(vars)))
+             vars <- paste0(
+                 'c(',apply(vars, 2, function(x) paste(x, collapse=',')), ')')
+         assignment <- paste0(dataVars, " = evalVarArg(", vars, ", ",
                              substitute(df, parent.frame()), ")")
+        # assignment <- paste0(dataVars, " = evalVarArg(", vArgsRaw[dataVars], ", ",
+        #                      substitute(df, parent.frame()), ")")
         eval(parse(text=paste0("list(", paste(assignment, collapse=", "), ")")))
     }
     if (hasZ){

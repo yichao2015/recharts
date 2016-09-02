@@ -133,6 +133,77 @@ autoArgLabel = function(arg, auto) {
     auto
 }
 
+
+getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large',
+                                           'mapType'),
+                          ...){
+    ## get all the element names vector from an echarts object's series
+    stopifnot(inherits(chart, 'echarts'))
+    element <- match.arg(element)
+    hasZ <- 'timeline' %in% names(chart$x)
+    if (hasZ){
+        obj <- try(sapply(seq_len(length(chart$x$options)), function(i) {
+            sapply(chart$x$options[[i]]$series, function(lst) lst[[element]])
+        }), TRUE)
+        data <- try(sapply(seq_len(length(chart$x$options)), function(i) {
+            sapply(chart$x$options[[i]]$series, function(lst) lst[['data']])
+        }), TRUE)
+        if (chart$x$options[[1]]$series[[1]]$type %in%
+            c('funnel', 'pie', 'radar')){
+            if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
+            if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
+        }else if (chart$x$options[[1]]$series[[1]]$type %in%
+                  c('force', 'chord')){
+            if (element == 'name')
+                obj <- unlist(chart$x$options[[1]]$series[[1]][c('categories', 'data')])
+            if (elemetn == 'data')
+                obj <- data[names(data) %in% c('nodes', 'links')]
+        }
+    }else{
+        obj <- try(sapply(chart$x$series, function(lst) lst[[element]]), TRUE)
+        data <- try(sapply(chart$x$series, function(lst) lst[['data']]), TRUE)
+        if (chart$x$series[[1]]$type %in% c('funnel', 'pie', 'radar')){
+            if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
+            if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
+        }else if (chart$x$series[[1]]$type %in% c('force', 'chord')){
+            if (element == 'name') obj <- unlist(chart$x$series[[1]][c('categories', 'data')])
+            if (element == 'data') obj <- data[names(data) %in% c('nodes', 'links')]
+        }
+    }
+    return(unlist(obj))
+}
+
+
+getYFromEChart <- function(chart, ...){
+    ## get y series data and extract the unique values vector
+    stopifnot(inherits(chart, 'echarts'))
+    hasZ <- 'timeline' %in% names(chart$x)
+    .getY <- function(seriesData){
+        if (! is.null(dim(seriesData))){
+            if (dim(seriesData)[2] > 1){
+                return(seriesData[,2])
+            }else{
+                return(seriesData[,1])
+            }
+        }else{
+            return(seriesData)
+        }
+    }
+    if (hasZ){
+        y <- sapply(chart$x$options, function(lst){
+            Ys <- sapply(lst$series, function(l) {
+                return(.getY(l$data))
+            })
+            return(Ys)
+        })
+    }else{
+        y <- sapply(chart$x$series, function(lst) {
+            return(.getY(lst$data))
+        })
+    }
+    return(as.numeric(unique(unlist(y))))
+}
+
 #' @export
 #' @exportMethod + echarts
 "+.echarts" <- function(e1, e2){
@@ -142,6 +213,252 @@ autoArgLabel = function(arg, auto) {
     e2 <- deparse(substitute(e2))
     return(paste(e1,'%>%',e2))
 }
+
+#-----Palettes and others---------
+#' Get The Colors Vector From A Named Palette
+#'
+#' Get hex color vector of a named palette from \code{\link{RColorBrewer}}, \code{\link{ggthemes}}
+#' or \code{\link{grDevices}}. You can \code{\link{show_col}} the vector to
+#' see the effects.
+#' @param palname name of the palette. Default NULL to get echarts default. Could be:
+#' \itemize{
+#'  \item \link{RColorBrewer} palettes: Including \code{'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu',
+#'  'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1',
+#'  'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens',
+#'  'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds',
+#'  'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'} \cr
+#'  \item \link{ggthemes} palettes: \code{'calc', 'economist', 'economist_white', 'economist_stata',
+#'  'excel', 'exel_fill', 'excel_line', 'excel_new', 'few', 'fivethirtyeight', '538', 'manyeyes',
+#'  'gdocs', 'pander', 'tableau', 'stata', 'stata1','stata1r','statamono', 'ptol',
+#'  'tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy', 'tableaublrd',
+#'  'tableaugnor', 'tableaucyclic', 'tableau10light', 'tableaublrd12', 'tableauprgy12',
+#'  'tableaugnor12', 'hc', 'darkunica', 'solarized', 'solarized_red', 'solarized_yellow',
+#'  'solarized_orange', 'solarized_magenta', 'solarized_violet', 'solarized_blue',
+#'  'solarized_cyan', 'solarized_green', 'wsj', 'wsj_rgby', 'wsj_red_green',
+#'  'wsj_black_green', 'wsj_dem_rep', 'colorblind', 'trafficlight'} \cr
+#'  \item Aetna official palettes: Including \code{'aetnagreen', 'aetnablue', 'aetnaviolet',
+#'  'aetnaorange', 'aetnateal', 'aetnacranberry'} \cr
+#'  \item Other palettes: \code{'rainbow', 'terrain', 'topo', 'heat', 'cm'}
+#' }
+#' @param n length of the color vector when the palette is continuous (\code{rain, cm,
+#' terrain, topo, heat, ...}). Default 6.
+#' @import RColorBrewer scales ggthemes
+#' @export
+#' @return color vectors
+#'
+#' @seealso \code{\link{RColorBrewer}}, \code{\link{scales}}, \code{\link{ggthemes}},
+#' \code{\link{show_col}}
+#' @examples
+#' \dontrun{
+#' library(scales)
+#' show_col(getColFromPal('tableau20'))
+#' show_col(getColFromPal('hc'))
+#' }
+getColFromPal <- function(palname=NULL, n=6){
+    brewer <- c('BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu',
+                'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1',
+                'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu',
+                'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn',
+                'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr',
+                'YlOrRd')
+    tableau <- data.frame(
+        nick=c('tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy',
+               'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light',
+               'tableaublrd12', 'tableauprgy12', 'tableaugnor12', 'tableau',
+               'tableaucolorblind', 'trafficlight'),
+        pal=c('tableau20', 'tableau10medium', 'gray5', 'purplegray6',
+              'bluered6', 'greenorange6', 'cyclic', 'tableau10light',
+              'bluered12', 'purplegray12', 'greenorange12', 'tableau10',
+              'colorblind10', 'trafficlight'))
+    ## echarts default
+    colObj <- c('#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
+                '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0',
+                '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700',
+                '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' )
+    if (! is.null(palname)) palname <- tolower(palname)
+    if (! is.null(palname)){
+        if (palname %in% paste0(
+            "aetna", c('green','blue','teal','cranberry','orange','violet'))){
+            colObj <- switch(
+                palname,
+                aetnagreen=c("#7AC143", "#7D3F98", "#F47721", "#D20962",
+                             "#00A78E", "#00BCE4", "#B8D936", "#EE3D94",
+                             "#FDB933", "#F58F9F", "#60C3AE", "#5F78BB",
+                             "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
+                aetnablue=c("#00BCE4", "#D20962", "#7AC143", "#F47721",
+                            "#7D3F98", "#00A78E", "#F58F9F", "#B8D936",
+                            "#60C3AE", "#FDB933", "#EE3D94", "#5E9732",
+                            "#5F78BB", "#CEA979", "#EF4135", "#7090A5"),
+                aetnateal=c("#00A78E", "#F47721", "#7AC143", "#00BCE4",
+                            "#D20962", "#7D3F98", "#60C3AE", "#FDB933",
+                            "#B8D936", "#5F78BB", "#F58F9F", "#EE3D94",
+                            "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
+                aetnacranberry=c("#D20962", "#00BCE4", "#7D3F98", "#7AC143",
+                                 "#F47721", "#00A78E", "#F58F9F", "#60C3AE",
+                                 "#EE3D94", "#B8D936", "#FDB933", "#5E9732",
+                                 "#5F78BB", "#CEA979", "#EF4135", "#7090A5"),
+                aetnaorange=c("#F47721", "#7AC143", "#00A78E", "#D20962",
+                              "#00BCE4", "#7D3F98", "#FDB933", "#B8D936",
+                              "#60C3AE", "#F58F9F", "#5F78BB", "#EE3D94",
+                              "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
+                aetnaviolet=c("#7D3F98", "#7AC143", "#F47721", "#00A78E",
+                              "#00BCE4", "#D20962", "#F58F9F", "#B8D936",
+                              "#FDB933", "#60C3AE", "#5F78BB", "#EE3D94",
+                              "#5E9732", "#CEA979", "#EF4135", "#7090A5")
+            )
+        }else if (palname %in% tolower(brewer)){
+            Palname <- brewer[which(tolower(brewer)==palname)]
+            maxcolors <- brewer.pal.info[row.names(brewer.pal.info)==Palname,
+                                         "maxcolors"]
+            colObj <- brewer.pal(ifelse((maxcolors>n && n>2), n, maxcolors),
+                                 Palname)
+        }else{
+            if (palname %in% c('rainbow', 'terrain', 'topo', 'heat', 'cm')){
+                colObj <- switch(palname,
+                                 rainbow=substr(rainbow(n), 1, 7),
+                                 terrain=substr(terrain.colors(n), 1, 7),
+                                 heat=substr(heat.colors(n), 1, 7),
+                                 topo=substr(topo.colors(n), 1, 7),
+                                 cm=substr(cm.colors(n), 1, 7)
+                )
+            }else{
+                if (palname %in% c('pander')){
+                    colObj <- palette_pander(n)
+                }else if (palname %in% c('calc')){
+                    colObj <- ggthemes:::ggthemes_data$calc$colors
+                }else if (palname %in% c('ptol')) {
+                    colObj <- ptol_pal()(ifelse(n > 12, 12, n))
+                }else if (palname %in% c('excel', "excel_fill", "excel_line",
+                                         "excel_new")){
+                    palname <- unlist(strsplit(palname, "excel_"))[2]
+                    if (is.na(palname)) palname <- 'new'
+                    colObj <- ggthemes:::ggthemes_data$excel[[palname]]
+                }else if (palname %in% c('economist', 'economist_white',
+                                         'economist_stata')){
+                    palname <- unlist(strsplit(palname,"economist_"))[2]
+                    if (is.na(palname) || palname=='white') {
+                        colObj <- ggthemes:::ggthemes_data$economist$fg
+                    } else {
+                        colObj <- ggthemes:::ggthemes_data$economist$stata$fg
+                    }
+                }else if (palname %in% c('darkunica', 'hc')){
+                    palname <- ifelse(palname == 'hc', 'default', palname)
+                    colObj <- ggthemes:::ggthemes_data$hc$palettes[[palname]]
+                }else if (palname %in% c('wsj', 'wsj_rgby', 'wsj_red_green',
+                                         'wsj_black_green', 'wsj_dem_rep')){
+                    palname <- unlist(strsplit(palname,"wsj_"))[2]
+                    if (is.na(palname)) palname <- 'colors6'
+                    colObj <- ggthemes:::ggthemes_data$wsj$palettes[[palname]]
+                }else if (palname %in% c('stata', 'stata1', 'stata1r', 'statamono')){
+                    palname <- switch(palname, stata='stata', stata1='s1color',
+                                      stata1r='s1rcolor', statamono='mono')
+                    if (palname == 'stata'){
+                        colObj <- ggthemes:::ggthemes_data$stata$colors
+                    }else{
+                        colObj <- try(eval(parse(text=paste0(
+                            "stata_pal('", palname, "')(15)"))), TRUE)
+                    }
+                }else if (palname %in% c('few', 'few_dark', 'few_light')){
+                    palname <- unlist(strsplit(palname,"few_"))[2]
+                    if (is.na(palname)) palname <- "medium"
+                    colObj <- ggthemes:::ggthemes_data$few[[palname]]
+                }else if (palname %in%
+                          c('fivethirtyeight','gdocs', 'colorblind', 'manyeyes',
+                            '538')){
+                    if (palname == '538') palname <- 'fivethirtyeight'
+                    colObj <- ggthemes:::ggthemes_data[[palname]]
+                }else if (palname %in%
+                          c('tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy',
+                            'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light',
+                            'tableaublrd12', 'tableauprgy12', 'tableaugnor12', 'tableau',
+                            'tableaucolorblind', 'trafficlight')){
+                    palname <- tableau[tableau$nick==palname,"pal"]
+                    colObj <- try(eval(parse(text=paste0("tableau_color_pal(palette='",
+                                                         palname,"')(20)"))), TRUE)
+                }else if (palname %in%
+                          c('solarized', 'solarized_red', 'solarized_yellow',
+                            'solarized_orange', 'solarized_magenta', 'solarized_violet',
+                            'solarized_blue', 'solarized_cyan', 'solarized_green')){
+                    palname <- unlist(strsplit(palname,"solarized_"))[2]
+                    colObj <- try(eval(parse(text=paste0(
+                        "solarized_pal('", ifnull(palname, 'blue'), "')(20)"))), TRUE)
+                }
+            }
+        }
+    }
+    return(as.vector(colObj))
+}
+
+#' Get Hex Color Vector (Not Exported)
+#'
+#' Get color vector from a palette/color name. It is wider than \code{\link{getColFromPal}}.
+#' @param palette Palette, default NULL. Could be
+#' \itemize{
+#'  \item palette name, e.g, "Blues". The palette will be proceeded by \code{\link{getColFromPal}}.
+#'  \item a hex color, e.g., "#FFFFFF", "0xFFFFFFFF"
+#'  \item a vector or color names, hex colors
+#'  \item NULL
+#' }
+#' @param ... Elipsis
+#'
+#' @return A vector of hex colors
+#'
+#' @seealso \code{\link{getColFromPal}} \code{\link{RColorBrewer}} \code{\link{ggthemes}}
+#' @examples
+#' \dontrun{
+#' library(scales)
+#' show_col(getColors(NULL))
+#' show_col(getColors("terrain"))
+#' show_col(getColors(c('red', 'gold', 'skyblue')))
+#' }
+getColors <- function(palette, ...){
+    # build a function to extract palette info
+    # used for echartR
+    if ("n" %in% names(list(...))) n <- list(...)[['n']] else n <- 6
+    if (length(palette)==1) {
+        if (substr(palette, 1, 1)=="#"){
+            if (nchar(palette) == 7 || nchar(palette) == 4) {
+                return(palette)
+            }else{
+                palette <- paste0('0x', substring(palette, seq(2,8,2), seq(3,9,2)))
+                palette <- strtoi(palette)
+                return(rgba(palette))
+            }
+        }else if (palette %in% colors()){
+            return(substr(col2hcl(palette), 1, 7))
+        }else if (grepl('^rgba\\(', palette)){
+            return(palette)
+        }else{
+            palettes <- unlist(strsplit(palette, "[\\(\\)]", perl=TRUE))
+            if (length(palettes)==1){
+                return(getColFromPal(palettes[1], n))
+            }else{
+                aetPal <- getColFromPal(palettes[1], as.numeric(palettes[2]))
+                if (as.numeric(palettes[2]) < length(aetPal)){
+                    return(sample(aetPal, as.numeric(palettes[2])))
+                }else{
+                    return(aetPal)
+                }
+            }
+        }
+    }else if(length(palette)>1){
+        .convCol <- function(iPal){
+            if (!is(try(col2rgb(iPal), TRUE), "try-error")){
+                if (substr(iPal, 1, 1) == "#"){
+                    return(toupper(iPal))
+                }else{
+                    vecCol <- as.vector(col2rgb(iPal))
+                    return(rgba(vecCol))
+                }
+            }
+        }
+        aetPal <- unlist(lapply(palette, .convCol))
+        return(aetPal)
+    }else{
+        return(getColFromPal(NULL))
+    }
+}
+
 
 # -------------Lazy functions to judge class-------------------
 isDate <- function(x, format=NULL){

@@ -1079,250 +1079,6 @@ setToolbox <- function(chart, show=TRUE, language='cn',
     return(chart %>% tuneGrid())
 }
 
-#-----Palettes and others---------
-#' Get The Colors Vector From A Named Palette
-#'
-#' Get hex color vector of a named palette from \code{\link{RColorBrewer}}, \code{\link{ggthemes}}
-#' or \code{\link{grDevices}}. You can \code{\link{show_col}} the vector to
-#' see the effects.
-#' @param palname name of the palette. Default NULL to get echarts default. Could be:
-#' \itemize{
-#'  \item \link{RColorBrewer} palettes: Including \code{'BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu',
-#'  'RdGy', 'RdYlBu', 'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1',
-#'  'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu', 'GnBu', 'Greens',
-#'  'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'Purples', 'RdPu', 'Reds',
-#'  'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'} \cr
-#'  \item \link{ggthemes} palettes: \code{'calc', 'economist', 'economist_white', 'economist_stata',
-#'  'excel', 'exel_fill', 'excel_line', 'excel_new', 'few', 'fivethirtyeight', '538', 'manyeyes',
-#'  'gdocs', 'pander', 'tableau', 'stata', 'stata1','stata1r','statamono', 'ptol',
-#'  'tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy', 'tableaublrd',
-#'  'tableaugnor', 'tableaucyclic', 'tableau10light', 'tableaublrd12', 'tableauprgy12',
-#'  'tableaugnor12', 'hc', 'darkunica', 'solarized', 'solarized_red', 'solarized_yellow',
-#'  'solarized_orange', 'solarized_magenta', 'solarized_violet', 'solarized_blue',
-#'  'solarized_cyan', 'solarized_green', 'wsj', 'wsj_rgby', 'wsj_red_green',
-#'  'wsj_black_green', 'wsj_dem_rep', 'colorblind', 'trafficlight'} \cr
-#'  \item Aetna official palettes: Including \code{'aetnagreen', 'aetnablue', 'aetnaviolet',
-#'  'aetnaorange', 'aetnateal', 'aetnacranberry'} \cr
-#'  \item Other palettes: \code{'rainbow', 'terrain', 'topo', 'heat', 'cm'}
-#' }
-#' @param n length of the color vector when the palette is continuous (\code{rain, cm,
-#' terrain, topo, heat, ...}). Default 6.
-#' @import RColorBrewer scales ggthemes
-#' @export
-#' @return color vectors
-#'
-#' @seealso \code{\link{RColorBrewer}}, \code{\link{scales}}, \code{\link{ggthemes}},
-#' \code{\link{show_col}}
-#' @examples
-#' \dontrun{
-#' library(scales)
-#' show_col(getColFromPal('tableau20'))
-#' show_col(getColFromPal('hc'))
-#' }
-getColFromPal <- function(palname=NULL, n=6){
-    brewer <- c('BrBG', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu',
-                'RdYlGn', 'Spectral', 'Accent', 'Dark2', 'Paired', 'Pastel1',
-                'Pastel2', 'Set1', 'Set2', 'Set3', 'Blues', 'BuGn', 'BuPu',
-                'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn',
-                'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr',
-                'YlOrRd')
-    tableau <- data.frame(
-        nick=c('tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy',
-               'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light',
-               'tableaublrd12', 'tableauprgy12', 'tableaugnor12', 'tableau',
-               'tableaucolorblind', 'trafficlight'),
-        pal=c('tableau20', 'tableau10medium', 'gray5', 'purplegray6',
-              'bluered6', 'greenorange6', 'cyclic', 'tableau10light',
-              'bluered12', 'purplegray12', 'greenorange12', 'tableau10',
-              'colorblind10', 'trafficlight'))
-    ## echarts default
-    colObj <- c('#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
-                '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0',
-                '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700',
-                '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' )
-    if (! is.null(palname)) palname <- tolower(palname)
-    if (! is.null(palname)){
-        if (palname %in% paste0(
-            "aetna", c('green','blue','teal','cranberry','orange','violet'))){
-            colObj <- switch(
-                palname,
-                aetnagreen=c("#7AC143", "#7D3F98", "#F47721", "#D20962",
-                             "#00A78E", "#00BCE4", "#B8D936", "#EE3D94",
-                             "#FDB933", "#F58F9F", "#60C3AE", "#5F78BB",
-                             "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
-                aetnablue=c("#00BCE4", "#D20962", "#7AC143", "#F47721",
-                            "#7D3F98", "#00A78E", "#F58F9F", "#B8D936",
-                            "#60C3AE", "#FDB933", "#EE3D94", "#5E9732",
-                            "#5F78BB", "#CEA979", "#EF4135", "#7090A5"),
-                aetnateal=c("#00A78E", "#F47721", "#7AC143", "#00BCE4",
-                            "#D20962", "#7D3F98", "#60C3AE", "#FDB933",
-                            "#B8D936", "#5F78BB", "#F58F9F", "#EE3D94",
-                            "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
-                aetnacranberry=c("#D20962", "#00BCE4", "#7D3F98", "#7AC143",
-                                 "#F47721", "#00A78E", "#F58F9F", "#60C3AE",
-                                 "#EE3D94", "#B8D936", "#FDB933", "#5E9732",
-                                 "#5F78BB", "#CEA979", "#EF4135", "#7090A5"),
-                aetnaorange=c("#F47721", "#7AC143", "#00A78E", "#D20962",
-                              "#00BCE4", "#7D3F98", "#FDB933", "#B8D936",
-                              "#60C3AE", "#F58F9F", "#5F78BB", "#EE3D94",
-                              "#5E9732", "#CEA979", "#EF4135", "#7090A5"),
-                aetnaviolet=c("#7D3F98", "#7AC143", "#F47721", "#00A78E",
-                              "#00BCE4", "#D20962", "#F58F9F", "#B8D936",
-                              "#FDB933", "#60C3AE", "#5F78BB", "#EE3D94",
-                              "#5E9732", "#CEA979", "#EF4135", "#7090A5")
-            )
-        }else if (palname %in% tolower(brewer)){
-            Palname <- brewer[which(tolower(brewer)==palname)]
-            maxcolors <- brewer.pal.info[row.names(brewer.pal.info)==Palname,
-                                         "maxcolors"]
-            colObj <- brewer.pal(ifelse((maxcolors>n && n>2), n, maxcolors),
-                                 Palname)
-        }else{
-            if (palname %in% c('rainbow', 'terrain', 'topo', 'heat', 'cm')){
-                colObj <- switch(palname,
-                                 rainbow=substr(rainbow(n), 1, 7),
-                                 terrain=substr(terrain.colors(n), 1, 7),
-                                 heat=substr(heat.colors(n), 1, 7),
-                                 topo=substr(topo.colors(n), 1, 7),
-                                 cm=substr(cm.colors(n), 1, 7)
-                )
-            }else{
-                if (palname %in% c('pander')){
-                    colObj <- palette_pander(n)
-                }else if (palname %in% c('calc')){
-                    colObj <- ggthemes:::ggthemes_data$calc$colors
-                }else if (palname %in% c('ptol')) {
-                    colObj <- ptol_pal()(ifelse(n > 12, 12, n))
-                }else if (palname %in% c('excel', "excel_fill", "excel_line",
-                                         "excel_new")){
-                    palname <- unlist(strsplit(palname, "excel_"))[2]
-                    if (is.na(palname)) palname <- 'new'
-                    colObj <- ggthemes:::ggthemes_data$excel[[palname]]
-                }else if (palname %in% c('economist', 'economist_white',
-                                         'economist_stata')){
-                    palname <- unlist(strsplit(palname,"economist_"))[2]
-                    if (is.na(palname) || palname=='white') {
-                        colObj <- ggthemes:::ggthemes_data$economist$fg
-                    } else {
-                        colObj <- ggthemes:::ggthemes_data$economist$stata$fg
-                    }
-                }else if (palname %in% c('darkunica', 'hc')){
-                    palname <- ifelse(palname == 'hc', 'default', palname)
-                    colObj <- ggthemes:::ggthemes_data$hc$palettes[[palname]]
-                }else if (palname %in% c('wsj', 'wsj_rgby', 'wsj_red_green',
-                                         'wsj_black_green', 'wsj_dem_rep')){
-                    palname <- unlist(strsplit(palname,"wsj_"))[2]
-                    if (is.na(palname)) palname <- 'colors6'
-                    colObj <- ggthemes:::ggthemes_data$wsj$palettes[[palname]]
-                }else if (palname %in% c('stata', 'stata1', 'stata1r', 'statamono')){
-                    palname <- switch(palname, stata='stata', stata1='s1color',
-                                      stata1r='s1rcolor', statamono='mono')
-                    if (palname == 'stata'){
-                        colObj <- ggthemes:::ggthemes_data$stata$colors
-                    }else{
-                        colObj <- try(eval(parse(text=paste0(
-                            "stata_pal('", palname, "')(15)"))), TRUE)
-                    }
-                }else if (palname %in% c('few', 'few_dark', 'few_light')){
-                    palname <- unlist(strsplit(palname,"few_"))[2]
-                    if (is.na(palname)) palname <- "medium"
-                    colObj <- ggthemes:::ggthemes_data$few[[palname]]
-                }else if (palname %in%
-                          c('fivethirtyeight','gdocs', 'colorblind', 'manyeyes',
-                            '538')){
-                    if (palname == '538') palname <- 'fivethirtyeight'
-                    colObj <- ggthemes:::ggthemes_data[[palname]]
-                }else if (palname %in%
-                          c('tableau20', 'tableau10medium', 'tableaugray', 'tableauprgy',
-                            'tableaublrd', 'tableaugnor', 'tableaucyclic', 'tableau10light',
-                            'tableaublrd12', 'tableauprgy12', 'tableaugnor12', 'tableau',
-                            'tableaucolorblind', 'trafficlight')){
-                    palname <- tableau[tableau$nick==palname,"pal"]
-                    colObj <- try(eval(parse(text=paste0("tableau_color_pal(palette='",
-                                                         palname,"')(20)"))), TRUE)
-                }else if (palname %in%
-                          c('solarized', 'solarized_red', 'solarized_yellow',
-                            'solarized_orange', 'solarized_magenta', 'solarized_violet',
-                            'solarized_blue', 'solarized_cyan', 'solarized_green')){
-                    palname <- unlist(strsplit(palname,"solarized_"))[2]
-                    colObj <- try(eval(parse(text=paste0(
-                        "solarized_pal('", ifnull(palname, 'blue'), "')(20)"))), TRUE)
-                }
-            }
-        }
-    }
-    return(as.vector(colObj))
-}
-
-#' Get Hex Color Vector (Not Exported)
-#'
-#' Get color vector from a palette/color name. It is wider than \code{\link{getColFromPal}}.
-#' @param palette Palette, default NULL. Could be
-#' \itemize{
-#'  \item palette name, e.g, "Blues". The palette will be proceeded by \code{\link{getColFromPal}}.
-#'  \item a hex color, e.g., "#FFFFFF", "0xFFFFFFFF"
-#'  \item a vector or color names, hex colors
-#'  \item NULL
-#' }
-#' @param ... Elipsis
-#'
-#' @return A vector of hex colors
-#'
-#' @seealso \code{\link{getColFromPal}} \code{\link{RColorBrewer}} \code{\link{ggthemes}}
-#' @examples
-#' \dontrun{
-#' library(scales)
-#' show_col(getColors(NULL))
-#' show_col(getColors("terrain"))
-#' show_col(getColors(c('red', 'gold', 'skyblue')))
-#' }
-getColors <- function(palette, ...){
-    # build a function to extract palette info
-    # used for echartR
-    if ("n" %in% names(list(...))) n <- list(...)[['n']] else n <- 6
-    if (length(palette)==1) {
-        if (substr(palette, 1, 1)=="#"){
-            if (nchar(palette) == 7 || nchar(palette) == 4) {
-                return(palette)
-            }else{
-                palette <- paste0('0x', substring(palette, seq(2,8,2), seq(3,9,2)))
-                palette <- strtoi(palette)
-                return(rgba(palette))
-            }
-        }else if (palette %in% colors()){
-            return(substr(col2hcl(palette), 1, 7))
-        }else if (grepl('^rgba\\(', palette)){
-            return(palette)
-        }else{
-            palettes <- unlist(strsplit(palette, "[\\(\\)]", perl=TRUE))
-            if (length(palettes)==1){
-                return(getColFromPal(palettes[1], n))
-            }else{
-                aetPal <- getColFromPal(palettes[1], as.numeric(palettes[2]))
-                if (as.numeric(palettes[2]) < length(aetPal)){
-                    return(sample(aetPal, as.numeric(palettes[2])))
-                }else{
-                    return(aetPal)
-                }
-            }
-        }
-    }else if(length(palette)>1){
-        .convCol <- function(iPal){
-            if (!is(try(col2rgb(iPal), TRUE), "try-error")){
-                if (substr(iPal, 1, 1) == "#"){
-                    return(toupper(iPal))
-                }else{
-                    vecCol <- as.vector(col2rgb(iPal))
-                    return(rgba(vecCol))
-                }
-            }
-        }
-        aetPal <- unlist(lapply(palette, .convCol))
-        return(aetPal)
-    }else{
-        return(getColFromPal(NULL))
-    }
-}
 
 makeDataZoom <- function(show=FALSE, pos=6, range=NULL, width=30,
                          fill='rgba(144,197,237,0.2)',
@@ -1606,35 +1362,6 @@ setDataRange <- function(
     return(chart %>% tuneGrid())
 }
 
-getYFromEChart <- function(chart, ...){
-    ## get y series data and extract the unique values vector
-    stopifnot(inherits(chart, 'echarts'))
-    hasZ <- 'timeline' %in% names(chart$x)
-    .getY <- function(seriesData){
-        if (! is.null(dim(seriesData))){
-            if (dim(seriesData)[2] > 1){
-                return(seriesData[,2])
-            }else{
-                return(seriesData[,1])
-            }
-        }else{
-            return(seriesData)
-        }
-    }
-    if (hasZ){
-        y <- sapply(chart$x$options, function(lst){
-            Ys <- sapply(lst$series, function(l) {
-                return(.getY(l$data))
-            })
-            return(Ys)
-        })
-    }else{
-        y <- sapply(chart$x$series, function(lst) {
-            return(.getY(lst$data))
-        })
-    }
-    return(as.numeric(unique(unlist(y))))
-}
 
 #' Set \code{symbolList} of Echarts
 #'
@@ -1703,45 +1430,75 @@ setSymbols <- function(chart, symbols=NULL, ...){
 
 }
 
-getSeriesPart <- function(chart, element=c('name', 'type', 'data', 'large'),
-                          ...){
-    ## get all the element names vector from an echarts object's series
+
+#' Set \code{roamController} of Echarts
+#'
+#' Set \code{roamController} of echarts object for map. you can modify it by setting symbolList using
+#' \code{\link{\%>\%}}.
+#' @param chart \code{echarts} object generated by \code{\link{echart}} or \code{\link{echartR}}
+#' @param show Logical, if the widget is shown. If set NULL, the widget will be
+#' removed from the chart object. Default TRUE.
+#' @param pos Numeric 1-12 or vector \code{c(x, y, orient)}. Default 2. Note that
+#' roamController is always vertical.
+#' @param width Default 80.
+#' @param height Default 120.
+#' @param bgColor Background color, default 'rgba(0,0,0,0)' (transparent).
+#' @param borderColor Border color, default '#ccc'.
+#' @param borderWidth Border width, default 0px (not shown).
+#' @param fillerColor Filler color, default '#fff'.
+#' @param handleColor Handle color, default '#6495ed'.
+#' @param step Movement in px per move. Default 15px.
+#' @param mapTypeControl Which map to be controlled by \code{roamController}. E.g,,
+#' \code{list(china=TRUE)}. Default NULL and \code{setRoam} will calculate automatically.
+#' @param ... Elipsis
+#'
+#' @return A modified echarts object
+#' @export
+#'
+#' @references \url{http://echarts.baidu.com/echarts2/doc/option.html#title~roamController}
+#' @examples
+#' \dontrun{
+#' }
+setRoam <- function(chart, show=TRUE, pos=2, width=80, height=120,
+                    bgColor='rgba(0,0,0,0)', borderColor='#ccc', borderWidth=0,
+                    fillerColor='#fff', handleColor='#6495ed', step=15,
+                    mapTypeControl=NULL, ...){
     stopifnot(inherits(chart, 'echarts'))
-    element <- match.arg(element)
     hasZ <- 'timeline' %in% names(chart$x)
-    if (hasZ){
-        obj <- try(sapply(seq_len(length(chart$x$options)), function(i) {
-            sapply(chart$x$options[[i]]$series, function(lst) lst[[element]])
-        }), TRUE)
-        data <- try(sapply(seq_len(length(chart$x$options)), function(i) {
-            sapply(chart$x$options[[i]]$series, function(lst) lst[['data']])
-        }), TRUE)
-        if (chart$x$options[[1]]$series[[1]]$type %in%
-            c('funnel', 'pie', 'radar')){
-            if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
-            if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
-        }else if (chart$x$options[[1]]$series[[1]]$type %in%
-                  c('force', 'chord')){
-            if (element == 'name')
-                obj <- unlist(chart$x$options[[1]]$series[[1]][c('categories', 'data')])
-            if (elemetn == 'data')
-                obj <- data[names(data) %in% c('nodes', 'links')]
-        }
+    if (is.null(show)){
+        if (hasZ)
+            chart$x$options[[1]]$roamController <- NULL
+        else
+            chart$x$roamController <- NULL
     }else{
-        obj <- try(sapply(chart$x$series, function(lst) lst[[element]]), TRUE)
-        data <- try(sapply(chart$x$series, function(lst) lst[['data']]), TRUE)
-        if (chart$x$series[[1]]$type %in% c('funnel', 'pie', 'radar')){
-            if (element == 'name') obj <- unlist(data)[names(unlist(data))=='name']
-            if (element == 'data') obj <- unlist(data)[names(unlist(data))=='value']
-        }else if (chart$x$series[[1]]$type %in% c('force', 'chord')){
-            if (element == 'name') obj <- unlist(chart$x$series[[1]][c('categories', 'data')])
-            if (element == 'data') obj <- data[names(data) %in% c('nodes', 'links')]
+        lstRoam <- list(show=show, width=width, height=height,
+                        backgroundColor=bgColor, borderColor=borderColor,
+                        borderWidth=borderWidth, fillerColor=fillerColor,
+                        handleColor=handleColor, step=step,
+                        mapTypeControl=list(TRUE))
+        if (length(pos)==1){
+            pos <- vecPos(pos)
+        }else stopifnot (length(pos) >= 3)
+        lstRoam[c('x', 'y')] <- pos[1:2]
+
+        if (is.null(mapTypeControl)){
+            names(lstRoam$mapTypeControl) <- if (hasZ)
+                gsub("^(.*)|", "\\1", chart$x$options[[1]]$series[[1]]$mapType) else
+                    gsub("^(.*)|", "\\1", chart$x$series[[1]]$mapType)
+        }else if (is.list(mapTypeControl)){
+            lstRoam$mapTypeControl <- mapTypeControl
+        }else if (is.vector(mapTypeControl)){
+            lstRoam$mapTypeControl <- rep(TRUE, length(mapTypeControl))
+            names(lstRoam$mapTypeControl) <- mapTypeControl
         }
+
+        if (hasZ)
+            chart$x$options[[1]]$roamController <- lstRoam
+        else
+            chart$x$roamController <- lstRoam
     }
-    return(unlist(obj))
+    return(chart %>% reElementId())
 }
-
-
 
 #' Set \code{legend} of Echarts
 #'
@@ -2767,10 +2524,10 @@ setTimeline <- function(chart, show=TRUE, type=c('time', 'number'), realtime=TRU
     return(chart %>% tuneGrid())
 }
 
-#' Add `geoCoord` to An Echarts Object
+#' Add \code{geoCoord} to An Echarts Object
 #'
-#' Add `geoCoord` object to echarts object. It is used for maps. \cr \cr
-#' For maps with a timeline, `geoCoord` object is added to \code{options[[1]]$series[[1]]},
+#' Add \code{geoCoord} object to echarts object. It is used for maps. \cr \cr
+#' For maps with a timeline, \code{geoCoord} object is added to \code{options[[1]]$series[[1]]},
 #' while for those without a timeline, it is added to \code{series[[1]]}.
 #' @param chart chart \code{echarts} object generated by \code{\link{echart}} or
 #' \code{\link{echartR}}
@@ -2808,13 +2565,193 @@ addGeoCoord <- function(chart, geoCoord=NULL){
         names(lstGeoCoord) <- as.character(geoCoord[,1])
         if ('timeline' %in% names(chart$x)){
             if (chart$x$options[[1]]$series[[1]]$type == 'map')
-                chart$x$options[[1]]$series[['geoCoord']] <- lstGeoCoord
+                chart$x$options[[1]]$series[[1]][['geoCoord']] <- lstGeoCoord
         }else{
             if (chart$x$series[[1]]$type == 'map')
-                chart$x$series[['geoCoord']] <- lstGeoCoord
+                chart$x$series[[1]][['geoCoord']] <- lstGeoCoord
         }
     }
     return(chart)
+}
+
+
+#' Add \code{heatmap} to Echarts Object
+#'
+#' Add heatmap object to an Echarts object. (applicable for map)
+#'
+#' @param chart \code{echarts} object generated by \code{\link{echart}} or
+#' \code{\link{echartR}}.
+#' @param series Vector. Specify which series you want to insert heatmap. Could be
+#' numeric (index of the series) or string (series name). If NULL, then apply to all.
+#' Default NULL.
+#' @param timeslots Vector. Specify which timeslots (z) you want to insert heatmap.
+#' Could be numeric (index of the timeslot) or string (timeslot name).
+#' If NULL, then apply to all. Default NULL. You could use \code{z} for short.
+#' @param data The heatmap source data. Two modes:
+#' \describe{
+#'   \item{data.frame or matrix}{A data.frame or matrix of 3 columns: lng (-180 ~ 180),
+#'   lat (-90 ~ 90) and heat value (0-1). If heat value is out of the range [0,1],
+#'   then it will be normalized.}
+#'   \item{list}{A list in the form: \code{list(c(<lng1>, <lat1>, <value1>),
+#'   c(<lng2>, <lat2>, <value2>), ...)}}
+#' }
+#' @param gradientColors Color palette of heat visualization. Three mode:
+#' \describe{
+#'   \item{vector}{A vector of colors (hex, name, or rgba string)}
+#'   \item{data.frame or matrix}{A data.frame or matrix of 2 columns: offset (0-1),
+#'   and color (hex, name or rgba string). }
+#'   \item{list}{A list in the form: \code{list(list(offset=0.2, color='red'),
+#'   list(offset=0.5, color='green'), ...)}}
+#' } \cr
+#' Default c('blue', 'cyan', 'lime', 'yellow', 'orange', 'red').
+#' @param blurSize Size of blur. Default 30.
+#' @param minAlpha Minimal alpha value which any opacity value below this threshold
+#' will be set \code{minAlpha} in order to prevent over-transparency. Default 0.05.
+#' @param valueScale Numeric. Scale of value that all the heat value will be multiplied
+#' by this value before plotting. Default 1.
+#' @param opacity Numeric 0-1. Degree of opacity. Default 1.
+#' @param ... Elipsis
+#'
+#' @return A modified echarts object
+#' @export
+#'
+#' @references \url{http://echarts.baidu.com/echarts2/doc/option.html#title~series-i(map).heatmap}
+#' @examples
+#' \dontrun{
+#'
+#' }
+addHeatmap <- function(chart, series=NULL, timeslots=NULL, data=NULL,
+                       gradientColors=list('blue', 'cyan', 'lime', 'yellow', 'orange', 'red'),
+                       blurSize=30, minAlpha=0.05,
+                       valueScale=1, opacity=1,
+...){
+    stopifnot(inherits(chart, 'echarts'))
+    if ('z' %in% names(list(...))) timeslots <- list(...)[['z']]
+    hasZ <- 'timeline' %in% names(chart$x)
+
+    if (is.null(data)) {
+        return(chart)
+    }else{
+        if (is.data.frame(data) || is.matrix(data)){
+            if (ncol(data) < 3)
+                stop('data must be a matrix/data.frame ',
+                     'with the columns lng, lat, heat (0-1) in order!')
+            if (! all (data.table::between(data[,3], 0, 1)))
+                data[,3] <- (data[,3]-min(data[,3], na.rm=TRUE))/
+                    (max(data[,3], na.rm=TRUE)-min(data[,3], na.rm=TRUE))
+            if (! all(data.table::between(data[,1], -180, 180)))
+                stop('data[,1] (lng) must be between -180 and 180')
+            if (! all(data.table::between(data[,2], -90, 90)))
+                stop('data[,2] (lat) must be between -90 and 90')
+            data <- asEchartData(unname(data[,1:3]))
+        }else{
+            stopifnot(is.list(data))
+        }
+    }
+
+    # construct lstHeatmap
+    lstHeatmap <- list(
+        data=unname(data), gradientColors=gradientColors, blurSize=blurSize,
+        minAlpha=minAlpha, valueScale=valueScale, opacity=opacity)
+
+    # define series and z
+    if (hasZ){
+        if (is.null(timeslots))
+            timeslots <- seq_along(chart$x$options)
+        else
+            if (is.numeric(timeslots)){
+                timeslots <- intersect(timeslots, seq_along(chart$x$options))
+            }else{
+                timeslots <- which(chart$x$timeline$data %in% timeslots)
+            }
+    }else{
+        timeslots <- NULL
+    }
+
+    mapType <- getSeriesPart(chart, 'mapType')
+    if (length(unique(mapType)) == 1){  # map mode is 'series'
+        series <- 1
+    }else{  # map mode is 'split'
+        if (is.null(series))
+            series <- which(getSeriesPart(chart, 'name') %in% series)
+        else
+            if (is.numeric(series)){
+                series <- intersect(series, seq_along(getSeriesPart(chart, 'name')))
+            }else{
+                series <- which(getSeriesPart(chart, 'name') %in%
+                    intersect(getSeriesPart(chart, 'name'), series))
+            }
+    }
+
+
+    # insert lstHeatmap
+    if (is.null(timeslots)){  # no timeline
+        if (is.null(series)){  # mono series
+            chart$x$series[[1]]$heatmap <- lstHeatmap
+        }else{  # multi series
+            for (s in series){
+                chart$x$series[[s]]$heatmap <- lstHeatmap
+            }
+        }
+    }else{  # with timeline
+        for (z in timeslots){
+            if (is.null(series)){  # mono series
+                chart$x$options[[z]]$series[[1]]$heatmap <- lstHeatmap
+            }else{  # multi series
+                for (s in series){
+                    chart$x$options[[z]]$series[[s]]$heatmap <- lstHeatmap
+                }
+            }
+        }
+    }
+    return(chart %>% reElementId())
+}
+
+
+#' Add \code{nameMap} to Echarts Object
+#'
+#' For map charts, you can add \code{nameMap} to translate the place names from one to another.
+#' The \code{nameMap} object will be inserted to the first series of the echarts object.
+#'
+#' @param chart \code{echarts} object generated by \code{\link{echart}} or
+#' \code{\link{echartR}}.
+#' @param nameMap Two modes: \cr
+#' \describe{
+#'  \item{data.frame/matrix}{A data.frame or matrix comprising of 2 columns: \code{nameToTranslate &
+#'  nameTranslatedTo}. E.g., You can load a preinstalled Chinese-English geographic
+#'  dictionary using \code{recharts:::geoNameMap}.}
+#'  \item{list}{The nameMap in list should follow the structure: \code{list(list(
+#' `United States of America`='USA'), list('United Kingdom'='GB'), ...)}}
+#' }
+#'
+#' @return A modified echarts object
+#' @export
+#' @seealso \code{data(geoNameMap)}
+#' @references \url{http://echarts.baidu.com/echarts2/doc/option.html#title~series-i(map).nameMap}
+#' @examples
+#' \dontrun{
+#' }
+addNameMap <- function(chart, nameMap){
+    stopifnot(inherits(chart, 'echarts'))
+    if (is.data.frame(nameMap) || is.matrix(nameMap)){
+        stopifnot(ncol(nameMap) > 1)
+        if (! (is.character(nameMap[,1]) && is.character(nameMap[,2])))
+            stop('nameMap[,1] and nameMap[,2] must both be characters.')
+        lstNameMap <- asEchartData(nameMap[,2])
+        names(lstNameMap) <- nameMap[,1]
+    }else if (is.list(nameMap)){
+        stopifnot(length(unlist(nameMap)) == length(nameMap))
+        if (is.null(names(nameMap)))
+            stop('list nameMap must be named with the names you want to translate!')
+        lstNameMap <- nameMap
+    }
+    hasZ <- 'timeline' %in% names(chart$x)
+    if(hasZ){
+        chart$x$options[[1]]$series[[1]]$nameMap <- lstNameMap
+    }else{
+        chart$x$series[[1]]$nameMap <- lstNameMap
+    }
+    return(chart %>% reElementId())
 }
 
 #' Add \code{markLine} to An Echarts Object
